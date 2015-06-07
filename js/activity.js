@@ -28,6 +28,7 @@ define(function(require) {
     require('p5.dom');
     require('mespeak');
     require('three.min');
+    require('jquery-1.11.3.min');
     require('activity/utils');
     require('activity/artwork');
     require('activity/munsell');
@@ -105,8 +106,7 @@ define(function(require) {
         var scriptingCamera = new THREE.OrthographicCamera( scriptingCameraWidth / - 2, scriptingCameraWidth / 2, scriptingCameraHeight / 2, scriptingCameraHeight / - 2, 1, 1000 );
 
         // Create a render and set the size
-        var webGLRenderer = new THREE.WebGLRenderer();
-        webGLRenderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
+        var webGLRenderer = new THREE.WebGLRenderer( { alpha: true } );
         webGLRenderer.setSize(window.innerWidth, window.innerHeight);
         webGLRenderer.shadowMapEnabled = true;
 
@@ -119,10 +119,6 @@ define(function(require) {
         // Add ambient light to the scene 
         var ambientLight = new THREE.AmbientLight(0xffffff);
         scene.add(ambientLight);
-
-        // Attach to the div
-        $("#webglOutput").append(webGLRenderer.domElement);
-        render();
 
 
         pluginObjs = {
@@ -331,15 +327,18 @@ define(function(require) {
         function init() {
             docById('loader').className = 'loader';
 
+            // Attach scripting renderer to the div
+            document.getElementById("webglOutput").appendChild(webGLRenderer.domElement);
+            renderScriptingScene();
 
-            stage = new createjs.Stage(canvas);
+            // stage = new createjs.Stage(canvas);
 
-            createjs.Touch.enable(stage);
+            // createjs.Touch.enable(stage);
 
-            createjs.Ticker.timingMode = createjs.Ticker.RAF_SYNCHED;
-                    createjs.Ticker.setFPS(30);
-            createjs.Ticker.addEventListener('tick', stage);
-            createjs.Ticker.addEventListener('tick', tick);
+            // createjs.Ticker.timingMode = createjs.Ticker.RAF_SYNCHED;
+            //         createjs.Ticker.setFPS(30);
+            // createjs.Ticker.addEventListener('tick', stage);
+            // createjs.Ticker.addEventListener('tick', tick);
 
             createMsgContainer('#ffffff', '#7a7a7a', function(text) {
                 msgText = text;
@@ -360,12 +359,18 @@ define(function(require) {
              *   logo (drawing)
              */
 
-            palettesContainer = new createjs.Container();
-            blocksContainer = new createjs.Container();
-            trashContainer = new createjs.Container();
-            turtleContainer = new createjs.Container();
-            stage.addChild(turtleContainer, trashContainer, blocksContainer,
-                           palettesContainer);
+            palettesContainer = new THREE.Group();
+            blocksContainer = new THREE.Group();
+            trashContainer = new THREE.Group();
+            scene.add(palettesContainer,blocksContainer,trashContainer);
+
+
+            // palettesContainer = new createjs.Container();
+            // blocksContainer = new createjs.Container();
+            // trashContainer = new createjs.Container();
+            // turtleContainer = new createjs.Container();
+            // stage.addChild(turtleContainer, trashContainer, blocksContainer,
+            //                palettesContainer);
             setupBlocksContainerEvents();
 
             trashcan = new Trashcan(canvas, trashContainer, cellSize, refreshCanvas);
@@ -944,8 +949,7 @@ define(function(require) {
         }
 
         function renderScriptingScene(){
-            webGLRenderer.render(scene, camera);
-
+            webGLRenderer.render(scene, scriptingCamera);
         }
 
         function tick(event) {
