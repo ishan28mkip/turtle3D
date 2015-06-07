@@ -1413,6 +1413,7 @@ function makePaletteBitmap(palette, data, name, callback, extras) {
 }
 
 
+
 function regeneratePalette(palette) {
     palette.visible = false;
     palette.hideMenuItems();

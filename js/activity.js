@@ -27,6 +27,7 @@ define(function(require) {
     require('p5.sound');
     require('p5.dom');
     require('mespeak');
+    require('three.min');
     require('activity/utils');
     require('activity/artwork');
     require('activity/munsell');
@@ -91,6 +92,38 @@ define(function(require) {
         var currentKeyCode = 0;
         var lastKeyCode = 0;
         var pasteContainer = null;
+        var scene;
+
+
+        // Three.js initialization
+        // Create a scene, that will hold all our elements such as objects, cameras and lights.
+        var scene = new THREE.Scene();
+
+        // Create a orthographic camera for the graphical scripting
+        var scriptingCameraWidth = window.innerWidth;
+        var scriptingCameraHeight = window.innerHeight; 
+        var scriptingCamera = new THREE.OrthographicCamera( scriptingCameraWidth / - 2, scriptingCameraWidth / 2, scriptingCameraHeight / 2, scriptingCameraHeight / - 2, 1, 1000 );
+
+        // Create a render and set the size
+        var webGLRenderer = new THREE.WebGLRenderer();
+        webGLRenderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
+        webGLRenderer.setSize(window.innerWidth, window.innerHeight);
+        webGLRenderer.shadowMapEnabled = true;
+
+        // Position and point the camera to the center of the scene
+        scriptingCamera.position.x = 0;
+        scriptingCamera.position.y = 0;
+        scriptingCamera.position.z = 1;
+        scriptingCamera.lookAt(new THREE.Vector3(0, 0, 0));
+
+        // Add ambient light to the scene 
+        var ambientLight = new THREE.AmbientLight(0xffffff);
+        scene.add(ambientLight);
+
+        // Attach to the div
+        $("#webglOutput").append(webGLRenderer.domElement);
+        render();
+
 
         pluginObjs = {
             'PALETTEPLUGINS': {},
@@ -298,7 +331,9 @@ define(function(require) {
         function init() {
             docById('loader').className = 'loader';
 
+
             stage = new createjs.Stage(canvas);
+
             createjs.Touch.enable(stage);
 
             createjs.Ticker.timingMode = createjs.Ticker.RAF_SYNCHED;
@@ -324,6 +359,7 @@ define(function(require) {
              *   turtles
              *   logo (drawing)
              */
+
             palettesContainer = new createjs.Container();
             blocksContainer = new createjs.Container();
             trashContainer = new createjs.Container();
@@ -905,6 +941,11 @@ define(function(require) {
 
         function refreshCanvas() {
             update = true;
+        }
+
+        function renderScriptingScene(){
+            webGLRenderer.render(scene, camera);
+
         }
 
         function tick(event) {
