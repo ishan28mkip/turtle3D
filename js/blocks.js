@@ -928,6 +928,7 @@ function Blocks(canvas, stage, refreshCanvas, trashcan, updateStage) {
         }
     }
 
+    // understand this later when the variables are clear
     this.findTopBlock = function(blk) {
         // Find the top block in a stack.
         if (blk == null) {

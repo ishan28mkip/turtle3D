@@ -1,18 +1,3 @@
-// Copyright (c) 2014,2015 Walter Bender
-//
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 3 of the License, or
-// (at your option) any later version.
-//
-// You should have received a copy of the GNU General Public License
-// along with this library; if not, write to the Free Software
-// Foundation, 51 Franklin Street, Suite 500 Boston, MA 02110-1335 USA
-//
-// Note: This code is inspired by the Python Turtle Blocks project
-// (https://github.com/walterbender/turtleart), but implemented from
-// scratch. -- Walter Bender, October 2014.
-
 var lang = document.webL10n.getLanguage();
 if (lang.indexOf("-") != -1) {
     lang = lang.slice(0, lang.indexOf("-"));
@@ -21,6 +6,7 @@ if (lang.indexOf("-") != -1) {
 
 define(function(require) {
     require('easeljs');
+    require('mouseEvents');
     require('tweenjs');
     require('preloadjs');
     require('howler');
@@ -57,7 +43,8 @@ define(function(require) {
 
         var canvas = docById('myCanvas');
 
-        var queue = new createjs.LoadQueue(false);
+        // See why is this queue created?
+        // var queue = new createjs.LoadQueue(false);
 
         // Check for the various File API support.
         if (window.File && window.FileReader && window.FileList && window.Blob) {
@@ -93,32 +80,29 @@ define(function(require) {
         var currentKeyCode = 0;
         var lastKeyCode = 0;
         var pasteContainer = null;
-        var scene;
+
+        // See where is this scene variable used?
+        // var scene;
 
 
-        // Three.js initialization
-        // Create a scene, that will hold all our elements such as objects, cameras and lights.
-        var scene = new THREE.Scene();
+        // Setup variables for three.js
+        var scriptingScene;
+        var turtleScene;
 
-        // Create a orthographic camera for the graphical scripting
-        var scriptingCameraWidth = window.innerWidth;
-        var scriptingCameraHeight = window.innerHeight; 
-        var scriptingCamera = new THREE.OrthographicCamera( scriptingCameraWidth / - 2, scriptingCameraWidth / 2, scriptingCameraHeight / 2, scriptingCameraHeight / - 2, 1, 1000 );
+        var scriptingCameraWidth;
+        var scriptingCameraHeight;
+        var scriptingCamera;
 
-        // Create a render and set the size
-        var webGLRenderer = new THREE.WebGLRenderer( { alpha: true } );
-        webGLRenderer.setSize(window.innerWidth, window.innerHeight);
-        webGLRenderer.shadowMapEnabled = true;
+        var turtleCameraWidth;
+        var turtleCameraHeight;
+        var turtleCamera;
 
-        // Position and point the camera to the center of the scene
-        scriptingCamera.position.x = 0;
-        scriptingCamera.position.y = 0;
-        scriptingCamera.position.z = 1;
-        scriptingCamera.lookAt(new THREE.Vector3(0, 0, 0));
+        var scriptingRenderer;
+        var turtleRenderer;
 
-        // Add ambient light to the scene 
-        var ambientLight = new THREE.AmbientLight(0xffffff);
-        scene.add(ambientLight);
+        var ambientLight;
+
+        // Variable initialization done
 
 
         pluginObjs = {
@@ -130,7 +114,10 @@ define(function(require) {
             'ARGPLUGINS': {},
             'BLOCKPLUGINS': {}
         };
-
+        // Create the mouse events variables
+        var events = [{'name' : 'click', 'bubble' : false},{'name' : 'dblclick', 'bubble' : false},{'name' : 'mousedown', 'bubble' : false},{'name' : 'mouseup', 'bubble' : false},{'name' : 'mousemove', 'bubble' : false}];
+        var eventObject;
+        
         // Stacks of blocks saved in local storage
         var macroDict = {};
 
@@ -182,7 +169,7 @@ define(function(require) {
 
         var helpContainer = null;
         var helpIdx = 0;
-        var HELPCONTENT = [[_('Welcome to Turtle Blocks'), _('Turtle Blocks is a Logo-inspired turtle that draws colorful pictures with snap-together visual-programming blocks.'), 'activity/activity-icon-color.svg'],
+        var HELPCONTENT = [[_('Welcome to Turtle Blocks 3D'), _('Turtle Blocks is a Logo-inspired turtle that draws colorful pictures with snap-together visual-programming blocks.'), 'activity/activity-icon-color.svg'],
                            [_('Palette buttons'), _('This toolbar contains the palette buttons: click to show or hide the palettes of blocks (Turtle, Pen, Numbers, Boolean, Flow, Blocks, Media, Sensors, and Extras). Once open, you can drag blocks from the palettes onto the canvas to use them.'), 'images/icons.svg'],
                            [_('Run fast'), _('Click to run the project in fast mode.'), 'icons/fast-button.svg'],
                            [_('Run slow'), _('Click to run the project in slow mode.'), 'icons/slow-button.svg'],
@@ -327,18 +314,87 @@ define(function(require) {
         function init() {
             docById('loader').className = 'loader';
 
-            // Attach scripting renderer to the div
-            document.getElementById("webglOutput").appendChild(webGLRenderer.domElement);
+
+            // Three.js initialization
+            // Create a scriptingScene, that will hold all our elements such as objects, cameras and lights.
+            scriptingScene = new THREE.Scene();
+
+            // Create a turtleScene that will hold all the turtle elements this demarcation of scenes has been done because
+            // of difference in cameras but this can cause problems with selecting the turtle
+            turtleScene = new THREE.Scene();
+
+
+            // Create a orthographic camera for the graphical scripting
+            scriptingCameraWidth = window.innerWidth;
+            scriptingCameraHeight = window.innerHeight; 
+            scriptingCamera = new THREE.OrthographicCamera( scriptingCameraWidth / - 2, scriptingCameraWidth / 2, scriptingCameraHeight / 2, scriptingCameraHeight / - 2, 1, 1000 );
+
+            turtleCameraWidth = window.innerWidth;
+            turtleCameraHeight = window.innerHeight;
+            turtleCamera = new THREE.PerspectiveCamera( 45, turtleCameraWidth / turtleCameraHeight, 1, 2000 );
+
+            // Create a scripting renderer and set the size
+            scriptingRenderer = new THREE.WebGLRenderer( { alpha: true } );
+            scriptingRenderer.setSize(window.innerWidth, window.innerHeight);
+            scriptingRenderer.shadowMapEnabled = true;
+            document.getElementById("scriptingOutput").appendChild(scriptingRenderer.domElement);
+
+
+            // Create the turtle renderer and set the size
+            turtleRenderer = new THREE.WebGLRenderer( {alpha: true} );
+            turtleRenderer.setSize(window.innerWidth, window.innerHeight);
+            turtleRenderer.shadowMapEnabled = true;
+            document.getElementById("turtleOutput").appendChild(turtleRenderer.domElement);
+
+            // Position and point the scripting camera to the center of the scene
+            scriptingCamera.position.x = 0;
+            scriptingCamera.position.y = 0;
+            scriptingCamera.position.z = 10;
+            scriptingCamera.lookAt(new THREE.Vector3(0, 0, 0));
+
+            // Position and point the turtle camera to the center of the screen
+            turtleCamera.position.x = 50;
+            turtleCamera.position.y = 50;
+            turtleCamera.position.z = 50;
+            turtleCamera.lookAt(new THREE.Vector3(0,0,0));
+
+            // Add ambient light to the scripting scene
+            ambientLight = new THREE.AmbientLight(0xffffff);
+            scriptingScene.add(ambientLight);
+
+            // Add ambient light to the turtle scene
+            turtleScene.add(ambientLight);
+
+            var events = [{'name' : 'click', 'bubble' : false},{'name' : 'dblclick', 'bubble' : false},{'name' : 'mousedown', 'bubble' : false},{'name' : 'mouseup', 'bubble' : false},{'name' : 'mousemove', 'bubble' : false}];
+            var eventObject  = new MouseEvents(events, scriptingRenderer, window.innerWidth, window.innerHeight,scriptingCamera,'3D');
+            eventObject.initMouseEvents(eventObject);
+
+
+            // Test plane addition
+            var geometry = new THREE.PlaneGeometry( 300, 300, 32 );
+            var material = new THREE.MeshBasicMaterial( {color: 0xffff00}  );
+            var plane = new THREE.Mesh( geometry, material );
+            scriptingScene.add( plane );
             renderScriptingScene();
 
-            // stage = new createjs.Stage(canvas);
+            // Test cube addition
+            // geometry = new THREE.BoxGeometry( 10, 10, 10 );
+            // material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
+            // var cube = new THREE.Mesh( geometry, material );
+            // cube.position.set(-50,-50,10);
+            // turtleScene.add( cube );
+            // renderTurtleScene();
 
-            // createjs.Touch.enable(stage);
+            // scene is already created
 
-            // createjs.Ticker.timingMode = createjs.Ticker.RAF_SYNCHED;
-            //         createjs.Ticker.setFPS(30);
-            // createjs.Ticker.addEventListener('tick', stage);
-            // createjs.Ticker.addEventListener('tick', tick);
+            stage = new createjs.Stage(canvas);
+
+            createjs.Touch.enable(stage);
+
+            createjs.Ticker.timingMode = createjs.Ticker.RAF_SYNCHED;
+                    createjs.Ticker.setFPS(30);
+            createjs.Ticker.addEventListener('tick', stage);
+            createjs.Ticker.addEventListener('tick', tick);
 
             createMsgContainer('#ffffff', '#7a7a7a', function(text) {
                 msgText = text;
@@ -359,18 +415,18 @@ define(function(require) {
              *   logo (drawing)
              */
 
-            palettesContainer = new THREE.Group();
-            blocksContainer = new THREE.Group();
-            trashContainer = new THREE.Group();
-            scene.add(palettesContainer,blocksContainer,trashContainer);
+            // palettesContainer = new THREE.Group();
+            // blocksContainer = new THREE.Group();
+            // trashContainer = new THREE.Group();
+            // scene.add(palettesContainer,blocksContainer,trashContainer);
 
 
-            // palettesContainer = new createjs.Container();
-            // blocksContainer = new createjs.Container();
-            // trashContainer = new createjs.Container();
-            // turtleContainer = new createjs.Container();
-            // stage.addChild(turtleContainer, trashContainer, blocksContainer,
-            //                palettesContainer);
+            palettesContainer = new createjs.Container();
+            blocksContainer = new createjs.Container();
+            trashContainer = new createjs.Container();
+            turtleContainer = new createjs.Container();
+            stage.addChild(turtleContainer, trashContainer, blocksContainer,
+                           palettesContainer);
             setupBlocksContainerEvents();
 
             trashcan = new Trashcan(canvas, trashContainer, cellSize, refreshCanvas);
@@ -532,6 +588,7 @@ define(function(require) {
             this.document.onkeydown = keyPressed;
         }
 
+        // This needs to rewritten depending on whether three.js is continued or not
         function setupBlocksContainerEvents() {
             var moving = false;
             stage.on('stagemousedown', function (event) {
@@ -622,15 +679,27 @@ define(function(require) {
         };
 
         function createMsgContainer(fillColor, strokeColor, callback, y) {
+            var container = new THREE.Group();
+            scene.add(container);
+            container.position.set((canvas.width - 1000) / 2, y);
+            container.visible = false;
+
+            parameters = {
+
+            }
+
+            var text = new THREE.Shape();
+
+
+
+
             var container = new createjs.Container();
             stage.addChild(container);
             container.x = (canvas.width - 1000) / 2;
             container.y = y;
             container.visible = false;
 
-            var img = new Image();
-            var svgData = MSGBLOCK.replace('fill_color', fillColor).replace(
-                'stroke_color', strokeColor);
+
             img.onload = function() {
                 var msgBlock = new createjs.Bitmap(img);
                 container.addChild(msgBlock);
@@ -949,7 +1018,11 @@ define(function(require) {
         }
 
         function renderScriptingScene(){
-            webGLRenderer.render(scene, scriptingCamera);
+            scriptingRenderer.render(scriptingScene, scriptingCamera);
+        }
+
+        function renderTurtleScene(){
+            turtleRenderer.render(turtleScene, turtleCamera);
         }
 
         function tick(event) {
@@ -1607,6 +1680,7 @@ define(function(require) {
             update = true;
         }
 
+        // creates a button
         function makeButton(name, x, y, size, rotation) {
             var container = new createjs.Container();
             if (name == 'paste-disabled-button') {

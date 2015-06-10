@@ -1,23 +1,4 @@
-// Copyright (c) 2014,2015 Walter Bender
-//
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 3 of the License, or
-// (at your option) any later version.
-//
-// You should have received a copy of the GNU General Public License
-// along with this library; if not, write to the Free Software
-// Foundation, 51 Franklin Street, Suite 500 Boston, MA 02110-1335 USA
-// Define below are the inline SVGs used for turtles and blocks. SVGs
-// are modified by fill_color, stroke_color, block_label, et al. using
-// .replace, e.g.,
-// BASICBLOCK.replace(/fill_color/g,
-// PALETTEFILLCOLORS['turtle']).replace(/stroke_color/g,
-// PALETTESTROKECOLORS['turtle']).replace('block_label', 'clear'));
-// Chrome can load the image type "data:image/svg+xml;utf8," inline,
-// but Firefox cannot, so we set it in the async methods instead.
-// The relative position of the button added to collapsible blocks,
-// e.g., start and action. (TODO: Calculate these values.)
+
 var COLLAPSEBUTTONXOFF = -48;
 var COLLAPSEBUTTONYOFF = 9;
 

@@ -54,95 +54,201 @@ var NAMEDICT = {
 // Define blocks here
 function initBasicProtoBlocks(palettes, blocks) {
     blocks.palettes = palettes;
+        //3D blocks
+    var setCursorPositionX = new ProtoBlock('setCursorPositionX');
+    setCursorPositionX.palette = palettes.dict['turtle'];
+    blocks.protoBlockDict['setCursorPositionX'] = setCursorPositionX;
+    setCursorPositionX.staticLabels.push(_('setPositionX'));
+    setCursorPositionX.adjustWidthToLabel();
+    setCursorPositionX.oneArgBlock();
+    setCursorPositionX.defaults.push(10);
 
-    // Turtle palette
-    var clearBlock = new ProtoBlock('clear');
-    clearBlock.palette = palettes.dict['turtle'];
-    blocks.protoBlockDict['clear'] = clearBlock;
-    clearBlock.staticLabels.push(_('clear'));
-    clearBlock.adjustWidthToLabel();
-    clearBlock.zeroArgBlock();
+    var setCursorPositionY = new ProtoBlock('setCursorPositionY');
+    setCursorPositionY.palette = palettes.dict['turtle'];
+    blocks.protoBlockDict['setCursorPositionY'] = setCursorPositionY;
+    setCursorPositionY.staticLabels.push(_('setPositionY'));
+    setCursorPositionY.adjustWidthToLabel();
+    setCursorPositionY.oneArgBlock();
+    setCursorPositionY.defaults.push(10);
 
-    var forwardBlock = new ProtoBlock('forward');
-    forwardBlock.palette = palettes.dict['turtle'];
-    blocks.protoBlockDict['forward'] = forwardBlock;
-    forwardBlock.staticLabels.push(_('forward'));
-    forwardBlock.adjustWidthToLabel();
-    forwardBlock.oneArgBlock();
-    forwardBlock.defaults.push(100);
+    var setCursorPositionZ = new ProtoBlock('setCursorPositionZ');
+    setCursorPositionZ.palette = palettes.dict['turtle'];
+    blocks.protoBlockDict['setCursorPositionZ'] = setCursorPositionZ;
+    setCursorPositionZ.staticLabels.push(_('setPositionZ'));
+    setCursorPositionZ.adjustWidthToLabel();
+    setCursorPositionZ.oneArgBlock();
+    setCursorPositionZ.defaults.push(10);
 
-    var rightBlock = new ProtoBlock('right');
-    rightBlock.palette = palettes.dict['turtle'];
-    blocks.protoBlockDict['right'] = rightBlock;
-    rightBlock.staticLabels.push(_('right'));
-    rightBlock.adjustWidthToLabel();
-    rightBlock.oneArgBlock();
-    rightBlock.defaults.push(90);
+    var setCursorPosition = new ProtoBlock('setCursorPosition');
+    setCursorPosition.palette = palettes.dict['turtle'];
+    blocks.protoBlockDict['setCursorPosition'] = setCursorPosition;
+    setCursorPosition.staticLabels.push(_('setPosition'));
+    setCursorPosition.adjustWidthToLabel();
+    setCursorPosition.threeArgBlock();
+    setCursorPosition.defaults.push(0);
+    setCursorPosition.defaults.push(0);
+    setCursorPosition.defaults.push(0);
+    setCursorPosition.dockTypes[1] = 'numberin';
 
-    var backBlock = new ProtoBlock('back');
-    backBlock.palette = palettes.dict['turtle'];
-    blocks.protoBlockDict['back'] = backBlock;
-    backBlock.staticLabels.push(_('back'));
-    backBlock.adjustWidthToLabel();
-    backBlock.oneArgBlock();
-    backBlock.defaults.push(100);
+    var doForwardX = new ProtoBlock('doForwardX');
+    doForwardX.palette = palettes.dict['turtle'];
+    blocks.protoBlockDict['doForwardX'] = doForwardX;
+    doForwardX.staticLabels.push(_('forwardX'));
+    doForwardX.adjustWidthToLabel();
+    doForwardX.oneArgBlock();
+    doForwardX.defaults.push(5);
 
-    var leftBlock = new ProtoBlock('left');
-    leftBlock.palette = palettes.dict['turtle'];
-    blocks.protoBlockDict['left'] = leftBlock;
-    leftBlock.staticLabels.push(_('left'));
-    leftBlock.adjustWidthToLabel();
-    leftBlock.oneArgBlock();
-    leftBlock.defaults.push(90);
+    var doForwardY = new ProtoBlock('doForwardY');
+    doForwardY.palette = palettes.dict['turtle'];
+    blocks.protoBlockDict['doForwardY'] = doForwardY;
+    doForwardY.staticLabels.push(_('forwardY'));
+    doForwardY.adjustWidthToLabel();
+    doForwardY.oneArgBlock();
+    doForwardY.defaults.push(5);
 
-    var arcBlock = new ProtoBlock('arc');
-    arcBlock.palette = palettes.dict['turtle'];
-    blocks.protoBlockDict['arc'] = arcBlock;
-    arcBlock.staticLabels.push(_('arc'), _('angle'), _('radius'));
-    arcBlock.adjustWidthToLabel();
-    arcBlock.twoArgBlock();
-    arcBlock.defaults.push(90);
-    arcBlock.defaults.push(100);
-    arcBlock.dockTypes[1] = 'numberin';
+    var doForwardZ = new ProtoBlock('doForwardZ');
+    doForwardZ.palette = palettes.dict['turtle'];
+    blocks.protoBlockDict['doForwardZ'] = doForwardZ;
+    doForwardZ.staticLabels.push(_('forwardZ'));
+    doForwardZ.adjustWidthToLabel();
+    doForwardZ.oneArgBlock();
+    doForwardZ.defaults.push(5);
 
-    var setheadingBlock = new ProtoBlock('setheading');
-    setheadingBlock.palette = palettes.dict['turtle'];
-    blocks.protoBlockDict['setheading'] = setheadingBlock;
-    setheadingBlock.staticLabels.push(_('set heading'));
-    setheadingBlock.adjustWidthToLabel();
-    setheadingBlock.oneArgBlock();
-    setheadingBlock.defaults.push(0);
+    var setRoll = new ProtoBlock('setRoll');
+    setRoll.palette = palettes.dict['turtle'];
+    blocks.protoBlockDict['setRoll'] = setRoll;
+    setRoll.staticLabels.push(_('setRoll'));
+    setRoll.adjustWidthToLabel(); 
+    setRoll.oneArgBlock();
+    setRoll.defaults.push(10);
 
-    var headingBlock = new ProtoBlock('heading');
-    headingBlock.palette = palettes.dict['turtle'];
-    blocks.protoBlockDict['heading'] = headingBlock;
-    headingBlock.staticLabels.push(_('heading'));
-    headingBlock.adjustWidthToLabel();
-    headingBlock.parameterBlock();
+    var setPitch = new ProtoBlock('setPitch');
+    setPitch.palette = palettes.dict['turtle'];
+    blocks.protoBlockDict['setPitch'] = setPitch;
+    setPitch.staticLabels.push(_('setPitch'));
+    setPitch.adjustWidthToLabel(); 
+    setPitch.oneArgBlock();
+    setPitch.defaults.push(10);
 
-    var setxyBlock = new ProtoBlock('setxy');
-    setxyBlock.palette = palettes.dict['turtle'];
-    blocks.protoBlockDict['setxy'] = setxyBlock;
-    setxyBlock.staticLabels.push(_('set xy'), _('x'), _('y'));
-    setxyBlock.adjustWidthToLabel();
-    setxyBlock.twoArgBlock();
-    setxyBlock.defaults.push(0);
-    setxyBlock.defaults.push(0);
-    setxyBlock.dockTypes[1] = 'numberin';
+    var setYaw = new ProtoBlock('setYaw');
+    setYaw.palette = palettes.dict['turtle'];
+    blocks.protoBlockDict['setYaw'] = setYaw;
+    setYaw.staticLabels.push(_('setYaw'));
+    setYaw.adjustWidthToLabel(); 
+    setYaw.oneArgBlock();
+    setYaw.defaults.push(10);
 
-    var xBlock = new ProtoBlock('x');
-    xBlock.palette = palettes.dict['turtle'];
-    blocks.protoBlockDict['x'] = xBlock;
-    xBlock.staticLabels.push(_('x'));
-    xBlock.adjustWidthToLabel();
-    xBlock.parameterBlock();
+    var doRoll = new ProtoBlock('doRoll');
+    doRoll.palette = palettes.dict['turtle'];
+    blocks.protoBlockDict['doRoll'] = doRoll;
+    doRoll.staticLabels.push(_('doRoll'));
+    doRoll.adjustWidthToLabel(); 
+    doRoll.oneArgBlock();
+    doRoll.defaults.push(10);
 
-    var yBlock = new ProtoBlock('y');
-    yBlock.palette = palettes.dict['turtle'];
-    blocks.protoBlockDict['y'] = yBlock;
-    yBlock.staticLabels.push(_('y'));
-    yBlock.adjustWidthToLabel();
-    yBlock.parameterBlock();
+    var doPitch = new ProtoBlock('doPitch');
+    doPitch.palette = palettes.dict['turtle'];
+    blocks.protoBlockDict['doPitch'] = doPitch;
+    doPitch.staticLabels.push(_('doPitch'));
+    doPitch.adjustWidthToLabel(); 
+    doPitch.oneArgBlock();
+    doPitch.defaults.push(10);
+
+    var doYaw = new ProtoBlock('doYaw');
+    doYaw.palette = palettes.dict['turtle'];
+    blocks.protoBlockDict['doYaw'] = doYaw;
+    doYaw.staticLabels.push(_('doYaw'));
+    doYaw.adjustWidthToLabel(); 
+    doYaw.oneArgBlock();
+    doYaw.defaults.push(10);
+    // // Turtle palette
+    // var clearBlock = new ProtoBlock('clear');
+    // clearBlock.palette = palettes.dict['turtle'];
+    // blocks.protoBlockDict['clear'] = clearBlock;
+    // clearBlock.staticLabels.push(_('clear'));
+    // clearBlock.adjustWidthToLabel();
+    // clearBlock.zeroArgBlock();
+
+    // var forwardBlock = new ProtoBlock('forward');
+    // forwardBlock.palette = palettes.dict['turtle'];
+    // blocks.protoBlockDict['forward'] = forwardBlock;
+    // forwardBlock.staticLabels.push(_('forward'));
+    // forwardBlock.adjustWidthToLabel();
+    // forwardBlock.oneArgBlock();
+    // forwardBlock.defaults.push(100);
+
+    // var rightBlock = new ProtoBlock('right');
+    // rightBlock.palette = palettes.dict['turtle'];
+    // blocks.protoBlockDict['right'] = rightBlock;
+    // rightBlock.staticLabels.push(_('right'));
+    // rightBlock.adjustWidthToLabel();
+    // rightBlock.oneArgBlock();
+    // rightBlock.defaults.push(90);
+
+    // var backBlock = new ProtoBlock('back');
+    // backBlock.palette = palettes.dict['turtle'];
+    // blocks.protoBlockDict['back'] = backBlock;
+    // backBlock.staticLabels.push(_('back'));
+    // backBlock.adjustWidthToLabel();
+    // backBlock.oneArgBlock();
+    // backBlock.defaults.push(100);
+
+    // var leftBlock = new ProtoBlock('left');
+    // leftBlock.palette = palettes.dict['turtle'];
+    // blocks.protoBlockDict['left'] = leftBlock;
+    // leftBlock.staticLabels.push(_('left'));
+    // leftBlock.adjustWidthToLabel();
+    // leftBlock.oneArgBlock();
+    // leftBlock.defaults.push(90);
+
+    // var arcBlock = new ProtoBlock('arc');
+    // arcBlock.palette = palettes.dict['turtle'];
+    // blocks.protoBlockDict['arc'] = arcBlock;
+    // arcBlock.staticLabels.push(_('arc'), _('angle'), _('radius'));
+    // arcBlock.adjustWidthToLabel();
+    // arcBlock.twoArgBlock();
+    // arcBlock.defaults.push(90);
+    // arcBlock.defaults.push(100);
+    // arcBlock.dockTypes[1] = 'numberin';
+
+    // var setheadingBlock = new ProtoBlock('setheading');
+    // setheadingBlock.palette = palettes.dict['turtle'];
+    // blocks.protoBlockDict['setheading'] = setheadingBlock;
+    // setheadingBlock.staticLabels.push(_('set heading'));
+    // setheadingBlock.adjustWidthToLabel();
+    // setheadingBlock.oneArgBlock();
+    // setheadingBlock.defaults.push(0);
+
+    // var headingBlock = new ProtoBlock('heading');
+    // headingBlock.palette = palettes.dict['turtle'];
+    // blocks.protoBlockDict['heading'] = headingBlock;
+    // headingBlock.staticLabels.push(_('heading'));
+    // headingBlock.adjustWidthToLabel();
+    // headingBlock.parameterBlock();
+
+    // var setxyBlock = new ProtoBlock('setxy');
+    // setxyBlock.palette = palettes.dict['turtle'];
+    // blocks.protoBlockDict['setxy'] = setxyBlock;
+    // setxyBlock.staticLabels.push(_('set xy'), _('x'), _('y'));
+    // setxyBlock.adjustWidthToLabel();
+    // setxyBlock.twoArgBlock();
+    // setxyBlock.defaults.push(0);
+    // setxyBlock.defaults.push(0);
+    // setxyBlock.dockTypes[1] = 'numberin';
+
+    // var xBlock = new ProtoBlock('x');
+    // xBlock.palette = palettes.dict['turtle'];
+    // blocks.protoBlockDict['x'] = xBlock;
+    // xBlock.staticLabels.push(_('x'));
+    // xBlock.adjustWidthToLabel();
+    // xBlock.parameterBlock();
+
+    // var yBlock = new ProtoBlock('y');
+    // yBlock.palette = palettes.dict['turtle'];
+    // blocks.protoBlockDict['y'] = yBlock;
+    // yBlock.staticLabels.push(_('y'));
+    // yBlock.adjustWidthToLabel();
+    // yBlock.parameterBlock();
 
     // Pen palette
     var setcolorBlock = new ProtoBlock('setcolor');
