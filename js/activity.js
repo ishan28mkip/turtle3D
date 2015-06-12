@@ -1,3 +1,59 @@
+// Done list
+/*
+* createMsgContainer
+
+
+
+
+*/
+
+// TODO
+
+
+
+
+// NEWS
+
+
+
+// Code Snippets
+    // createMsgContainer
+        // Code to add a bounding box
+        // var box = new THREE.BoxHelper( msgBlock );
+        // scriptingScene.add(box);
+
+        // Code to get 2D bounds of the container
+        // console.log(get2DBounds(container,false));
+
+        // Code to make the error handler draggable
+        // var px,py;
+        // var coor = new THREE.Vector3();
+        // coor.z = 0;
+        // container.on('pressmove',function(event){
+        //     if(!px || !py){
+        //         px = event.clientX;
+        //         py = event.clientY;
+        //     }
+        //     else{
+        //         coor.x = event.clientX - px;
+        //         coor.y = py - event.clientY;
+        //     }
+        //     container.position.add(coor);
+        //     px = event.clientX;
+        //     py = event.clientY;
+        //     renderScriptingScene();
+        // });
+        // container.on('pressup',function(event){
+        //     px = false;
+        //     py = false;
+        // });
+
+        // Code to add axes to any container
+        // axes = buildAxes( 1000 );
+        // container.add( axes );
+
+
+
 var lang = document.webL10n.getLanguage();
 if (lang.indexOf("-") != -1) {
     lang = lang.slice(0, lang.indexOf("-"));
@@ -13,7 +69,6 @@ define(function(require) {
     require('p5.sound');
     require('p5.dom');
     require('mespeak');
-    require('three.min');
     require('jquery-1.11.3.min');
     require('activity/utils');
     require('activity/artwork');
@@ -32,6 +87,7 @@ define(function(require) {
 
     // Manipulate the DOM only when it is ready.
     require(['domReady!'], function(doc) {
+
         window.scroll(0, 0);
 
         try {
@@ -349,7 +405,7 @@ define(function(require) {
             // Position and point the scripting camera to the center of the scene
             scriptingCamera.position.x = 0;
             scriptingCamera.position.y = 0;
-            scriptingCamera.position.z = 10;
+            scriptingCamera.position.z = 1000;
             scriptingCamera.lookAt(new THREE.Vector3(0, 0, 0));
 
             // Position and point the turtle camera to the center of the screen
@@ -365,25 +421,13 @@ define(function(require) {
             // Add ambient light to the turtle scene
             turtleScene.add(ambientLight);
 
-            var events = [{'name' : 'click', 'bubble' : false},{'name' : 'dblclick', 'bubble' : false},{'name' : 'mousedown', 'bubble' : false},{'name' : 'mouseup', 'bubble' : false},{'name' : 'mousemove', 'bubble' : false}];
-            var eventObject  = new MouseEvents(events, scriptingRenderer, window.innerWidth, window.innerHeight,scriptingCamera,'3D');
-            eventObject.initMouseEvents(eventObject);
+            // Axes
+            axes = buildAxes( 1000 );
+            scriptingScene.add( axes );
 
-
-            // Test plane addition
-            var geometry = new THREE.PlaneGeometry( 300, 300, 32 );
-            var material = new THREE.MeshBasicMaterial( {color: 0xffff00}  );
-            var plane = new THREE.Mesh( geometry, material );
-            scriptingScene.add( plane );
-            renderScriptingScene();
-
-            // Test cube addition
-            // geometry = new THREE.BoxGeometry( 10, 10, 10 );
-            // material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
-            // var cube = new THREE.Mesh( geometry, material );
-            // cube.position.set(-50,-50,10);
-            // turtleScene.add( cube );
-            // renderTurtleScene();
+            // Initialize the DOM Mouse Events
+            var events = ['click','dblclick','mousedown','mouseup','mousemove'];
+            initMouseEvents(events,scriptingRenderer,scriptingCamera);
 
             // scene is already created
 
@@ -418,7 +462,8 @@ define(function(require) {
             // palettesContainer = new THREE.Group();
             // blocksContainer = new THREE.Group();
             // trashContainer = new THREE.Group();
-            // scene.add(palettesContainer,blocksContainer,trashContainer);
+            // turtleContainer = new THREE.Group();
+            // scriptingScene.add(turtleContainer,palettesContainer,blocksContainer,trashContainer);
 
 
             palettesContainer = new createjs.Container();
@@ -678,63 +723,80 @@ define(function(require) {
             return bitmap;
         };
 
+
         function createMsgContainer(fillColor, strokeColor, callback, y) {
             var container = new THREE.Group();
-            scene.add(container);
-            container.position.set((canvas.width - 1000) / 2, y);
-            container.visible = false;
+            scriptingScene.add(container);
+            container.position.set(0, cy(y+cellSize/2),1); //cellsize/2 to center it
+            container.visible = true;
 
-            parameters = {
+            axes = buildAxes( 1000 );
+            container.add( axes );
 
-            }
+            var img = new Image();
+            var svgData = MSGBLOCK.replace('fill_color', fillColor).replace(
+                'stroke_color', strokeColor);
+            var img = new Image();
+            img.onload = function(){
+                var texture = new THREE.Texture(img) 
+                texture.needsUpdate = true;
+                var material = new THREE.MeshBasicMaterial( {map: texture, side: THREE.DoubleSide} );
+                material.transparent = true;
+                var msgBlock = new THREE.Mesh(new THREE.PlaneGeometry(img.width, img.height),material);
+                container.add(msgBlock);
 
-            var text = new THREE.Shape();
+                var options = {'font' : 'helvetiker','weight' : 'normal', 'style' : 'normal','size' : 15,'curveSegments' : 20};
+                var textShapes = THREE.FontUtils.generateShapes( 'The message has changed and has been replaced', options );
+                var text = new THREE.ShapeGeometry( textShapes );
+                var textMesh = new THREE.Mesh( text, new THREE.MeshBasicMaterial( { color: 0x000000 } ) ) ;
+                
+                textMesh.geometry.computeBoundingBox(); 
+                var textbounds = textMesh.geometry.boundingBox.size();
+                textMesh.position.set(-textbounds.x/2,-textbounds.y/4,1); // FLAG : See why -textbounds.y/4 works
+                container.add(textMesh);
 
+                container.hitmesh = msgBlock;
+                container.hitmesh.parentMesh = container;
 
+                // container.on('click',function(){
+                //     container.visible = false;
+                //     if (errorMsgArrow !== null) {
+                //         errorMsgArrow.removeAllChildren(); // Hide the error arrow.
+                //     }
+                //     renderScriptingScene();
+                // });
 
-
-            var container = new createjs.Container();
-            stage.addChild(container);
-            container.x = (canvas.width - 1000) / 2;
-            container.y = y;
-            container.visible = false;
-
-
-            img.onload = function() {
-                var msgBlock = new createjs.Bitmap(img);
-                container.addChild(msgBlock);
-                text = new createjs.Text('your message here',
-                    '20px Arial', '#000000');
-                container.addChild(text);
-                text.textAlign = 'center';
-                text.textBaseline = 'alphabetic';
-                text.x = 500;
-                text.y = 30;
-
-                var bounds = container.getBounds();
-                container.cache(bounds.x, bounds.y, bounds.width, bounds.height);
-
-                var hitArea = new createjs.Shape();
-                hitArea.graphics.beginFill('#FFF').drawRect(0, 0, 1000, 42);
-                hitArea.x = 0;
-                hitArea.y = 0;
-                container.hitArea = hitArea;
-
-                container.on('click', function(event) {
-                    container.visible = false;
-                    // On the possibility that there was an error
-                    // arrow associated with this container
-                    if (errorMsgArrow !== null) {
-                        errorMsgArrow.removeAllChildren(); // Hide the error arrow.
+                var px,py;
+                var coor = new THREE.Vector3();
+                coor.z = 0;
+                container.on('pressmove',function(event){
+                    if(!px || !py){
+                        px = event.clientX;
+                        py = event.clientY;
                     }
-                    update = true;
+                    else{
+                        coor.x = event.clientX - px;
+                        coor.y = py - event.clientY;
+                    }
+                    container.position.add(coor);
+                    px = event.clientX;
+                    py = event.clientY;
+                    renderScriptingScene();
                 });
-                callback(text);
-                blocks.setMsgText(text);
+                container.on('pressup',function(event){
+                    px = false;
+                    py = false;
+                });
+
+                renderScriptingScene();
+                callback(textMesh);
+                blocks.setMsgText(textMesh);
+
             }
             img.src = 'data:image/svg+xml;base64,' + window.btoa(
                 unescape(encodeURIComponent(svgData)));
         };
+
 
         function createErrorContainers() {
             // Some error messages have special artwork.
@@ -745,44 +807,46 @@ define(function(require) {
         }
 
         function makeErrorArtwork(name) {
-                var container = new createjs.Container();
-                stage.addChild(container);
-                container.x = (canvas.width - 1000) / 2;
-                container.y = 110;
-                errorArtwork[name] = container;
-                errorArtwork[name].name = name;
-                errorArtwork[name].visible = false;
+            var container = new THREE.Group();
+            scriptingScene.add(container);
+            container.position.set(0 , cy(cellSize*2)-100,2);
+            errorArtwork[name] = container;
+            errorArtwork[name].name = name;
+            errorArtwork[name].visible = true;
 
-                var img = new Image();
-                img.onload = function() {
-                    console.log('creating error message artwork for ' + img.src);
-                    var artwork = new createjs.Bitmap(img);
-                    container.addChild(artwork);
-		    var text = new createjs.Text('', '20px Sans', '#000000');
-                    container.addChild(text);
-                    text.x = 70;
-                    text.y = 10;
+            var img = new Image();
+            img.onload = function() {
+                console.log('creating error message artwork for ' + img.src);
+                var texture = new THREE.Texture(img) 
+                texture.needsUpdate = true;
+                var material = new THREE.MeshBasicMaterial( {map: texture, side: THREE.DoubleSide} );
+                material.transparent = true;
+                var artwork = new THREE.Mesh(new THREE.PlaneGeometry(img.width, img.height),material);
+                container.add(artwork);
 
-                    var bounds = container.getBounds();
-                    container.cache(bounds.x, bounds.y, bounds.width, bounds.height);
+                var options = {'font' : 'helvetiker','weight' : 'normal', 'style' : 'normal','size' : 15,'curveSegments' : 20};
+                var textShapes = THREE.FontUtils.generateShapes( 'Message', options );
+                var text = new THREE.ShapeGeometry( textShapes );
+                var textMesh = new THREE.Mesh( text, new THREE.MeshBasicMaterial( { color: 0x000000 } ) ) ;
+                
+                textMesh.geometry.computeBoundingBox(); 
+                var textbounds = textMesh.geometry.boundingBox.size();
+                textMesh.position.set(-textbounds.x/2,-textbounds.y/4,1); // FLAG : See why -textbounds.y/4 works
+                container.add(textMesh);
 
-                    var hitArea = new createjs.Shape();
-                    hitArea.graphics.beginFill('#FFF').drawRect(0, 0, bounds.width, bounds.height);
-                    hitArea.x = 0;
-                    hitArea.y = 0;
-                    container.hitArea = hitArea;
+                container.hitmesh = artwork;
+                container.hitmesh.parentMesh = container;
 
-                    container.on('click', function(event) {
-                        container.visible = false;
-                        // On the possibility that there was an error
-                        // arrow associated with this container
-                        if (errorMsgArrow !== null) {
-                            errorMsgArrow.removeAllChildren(); // Hide the error arrow.
-                        }
-                        update = true;
-                    });
-                }
-                img.src = 'images/' + name + '.svg';
+                container.on('click',function(){
+                    container.visible = false;
+                    if (errorMsgArrow !== null) {
+                        errorMsgArrow.removeAllChildren(); // Hide the error arrow.
+                    }
+                    renderScriptingScene();
+                });
+                renderScriptingScene();
+            }
+            img.src = 'images/' + name + '.svg';
         }
 
         function keyPressed(event) {
