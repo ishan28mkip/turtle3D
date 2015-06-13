@@ -1,11 +1,12 @@
+// Bug List
+    // FIXME
+    // TODO
+    // PE : Probable source of error
+
 // Done list
-/*
-* createMsgContainer
-
-
-
-
-*/
+    // createMsgContainer
+    // creatErrorContainer
+    // 
 
 // TODO
 
@@ -459,11 +460,12 @@ define(function(require) {
              *   logo (drawing)
              */
 
-            // palettesContainer = new THREE.Group();
-            // blocksContainer = new THREE.Group();
-            // trashContainer = new THREE.Group();
-            // turtleContainer = new THREE.Group();
-            // scriptingScene.add(turtleContainer,palettesContainer,blocksContainer,trashContainer);
+            palettesContainer = new THREE.Group();
+            blocksContainer = new THREE.Group();
+            trashContainer = new THREE.Group();
+            turtleContainer = new THREE.Group();
+            scriptingScene.add(palettesContainer,blocksContainer,trashContainer);
+            turtleScene.add(turtleContainer);
 
 
             palettesContainer = new createjs.Container();
@@ -633,45 +635,48 @@ define(function(require) {
             this.document.onkeydown = keyPressed;
         }
 
-        // This needs to rewritten depending on whether three.js is continued or not
         function setupBlocksContainerEvents() {
             var moving = false;
-            stage.on('stagemousedown', function (event) {
-                stageMouseDown = true;
-            });
+            scriptingRenderer.domElement.addEventListener( 'mousedown',  function(event){
+                stagemousedown = true;
+            }, false);
+            scriptingRenderer.domElement.addEventListener( 'mouseup',  function(event){
+                stagemousedown = false;
+            }, false);
+            scriptingRenderer.domElement.addEventListener('mousemove',function(event){
+                stageX = event.clientX; //PE : original code has event.stageX
+                stageY = event.clientY;
+            },false); 
 
-            stage.on('stagemouseup', function (event) {
-                stageMouseDown = false;
-            });
+            scriptingRenderer.domElement.addEventListener( 'mousedown',  function(event){
 
-            stage.on('stagemousemove', function (event) {
-                stageX = event.stageX;
-                stageY = event.stageY;
-            });
+                var mouseTHREECoordinates = {};
+                var intersects;
+                mouseTHREECoordinates.x = ( event.clientX / scriptingRenderer.domElement.width ) * 2 - 1;
+                mouseTHREECoordinates.y = - ( event.clientY / scriptingRenderer.domElement.height ) * 2 + 1;
+                raycaster.setFromCamera( mouseTHREECoordinates, scriptingCamera ); 
+                intersects = raycaster.intersectObjects(scriptingScene.children,true);
 
-            stage.on('stagemousedown', function (event) {
-                if (stage.getObjectUnderPoint() !== null | turtles.running()) {
+                if (intersects.length > 0 || turtles.running()) {
                     return;
                 }
-
                 moving = true;
-                lastCords = {x: event.stageX, y: event.stageY};
+                lastCords = {x: event.clientX, y: event.clientY};
+            }, false);
 
-                stage.on('stagemousemove', function (event) {
-                    if (!moving) {
-                        return;
-                    }
+            scriptingRenderer.domElement.addEventListener('mousemove',function(event){
+                if (!moving) {
+                    return;
+                }
+                blocksContainer.x += event.clientX - lastCords.x;
+                blocksContainer.y += event.clientY - lastCords.y;
+                lastCords = {x: event.clientX, y: event.clientY};
+                renderScriptingScene();
+            },false);
 
-                    blocksContainer.x += event.stageX - lastCords.x;
-                    blocksContainer.y += event.stageY - lastCords.y;
-                    lastCords = {x: event.stageX, y: event.stageY};
-                    refreshCanvas();
-                });
-
-                stage.on('stagemouseup', function (event) {
-                    moving = false;
-                }, null, true);  // once = true
-            });
+            scriptingRenderer.domElement.addEventListener( 'mouseup',  function(event){
+                moving = false;
+            }, false);
         }
 
         function scrollEvent(event) {
@@ -809,10 +814,10 @@ define(function(require) {
         function makeErrorArtwork(name) {
             var container = new THREE.Group();
             scriptingScene.add(container);
-            container.position.set(0 , cy(cellSize*2)-100,2);
+            container.position.set(-200 , cy(cellSize*2)-100,1);
             errorArtwork[name] = container;
             errorArtwork[name].name = name;
-            errorArtwork[name].visible = true;
+            errorArtwork[name].visible = false;
 
             var img = new Image();
             img.onload = function() {
@@ -824,8 +829,8 @@ define(function(require) {
                 var artwork = new THREE.Mesh(new THREE.PlaneGeometry(img.width, img.height),material);
                 container.add(artwork);
 
-                var options = {'font' : 'helvetiker','weight' : 'normal', 'style' : 'normal','size' : 15,'curveSegments' : 20};
-                var textShapes = THREE.FontUtils.generateShapes( 'Message', options );
+                var options = {'font' : 'helvetiker','weight' : 'normal', 'style' : 'normal','size' : 10,'curveSegments' : 20};
+                var textShapes = THREE.FontUtils.generateShapes( '', options );
                 var text = new THREE.ShapeGeometry( textShapes );
                 var textMesh = new THREE.Mesh( text, new THREE.MeshBasicMaterial( { color: 0x000000 } ) ) ;
                 
@@ -837,13 +842,16 @@ define(function(require) {
                 container.hitmesh = artwork;
                 container.hitmesh.parentMesh = container;
 
-                container.on('click',function(){
+                container.on('click', function(event) {
                     container.visible = false;
+                    // On the possibility that there was an error
+                    // arrow associated with this container
                     if (errorMsgArrow !== null) {
                         errorMsgArrow.removeAllChildren(); // Hide the error arrow.
                     }
                     renderScriptingScene();
                 });
+
                 renderScriptingScene();
             }
             img.src = 'images/' + name + '.svg';

@@ -247,30 +247,39 @@ function onSceneEvent(event,eventName){
         case 'click': 
             intersects = raycaster.intersectObjects(clickArray);
             if(intersects.length > 0){
-                for(var i=0; i<intersects.length; i++){
-                    intersects[i].object.parentMesh.dispatchEvent(setEventTypeMesh(event,'click', intersects[i].object.parentMesh));
+                for(var i = intersects.length - 1 ; i >=0 ; i--){
+                    if(intersects[i].object.parentMesh.visible == true){
+                        intersects[i].object.parentMesh.dispatchEvent(setEventTypeMesh(event,'click', intersects[i].object.parentMesh));
+                        break;
+                    }
                 }
-             }
+            }
             break;
         case 'dblclick':
             intersects = raycaster.intersectObjects(dblclickArray);
             if(intersects.length > 0){
-                for(var i=0; i<intersects.length; i++){
-                    intersects[i].object.parentMesh.dispatchEvent(setEventTypeMesh(event,'dblclick', intersects[i].object.parentMesh));
+                for(var i = intersects.length - 1 ; i >=0 ; i--){
+                    if(intersects[i].object.parentMesh.visible == true){
+                        intersects[i].object.parentMesh.dispatchEvent(setEventTypeMesh(event,'dblclick', intersects[i].object.parentMesh));
+                        break;
+                    }
                 }
              }
             break;
         case 'mousedown' :
             intersects = raycaster.intersectObjects(mousedownArray);
             if(intersects.length > 0){
-                for(var i=0; i<intersects.length; i++){
-                    if(intersects[i].object.parentMesh._listeners.hasOwnProperty('mousedown')){
-                        intersects[i].object.parentMesh.dispatchEvent(setEventTypeMesh(event,'mousedown', intersects[i].object.parentMesh));
-                        intersects[i].object.parentMesh._listeners.mousedown.active = true;
-                    }
-                    else if(intersects[i].object.parentMesh._listeners.hasOwnProperty('pressmove')){
-                        intersects[i].object.parentMesh.dispatchEvent(setEventTypeMesh(event,'pressmove', intersects[i].object.parentMesh));
-                        intersects[i].object.parentMesh._listeners.pressmove.active = true;
+                for(var i=intersects.length-1; i>=0; i--){
+                    if(intersects[i].object.parentMesh.visible == true){
+                        if(intersects[i].object.parentMesh._listeners.hasOwnProperty('mousedown')){
+                            intersects[i].object.parentMesh.dispatchEvent(setEventTypeMesh(event,'mousedown', intersects[i].object.parentMesh));
+                            intersects[i].object.parentMesh._listeners.mousedown.active = true;
+                        }
+                        else if(intersects[i].object.parentMesh._listeners.hasOwnProperty('pressmove')){
+                            intersects[i].object.parentMesh.dispatchEvent(setEventTypeMesh(event,'pressmove', intersects[i].object.parentMesh));
+                            intersects[i].object.parentMesh._listeners.pressmove.active = true;
+                        }
+                        break;
                     }
                 }
              }
@@ -278,21 +287,25 @@ function onSceneEvent(event,eventName){
         case 'mouseup' : 
             intersects = raycaster.intersectObjects(mouseupArray);
             if(intersects.length > 0){
-                for(var i=0; i<intersects.length; i++){
-                    if(intersects[i].object.parentMesh._listeners.hasOwnProperty('mousedown')){
-                        if(intersects[i].object.parentMesh._listeners.mousedown.active){
-                            intersects[i].object.parentMesh._listeners.mousedown.active = false;
+                for(var i=intersects.length - 1; i>=0; i--){
+                    if(intersects[i].object.parentMesh.visible == true){
+                        if(intersects[i].object.parentMesh._listeners.hasOwnProperty('mousedown')){
+                            if(intersects[i].object.parentMesh._listeners.mousedown.active){
+                                intersects[i].object.parentMesh._listeners.mousedown.active = false;
+                            }
                         }
-                    }
-                    if(intersects[i].object.parentMesh._listeners.hasOwnProperty('mouseup')){
-                        intersects[i].object.parentMesh.dispatchEvent(setEventTypeMesh(event,'mouseup', intersects[i].object.parentMesh));
-                    }
-                    if(intersects[i].object.parentMesh._listeners.hasOwnProperty('pressup')){
-                        if(intersects[i].object.parentMesh._listeners.pressmove.active){
-                            intersects[i].object.parentMesh.dispatchEvent(setEventTypeMesh(event,'pressup', intersects[i].object.parentMesh));
-                            intersects[i].object.parentMesh._listeners.pressmove.active = false;
+                        if(intersects[i].object.parentMesh._listeners.hasOwnProperty('mouseup')){
+                            intersects[i].object.parentMesh.dispatchEvent(setEventTypeMesh(event,'mouseup', intersects[i].object.parentMesh));
                         }
+                        if(intersects[i].object.parentMesh._listeners.hasOwnProperty('pressup')){
+                            if(intersects[i].object.parentMesh._listeners.pressmove.active){
+                                intersects[i].object.parentMesh.dispatchEvent(setEventTypeMesh(event,'pressup', intersects[i].object.parentMesh));
+                                intersects[i].object.parentMesh._listeners.pressmove.active = false;
+                            }
+                        }
+                        break;                       
                     }
+
                 }
              }
              for(i=0; i< mousedownArray.length; i++){
@@ -303,7 +316,9 @@ function onSceneEvent(event,eventName){
                 }
                 else if(mousedownArray[i].parentMesh._listeners.hasOwnProperty('pressmove')){
                     if(mousedownArray[i].parentMesh._listeners.pressmove.active){
-                        mousedownArray[i].parentMesh.dispatchEvent(setEventTypeMesh(event,'pressup', mousedownArray[i].parentMesh));
+                        if(mousedownArray[i].parentMesh.visible == true){
+                            mousedownArray[i].parentMesh.dispatchEvent(setEventTypeMesh(event,'pressup', mousedownArray[i].parentMesh));
+                        }
                         mousedownArray[i].parentMesh._listeners.pressmove.active = false;
                     }
                 }
@@ -311,7 +326,7 @@ function onSceneEvent(event,eventName){
             break;
 
         case 'mousemotion' : 
-            var flag;
+            var flag, intersected;
             for(var i = 0; i<mousedownArray.length; i++){
                 if(mousedownArray[i].parentMesh._listeners.hasOwnProperty('pressmove')){
                     if(mousedownArray[i].parentMesh._listeners.pressmove.active){
@@ -321,32 +336,36 @@ function onSceneEvent(event,eventName){
             }
             intersects = raycaster.intersectObjects(mousemotionArray);
             if(intersects.length > 0){
-                for(var i=0; i<intersects.length; i++){
-                    if(intersects[i].object.parentMesh._listeners.hasOwnProperty('mousemove')){
-                        intersects[i].object.parentMesh.dispatchEvent(setEventTypeMesh(event,'mousemove', intersects[i].object.parentMesh));
+                for(var i=intersects.length - 1; i>=0; i--){
+                    if(intersects[i].object.parentMesh.visible == true){
+                        intersected = intersects[i].object;
+                        break;
                     }
-                    else if(intersects[i].object.parentMesh._listeners.hasOwnProperty('mouseover')){
-                        if(intersects[i].object.parentMesh._listeners.mouseover.active == undefined){
-                            intersects[i].object.parentMesh._listeners.mouseover.active = true;
-                            intersects[i].object.parentMesh.dispatchEvent(setEventTypeMesh(event,'mouseover', intersects[i].object.parentMesh));
+                }
+                if(intersected !== undefined){
+                    if(intersected.parentMesh._listeners.hasOwnProperty('mousemove')){
+                        intersected.parentMesh.dispatchEvent(setEventTypeMesh(event,'mousemove', intersected.parentMesh));
+                    }
+                    else if(intersected.parentMesh._listeners.hasOwnProperty('mouseover')){
+                        if(intersected.parentMesh._listeners.mouseover.active == undefined){
+                            intersected.parentMesh._listeners.mouseover.active = true;
+                            intersected.parentMesh.dispatchEvent(setEventTypeMesh(event,'mouseover', intersected.parentMesh));
                         }
-                        else if(intersects[i].object.parentMesh._listeners.mouseover.active == false){
-                            intersects[i].object.parentMesh._listeners.mouseover.active = true;
-                            intersects[i].object.parentMesh.dispatchEvent(setEventTypeMesh(event,'mouseover', intersects[i].object.parentMesh));
+                        else if(intersected.parentMesh._listeners.mouseover.active == false){
+                            intersected.parentMesh._listeners.mouseover.active = true;
+                            intersected.parentMesh.dispatchEvent(setEventTypeMesh(event,'mouseover', intersected.parentMesh));
                         }
                     }
                 }
              }
 
+
              // Check for mouseout
              for(i=0; i < mousemotionArray.length; i++){
                 flag = false;
                 if(mousemotionArray[i].parentMesh._listeners.hasOwnProperty('mouseover') && mousemotionArray[i].parentMesh._listeners.mouseover.active == true){
-                    for(var j = 0; j<intersects.length; j++){
-                        if(intersects[j].object == mousemotionArray[i])
-                            flag = true;
-                            break;
-                    }
+                    if(intersected == mousemotionArray[i])
+                        flag = true;
                     if(flag){
                         break;
                     }
