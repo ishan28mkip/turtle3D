@@ -1,13 +1,8 @@
-// Copyright (c) 2014,2015 Walter Bender
-//
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 3 of the License, or
-// (at your option) any later version.
-//
-// You should have received a copy of the GNU General Public License
-// along with this library; if not, write to the Free Software
-// Foundation, 51 Franklin Street, Suite 500 Boston, MA 02110-1335 USA
+// TODO : Add 3D version to getBounds and add 2D version to intersect, using get2Dbounds
+
+// NEWS : 
+    // Fixed the get2Dbounds function and optimized a bit // 12:09 14th June
+
 function canvasPixelRatio() {
     var devicePixelRatio = window.devicePixelRatio || 1;
     var context = document.querySelector('#myCanvas').getContext('2d');
@@ -22,18 +17,58 @@ function canvasPixelRatio() {
 
 // ------------------------------------------------------------------- //
 
-function cx(x){
+(function() {
+    var lastTime = 0;
+    var vendors = ['ms', 'moz', 'webkit', 'o'];
+    for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+        window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
+        window.cancelAnimationFrame = window[vendors[x]+'CancelAnimationFrame'] 
+                                   || window[vendors[x]+'CancelRequestAnimationFrame'];
+    }
+ 
+    if (!window.requestAnimationFrame)
+        window.requestAnimationFrame = function(callback, element) {
+            var currTime = new Date().getTime();
+            var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+            var id = window.setTimeout(function() { callback(currTime + timeToCall); }, 
+              timeToCall);
+            lastTime = currTime + timeToCall;
+            return id;
+        };
+ 
+    if (!window.cancelAnimationFrame)
+        window.cancelAnimationFrame = function(id) {
+            clearTimeout(id);
+        };
+}());
+
+
+// PE : Do these functions depend upon the coordinate axis ?
+function threeCoorX(x){
     return (x - window.innerWidth/2);
 }
 
-function cy(y){
-    return -(y - window.innerHeight/2);
+function threeCoorY(y){
+    if(y <= window.innerHeight/2)
+        return (window.innerHeight/2 - y);
+    else
+        return (y-window.innerHeight/2);
+}
+
+function mouseCoorX(x){
+    return (x + window.innerHeight/2);
+}
+
+function mouseCoorY(y){
+    if(y >= 0)
+        return (window.innerHeight/2 - y);
+    else
+        return (-y + window.innerHeight/2);
 }
 
             // Add axis
 function buildAxes( length ) {
     var axes = new THREE.Object3D();
-
     axes.add( buildAxis( new THREE.Vector3( 0, 0, 10 ), new THREE.Vector3( length, 0, 0 ), 0xFF0000, false ) ); // +X
     axes.add( buildAxis( new THREE.Vector3( 0, 0, 10 ), new THREE.Vector3( -length, 0, 0 ), 0xFF0000, true) ); // -X
     axes.add( buildAxis( new THREE.Vector3( 0, 0, 10 ), new THREE.Vector3( 0, length, 0 ), 0x00FF00, false ) ); // +Y
@@ -45,8 +80,7 @@ function buildAxes( length ) {
 }
 
 function buildAxis( src, dst, colorHex, dashed ) {
-    var geom = new THREE.Geometry(),
-    mat; 
+    var geom = new THREE.Geometry(),mat; 
 
     if(dashed) {
         mat = new THREE.LineDashedMaterial({ linewidth: 3, color: colorHex, dashSize: 3, gapSize: 3 });
@@ -62,42 +96,58 @@ function buildAxis( src, dst, colorHex, dashed ) {
     return axis;
 }
 
+// Binding the on event to Object3D prototype
 // to be used to get bounds of a container, recursively should be set to false if only no container nesting is there
 // TODO
 // Use a better algorithm here when time permits to get the maximum and minimum
-function get2DBounds(container,recursively){
-    var bounds,result = {},flag = false;
-    for(var i = 0; i<container.children.length; i++){
-        if(container.children[i].geometry !== undefined){
+
+Object.defineProperty(THREE.Object3D.prototype, 'get2DBounds', {
+    enumerable: false,
+    configurable: false,
+    writable: false,
+    value: function(container,recursively,bound){
+        var bounds;
+        var flag;
+        if(bound === undefined)
+        {
             flag = true;
-            if(flag){
-                container.children[i].geometry.computeBoundingBox();
-                bounds = container.children[i].geometry.boundingBox; 
-                result.maxX = bounds.max.x;
-                result.maxY = bounds.max.y;
-                result.minX = bounds.min.x;
-                result.minY = bounds.min.y;
-                flag = false;
+        }
+        else{
+            bounds = bound;
+            flag = false;
+        }
+
+        for(var i = 0; i<container.children.length; i++){
+            if(container.children[i].geometry !== undefined){
+                if(flag){
+                    container.children[i].geometry.computeBoundingBox();
+                    bounds = container.children[i].geometry.boundingBox; 
+                    flag = false;
+                }
+                else{
+                    container.children[i].geometry.computeBoundingBox();
+                    var newBounds = container.children[i].geometry.boundingBox;
+                    bounds.max.x = ( newBounds.max.x > bounds.max.x) ?  newBounds.max.x : bounds.max.x;
+                    bounds.max.y = ( newBounds.max.y > bounds.max.y) ?  newBounds.max.y : bounds.max.y;
+                    bounds.min.x = ( newBounds.min.x < bounds.min.x) ?  newBounds.min.x : bounds.min.x;
+                    bounds.min.y = ( newBounds.min.x < bounds.min.x) ?  newBounds.min.y : bounds.min.y;
+                }
             }
-            else{
-                container.children[i].geometry.computeBoundingBox();
-                bounds = container.children[i].geometry.boundingBox; 
-                if(bounds.max.x > result.maxX)
-                    result.maxX = bounds.max.x;
-                if(bounds.max.y > result.maxY)
-                    result.maxY = bounds.min.y;
-                if(bounds.min.x < result.minX)
-                    result.minX = bounds.min.x;
-                if(bounds.min.y < result.minY)
-                    result.minY = bounds.min.y;
+            else if(recursively){
+                if(flag){
+                    bounds = container.children[i].get2DBounds(container.children[i], true);
+                    flag = false;
+                }
+                else{
+                    bounds = container.children[i].get2DBounds(container.children[i], true, bounds);
+                }
             }
         }
-        else if(recursively && container.children[i].geometry == undefined){
-            result = get2DBounds(container.children[i], true);
-        }
+        return bounds;
     }
-    return result;
-}
+});
+
+
 
 // Gets the 3D bound of any object
 function get3DBounds(container,recursively){
@@ -109,6 +159,8 @@ function get3DBounds(container,recursively){
 // Optimize the library
 // FIXME mouseup bug : If mousedown is on element1 and element2 also has mousedown and mouseup events attached then mouseup event will fire even if mouse is on element2. Event should only fire if mouse is on element1. 
 // FIXME mouseout can only be used with mouseover & pressmove can only be used along with pressup
+// TODO : Add many to one and one to many binding on hitmesh
+// TODO : Option to generate event even when hidden
 
 // Event handler arrays
 var clickArray = [];
@@ -393,6 +445,8 @@ function setEventTypeMesh(event,type, mesh){
     eventObject.srcElement = mesh;
     return eventObject;
 }
+
+
 
 
 // ------------------------------------------------------------------- //

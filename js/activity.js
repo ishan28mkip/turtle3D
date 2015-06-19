@@ -4,9 +4,9 @@
     // PE : Probable source of error
 
 // Done list
-    // createMsgContainer
-    // creatErrorContainer
-    // 
+    // createMsgContainer();
+    // creatErrorContainer();
+    // setupBlocksContainerEvents();
 
 // TODO
 
@@ -42,7 +42,7 @@
         //     container.position.add(coor);
         //     px = event.clientX;
         //     py = event.clientY;
-        //     renderScriptingScene();
+        //     refreshCanvas(1);
         // });
         // container.on('pressup',function(event){
         //     px = false;
@@ -63,8 +63,6 @@ if (lang.indexOf("-") != -1) {
 
 define(function(require) {
     require('easeljs');
-    require('mouseEvents');
-    require('tweenjs');
     require('preloadjs');
     require('howler');
     require('p5.sound');
@@ -98,7 +96,8 @@ define(function(require) {
             console.log(e);
         }
 
-        var canvas = docById('myCanvas');
+        // var canvas = docById('myCanvas');
+        var canvas = docById('scriptingOutput');
 
         // See why is this queue created?
         // var queue = new createjs.LoadQueue(false);
@@ -171,10 +170,7 @@ define(function(require) {
             'ARGPLUGINS': {},
             'BLOCKPLUGINS': {}
         };
-        // Create the mouse events variables
-        var events = [{'name' : 'click', 'bubble' : false},{'name' : 'dblclick', 'bubble' : false},{'name' : 'mousedown', 'bubble' : false},{'name' : 'mouseup', 'bubble' : false},{'name' : 'mousemove', 'bubble' : false}];
-        var eventObject;
-        
+
         // Stacks of blocks saved in local storage
         var macroDict = {};
 
@@ -371,7 +367,6 @@ define(function(require) {
         function init() {
             docById('loader').className = 'loader';
 
-
             // Three.js initialization
             // Create a scriptingScene, that will hold all our elements such as objects, cameras and lights.
             scriptingScene = new THREE.Scene();
@@ -430,16 +425,7 @@ define(function(require) {
             var events = ['click','dblclick','mousedown','mouseup','mousemove'];
             initMouseEvents(events,scriptingRenderer,scriptingCamera);
 
-            // scene is already created
-
-            stage = new createjs.Stage(canvas);
-
-            createjs.Touch.enable(stage);
-
-            createjs.Ticker.timingMode = createjs.Ticker.RAF_SYNCHED;
-                    createjs.Ticker.setFPS(30);
-            createjs.Ticker.addEventListener('tick', stage);
-            createjs.Ticker.addEventListener('tick', tick);
+            // TODO create a tick library for three.js
 
             createMsgContainer('#ffffff', '#7a7a7a', function(text) {
                 msgText = text;
@@ -466,22 +452,14 @@ define(function(require) {
             turtleContainer = new THREE.Group();
             scriptingScene.add(palettesContainer,blocksContainer,trashContainer);
             turtleScene.add(turtleContainer);
-
-
-            palettesContainer = new createjs.Container();
-            blocksContainer = new createjs.Container();
-            trashContainer = new createjs.Container();
-            turtleContainer = new createjs.Container();
-            stage.addChild(turtleContainer, trashContainer, blocksContainer,
-                           palettesContainer);
             setupBlocksContainerEvents();
 
             trashcan = new Trashcan(canvas, trashContainer, cellSize, refreshCanvas);
             turtles = new Turtles(canvas, turtleContainer, refreshCanvas);
-            blocks = new Blocks(canvas, blocksContainer, refreshCanvas, trashcan, stage.update);
-            palettes = initPalettes(canvas, refreshCanvas, palettesContainer, cellSize, refreshCanvas, trashcan, blocks);
+            blocks = new Blocks(canvas, blocksContainer, refreshCanvas, trashcan);
+            // palettes = initPalettes(canvas, refreshCanvas, palettesContainer, cellSize, trashcan, blocks);
 
-            palettes.setBlocks(blocks);
+            // palettes.setBlocks(blocks);
             turtles.setBlocks(blocks);
             blocks.setTurtles(turtles);
             blocks.setErrorMsg(errorMsg);
@@ -671,7 +649,7 @@ define(function(require) {
                 blocksContainer.x += event.clientX - lastCords.x;
                 blocksContainer.y += event.clientY - lastCords.y;
                 lastCords = {x: event.clientX, y: event.clientY};
-                renderScriptingScene();
+                refreshCanvas(1);
             },false);
 
             scriptingRenderer.domElement.addEventListener( 'mouseup',  function(event){
@@ -732,11 +710,11 @@ define(function(require) {
         function createMsgContainer(fillColor, strokeColor, callback, y) {
             var container = new THREE.Group();
             scriptingScene.add(container);
-            container.position.set(0, cy(y+cellSize/2),1); //cellsize/2 to center it
-            container.visible = true;
+            container.position.set(0, window.innerHeight/2 - (y+cellSize/2),1); //cellsize/2 to center it
+            container.visible = false;
 
-            axes = buildAxes( 1000 );
-            container.add( axes );
+            // axes = buildAxes( 1000 );
+            // container.add( axes );
 
             var img = new Image();
             var svgData = MSGBLOCK.replace('fill_color', fillColor).replace(
@@ -747,7 +725,7 @@ define(function(require) {
                 texture.needsUpdate = true;
                 var material = new THREE.MeshBasicMaterial( {map: texture, side: THREE.DoubleSide} );
                 material.transparent = true;
-                var msgBlock = new THREE.Mesh(new THREE.PlaneGeometry(img.width, img.height),material);
+                var msgBlock = new THREE.Mesh(new THREE.PlaneBufferGeometry(img.width, img.height),material);
                 container.add(msgBlock);
 
                 var options = {'font' : 'helvetiker','weight' : 'normal', 'style' : 'normal','size' : 15,'curveSegments' : 20};
@@ -768,7 +746,7 @@ define(function(require) {
                 //     if (errorMsgArrow !== null) {
                 //         errorMsgArrow.removeAllChildren(); // Hide the error arrow.
                 //     }
-                //     renderScriptingScene();
+                //     refreshCanvas(1);
                 // });
 
                 var px,py;
@@ -786,14 +764,14 @@ define(function(require) {
                     container.position.add(coor);
                     px = event.clientX;
                     py = event.clientY;
-                    renderScriptingScene();
+                    refreshCanvas(1);
                 });
                 container.on('pressup',function(event){
                     px = false;
                     py = false;
                 });
 
-                renderScriptingScene();
+                refreshCanvas(1);
                 callback(textMesh);
                 blocks.setMsgText(textMesh);
 
@@ -814,7 +792,7 @@ define(function(require) {
         function makeErrorArtwork(name) {
             var container = new THREE.Group();
             scriptingScene.add(container);
-            container.position.set(-200 , cy(cellSize*2)-100,1);
+            container.position.set(-200 , threeCoorY(cellSize*2)-100,1);
             errorArtwork[name] = container;
             errorArtwork[name].name = name;
             errorArtwork[name].visible = false;
@@ -826,7 +804,7 @@ define(function(require) {
                 texture.needsUpdate = true;
                 var material = new THREE.MeshBasicMaterial( {map: texture, side: THREE.DoubleSide} );
                 material.transparent = true;
-                var artwork = new THREE.Mesh(new THREE.PlaneGeometry(img.width, img.height),material);
+                var artwork = new THREE.Mesh(new THREE.PlaneBufferGeometry(img.width, img.height),material);
                 container.add(artwork);
 
                 var options = {'font' : 'helvetiker','weight' : 'normal', 'style' : 'normal','size' : 10,'curveSegments' : 20};
@@ -849,10 +827,10 @@ define(function(require) {
                     if (errorMsgArrow !== null) {
                         errorMsgArrow.removeAllChildren(); // Hide the error arrow.
                     }
-                    renderScriptingScene();
+                    refreshCanvas(1);
                 });
 
-                renderScriptingScene();
+                refreshCanvas(1);
             }
             img.src = 'images/' + name + '.svg';
         }
@@ -1085,26 +1063,28 @@ define(function(require) {
             }
         }
 
-        function refreshCanvas() {
-            update = true;
-        }
-
-        function renderScriptingScene(){
-            scriptingRenderer.render(scriptingScene, scriptingCamera);
-        }
-
-        function renderTurtleScene(){
-            turtleRenderer.render(turtleScene, turtleCamera);
-        }
-
-        function tick(event) {
-            // This set makes it so the stage only re-renders when an
-            // event handler indicates a change has happened.
-            if (update) {
-                update = false; // Only update once
-                stage.update(event);
+        function refreshCanvas(renderer) {
+            if(renderer ==  0){
+                scriptingRenderer.render(scriptingScene,scriptingCamera);
+                turtleRenderer.render(turtleScene, turtleCamera);
+            }
+            else if(renderer == 1){
+                scriptingRenderer.render(scriptingScene, scriptingCamera);
+            }
+            else if(renderer == 2){
+                turtleRenderer.render(turtleScene, turtleCamera);
             }
         }
+
+        // Remove this function if it is not used later on 
+        // function tick(event) {
+        //     // This set makes it so the stage only re-renders when an
+        //     // event handler indicates a change has happened.
+        //     if (update) {
+        //         update = false; // Only update once
+        //         stage.update(event);
+        //     }
+        // }
 
         function doOpenSamples() {
             console.log('save locally');

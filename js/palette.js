@@ -1019,8 +1019,9 @@ this.scrollEvent = function(direction, scrollSpeed) {
 
 var blocks = undefined;
 
-function initPalettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashcan, b) {
+function initPalettes(canvas, refreshCanvas, stage, cellSize, trashcan, b) {
     // Instantiate the palettes object on first load.
+    // (canvas, refreshCanvas, palettesContainer, cellSize, refreshCanvas, trashcan, blocks);
     var palettes = new Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashcan).
     add('turtle').
     add('pen').
