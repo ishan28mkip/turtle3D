@@ -3,6 +3,10 @@
 // NEWS : 
     // Fixed the get2Dbounds function and optimized a bit // 12:09 14th June
 
+var windowHeight = window.innerHeight;
+var windowWidth = window.innerWidth;
+
+
 function canvasPixelRatio() {
     var devicePixelRatio = window.devicePixelRatio || 1;
     var context = document.querySelector('#myCanvas').getContext('2d');
@@ -42,8 +46,7 @@ function canvasPixelRatio() {
         };
 }());
 
-
-// PE : Do these functions depend upon the coordinate axis ?
+// PE : Replace window.innerWidth & window.innerHeight with canvas width and height
 function threeCoorX(x){
     return (x - window.innerWidth/2);
 }

@@ -22,12 +22,6 @@ var TRASHWIDTH = 320;
 var TRASHHEIGHT = 120;
 
 
-animate();
-function animate(time) {
-    requestAnimationFrame( animate );
-    TWEEN.update(time);
-}
-
 function Trashcan (canvas, stage, size, refreshCanvas) {
     this.canvas = canvas;
     this.stage = stage;

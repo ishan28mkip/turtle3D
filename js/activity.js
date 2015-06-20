@@ -438,7 +438,7 @@ define(function(require) {
             createErrorContainers();
 
             /* Z-Order (top to bottom):
-             *   menus
+             *   menus 
              *   palettes
              *   blocks
              *   trash
@@ -457,7 +457,7 @@ define(function(require) {
             trashcan = new Trashcan(canvas, trashContainer, cellSize, refreshCanvas);
             turtles = new Turtles(canvas, turtleContainer, refreshCanvas);
             blocks = new Blocks(canvas, blocksContainer, refreshCanvas, trashcan);
-            // palettes = initPalettes(canvas, refreshCanvas, palettesContainer, cellSize, trashcan, blocks);
+            palettes = initPalettes(canvas, refreshCanvas, palettesContainer, cellSize, trashcan, blocks);
 
             // palettes.setBlocks(blocks);
             turtles.setBlocks(blocks);

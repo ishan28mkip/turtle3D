@@ -18,7 +18,7 @@ function Turtle (name, turtles) {
 
     // In the trash?
     this.trash = false;
-
+    
     // Things used for drawing the turtle.
     this.container = null;
     this.x = 0;
