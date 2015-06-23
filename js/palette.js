@@ -74,7 +74,7 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
     this.visible = true;
     this.scale = 1.0;
 
-    this.x = -windowWidth/2 ;
+    this.x = -windowWidth/2 + 10; //10 pixel offset is given from the left corner
     this.y = threeCoorY(this.cellSize);
 
     this.current = 'turtle';
@@ -139,13 +139,12 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
                 // this.buttons[name].snapToPixelEnabled = true; //TODO implement a snap to pixel feature
                 this.stage.add(this.buttons[name]);
 
-                this.buttons[name].position.set(this.x + this.halfCellSize, this.y + this.scrollDiff, 1);
+                this.buttons[name].position.set(this.x + this.halfCellSize, this.y + this.scrollDiff, 10);
                 this.y -= this.cellSize;
                 var me = this;
 
                 function processButtonIcon(me, name, bitmap, extras) {
                     me.buttons[name].add(bitmap);
-                    
                     // TODO : Fix these scalling
                     if (me.cellSize != me.originalSize) {
                         bitmap.scaleX = me.cellSize / me.originalSize;
@@ -160,22 +159,15 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
                     circleShape.quadraticCurveTo( -circleRadius, -circleRadius, -circleRadius, 0 );
                     circleShape.quadraticCurveTo( -circleRadius, circleRadius, 0, circleRadius );
                     var circleGeometry = new THREE.ShapeGeometry( circleShape );
-                    var circleMesh = new THREE.Mesh( circleGeometry, new THREE.MeshBasicMaterial( { color: 0xff0000 } ) ) ; 
+                    var circleMesh = new THREE.Mesh( circleGeometry, new THREE.MeshBasicMaterial( { color: 0x222222 } ) ) ; 
                     me.buttons[name].add(circleMesh);
 
-                    bitmap.hitmesh = circleMesh;
-                    circleMesh.parentMesh = bitmap;
-                    console.log(me);
+                    // bitmap.hitmesh = circleMesh;
+                    // circleMesh.parentMesh = bitmap;
+                    me.buttons[name].hitmesh = circleMesh;
+                    circleMesh.parentMesh = me.buttons[name];
+
                     me.refreshCanvas(1);
-
-                    // LATER set the location of the hitarea
-
-                    // var hitArea = new createjs.Shape();
-                    // hitArea.graphics.beginFill('#FFF').drawEllipse(-me.halfCellSize, -me.halfCellSize, me.cellSize, me.cellSize);
-                    // hitArea.x = me.halfCellSize;
-                    // hitArea.y = me.halfCellSize;
-                    // me.buttons[name].hitArea = hitArea;
-                    // me.buttons[name].visible = false;
 
                     me.dict[name].makeMenu(false);
                     me.dict[name].moveMenu(me.cellSize, me.cellSize);
@@ -295,9 +287,20 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
 
 
 // Palette Button event handlers
+// Fix these functions quickly
 function loadPaletteButtonHandler(palettes, name) {
     var locked = false;
     var scrolling = false;
+
+    palettes.buttons[name].on('mouseover',function(event){
+        event.target.hitmesh.material.opacity = 0.4;
+        palettes.refreshCanvas(1);
+    });
+
+    palettes.buttons[name].on('mouseout',function(event){
+        event.target.hitmesh.material.opacity = 1;
+        palettes.refreshCanvas(1);
+    });
 
     palettes.buttons[name].on('mousedown', function(event) {
         scrolling = true;
@@ -320,21 +323,22 @@ function loadPaletteButtonHandler(palettes, name) {
 
 
     // A palette button opens or closes a palette.
-    var circles = {};
-    palettes.buttons[name].on('mouseover', function(event) {
-        var r = palettes.cellSize / 2;
-        circles = showMaterialHighlight(
-            palettes.buttons[name].x + r, palettes.buttons[name].y + r, r,
-            event, palettes.scale, palettes.stage);
-    });
+    // TODO : Add this highlight function back later
+    // var circles = {};
+    // palettes.buttons[name].on('mouseover', function(event) {
+    //     var r = palettes.cellSize / 2;
+    //     circles = showMaterialHighlight(
+    //         palettes.buttons[name].x + r, palettes.buttons[name].y + r, r,
+    //         event, palettes.scale, palettes.stage);
+    // });
 
-    palettes.buttons[name].on('pressup', function(event) {
-        hideMaterialHighlight(circles, palettes.stage);
-    });
+    // palettes.buttons[name].on('pressup', function(event) {
+    //     hideMaterialHighlight(circles, palettes.stage);
+    // });
 
-    palettes.buttons[name].on('mouseout', function(event) {
-        hideMaterialHighlight(circles, palettes.stage);
-    });
+    // palettes.buttons[name].on('mouseout', function(event) {
+    //     hideMaterialHighlight(circles, palettes.stage);
+    // });
 
     palettes.buttons[name].on('click', function(event) {
         if (locked) {
@@ -355,7 +359,7 @@ function loadPaletteButtonHandler(palettes, name) {
                 }
             }
         }
-        palettes.refreshCanvas();
+        palettes.refreshCanvas(1);
     });
 }
 
@@ -383,14 +387,14 @@ function Palette(palettes, name) {
 
     this.makeMenu = function(createHeader) {
         if (this.menuContainer == null) {
-            this.menuContainer = new createjs.Container();
-            this.menuContainer.snapToPixelEnabled = true;
+            this.menuContainer = new THREE.Group();
+            // this.menuContainer.snapToPixelEnabled = true; //TODO how to enable pixel snapping in three.js
         }
         if (!createHeader) {
             return;
         };
         var paletteWidth = MENUWIDTH + (this.columns * 160);
-        this.menuContainer.removeAllChildren();
+        // this.menuContainer.removeAllChildren();
 
         // Create the menu button
         function processHeader(palette, name, bitmap, extras) {
@@ -817,16 +821,18 @@ function Palette(palettes, name) {
     }
 
     this.moveMenu = function(x, y) {
-        dx = x - this.menuContainer.x;
-        dy = y - this.menuContainer.y;
-        this.menuContainer.x = x;
-        this.menuContainer.y = y;
+        dx = x - this.menuContainer.position.x;
+        dy = y - this.menuContainer.position.y;
+        this.menuContainer.position.setX(x);
+        this.menuContainer.position.setY(y);
         this.moveMenuItemsRelative(dx, dy);
     }
 
     this.moveMenuRelative = function(dx, dy) {
-        this.menuContainer.x += dx;
-        this.menuContainer.y += dy;
+        var x = this.menuContainer.position.x;
+        var y = this.menuContainer.position.y;
+        this.menuContainer.position.setX(x + dx);
+        this.menuContainer.position.setY(y + dy;
         this.moveMenuItemsRelative(dx, dy);
     }
 
@@ -1429,10 +1435,17 @@ function makePaletteBitmap(palette, data, name, callback, extras) {
     // Works with Chrome, Safari, Firefox (untested on IE)
     var img = new Image();
         img.onload = function () {
-            var texture = new THREE.Texture(img) 
+            var canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            var context = canvas.getContext('2d');
+            context.drawImage(img, 0, 0);
+            var texture = new THREE.Texture(canvas);
             texture.needsUpdate = true;
-            var material = new THREE.MeshBasicMaterial( {map: texture, side: THREE.DoubleSide} );
+            texture.minFilter = THREE.NearestFilter; 
+            var material = new THREE.MeshBasicMaterial( {map: texture} );
             material.transparent = true;
+            material.depthWrite = false;
             // me.container.scaleX = size/me.iconsize; //See if the scale variable is required here
             // me.container.scaleY = size/me.iconsize;
             // var bitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(me.container.scaleX*img.width, me.container.scaleY*img.height),material);
