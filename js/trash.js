@@ -1,56 +1,79 @@
-// Copyright (c) 2014 Walter Bender
-//
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 3 of the License, or
-// (at your option) any later version.
-//
-// You should have received a copy of the GNU General Public License
-// along with this library; if not, write to the Free Software
-// Foundation, 51 Franklin Street, Suite 500 Boston, MA 02110-1335 USA
+// PE : Check the scaling and if it is not working fix it
+// Code Snippets
+   // Set interval based opacity animation
+    // var me = this;
+    // var interval = setInterval(function(){
+    //     me.container.traverse( function( node ) {
+    //         if( node.material) {
+    //             if(node.material.opacity - (1/10) > 0)
+    //                 node.material.opacity = node.material.opacity - (1/10);
+    //             else
+    //                 clearInterval(interval);
+    //         }
+    //     });
+    //     me.refreshCanvas(1);
+    // },20);
+    
+    // View overtrashcan function for coordinate conversion demo
 
-// The trashcan is an area at the bottom of the screen where stacks of
-// blocks can be dragged. Once in the trash area, they are marked as
-// trash and hidden. There is a menu button that can be used to
-// restore trash.
 require(['activity/utils']);
 
 var TRASHWIDTH = 320;
 var TRASHHEIGHT = 120;
+
 
 function Trashcan (canvas, stage, size, refreshCanvas) {
     this.canvas = canvas;
     this.stage = stage;
     this.refreshCanvas = refreshCanvas;
     this.size = size;
-
     this.iconsize = 55;  // default value
-    this.container = new createjs.Container();
+    this.container = new THREE.Group();
 
     function makeBorderHighlight(me) {
+
         var img = new Image();
-        img.onload = function () {
-            bitmap = new createjs.Bitmap(img);
-            bitmap.scaleX = size / me.iconsize;
-            bitmap.scaleY = size / me.iconsize;
-            me.container.addChild(bitmap);
-            bitmap.visible = false;
-            bounds = me.container.getBounds();
-            me.container.cache(bounds.x, bounds.y, bounds.width, bounds.height);
-            // Hide the trash until a block is moved.
-            me.container.visible = false;
+        img.onload = function(){
+            var texture = new THREE.Texture(img) 
+            texture.needsUpdate = true;
+            var material = new THREE.MeshBasicMaterial( {map: texture, side: THREE.DoubleSide} );
+            material.transparent = true;
+            var border = new THREE.Mesh(new THREE.PlaneBufferGeometry(img.width*me.container.scaleX, img.height*me.container.scaleY),material);
+            me.container.add(border);
+            border.name = 'trashBorderHighlight';
+            // bounds = me.container.getBounds(); //cache feature does not make sense for webgl based rendering
+            // me.container.cache(bounds.x, bounds.y, bounds.width, bounds.height);
+            // Hide the trash until a block is moved
+            me.container.visible = true;
+            me.unhighlight();
+            refreshCanvas(1);
         }
         img.src = 'data:image/svg+xml;base64,' + window.btoa(
-            unescape(encodeURIComponent(BORDER.replace('stroke_color', '#000000'))));
+            unescape(encodeURIComponent(BORDER.replace('stroke_color', '#555555'))));
     }
 
     function makeBorder(me) {
         var img = new Image();
-        img.onload = function () {
-            border = new createjs.Bitmap(img);
-            bitmap.scaleX = me.size / me.iconsize;
-            bitmap.scaleY = me.size / me.iconsize;
-            me.container.addChild(border);
+        img.onload = function(){
+            var texture = new THREE.Texture(img) 
+            texture.needsUpdate = true;
+            var material = new THREE.MeshBasicMaterial( {map: texture, side: THREE.DoubleSide} );
+            material.transparent = true;
+            var border = new THREE.Mesh(new THREE.PlaneBufferGeometry(img.width*me.container.scaleX, img.height*me.container.scaleY),material);
+            me.container.add(border);
+            border.name = 'trashBorder';
+            
+            me.container.hitmesh = border;
+            border.parentMesh = me.container;
+
+            // Remove these when done
+            me.container.on('mouseover',function(event){
+                me.highlight();
+            });
+            me.container.on('mouseout',function(event){
+                me.unhighlight();
+            });
+
             makeBorderHighlight(me);
         }
         img.src = 'data:image/svg+xml;base64,' + window.btoa(
@@ -60,38 +83,74 @@ function Trashcan (canvas, stage, size, refreshCanvas) {
     function makeTrash(me) {
         var img = new Image();
         img.onload = function () {
-            bitmap = new createjs.Bitmap(img);
-            me.container.addChild(bitmap);
-            me.iconsize = bitmap.getBounds().width;
-            bitmap.scaleX = me.size / me.iconsize;
-            bitmap.scaleY = me.size / me.iconsize;
-            bitmap.x = ((TRASHWIDTH - size) / 2) * bitmap.scaleX;
-            bitmap.y = ((TRASHHEIGHT - size) / 2) * bitmap.scaleY;
+            var texture = new THREE.Texture(img) 
+            texture.needsUpdate = true;
+            var material = new THREE.MeshBasicMaterial( {map: texture, side: THREE.DoubleSide} );
+            material.transparent = true;
+            me.container.scaleX = size/me.iconsize;
+            me.container.scaleY = size/me.iconsize;
+            var bitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(me.container.scaleX*img.width, me.container.scaleY*img.height),material);
+            me.container.add(bitmap);
+            bitmap.name = 'trashIcon';
+
+            // var axes = buildAxes( 1000 );
+            // me.container.add( axes );
+            // me.iconsize = bitmap.getBounds().width; //PE : see why is this done
+            me.container.position.set(0, -window.innerHeight/2 + ((TRASHHEIGHT + size) / 2) * me.container.scaleY ,1);
             makeBorder(me);
         }
         img.src = 'images/trash.svg';
     }
 
+    // TODO set the y properly
     this.resizeEvent = function(scale) {
-        this.container.x = (this.canvas.width * 1/scale / 2) - ((TRASHWIDTH / 2) * (this.size / this.iconsize));
-        this.container.y = (this.canvas.height * 1/scale) - (TRASHHEIGHT * (this.size / this.iconsize));
+        this.container.position.setX(0);
+        this.container.position.setY(-window.innerHeight/2 + ((TRASHHEIGHT + size) / 2) * this.container.scaleY);
     }
 
-    this.stage.addChild(this.container);
-    this.stage.setChildIndex(this.container, 0);
+    this.stage.add(this.container);
+    // this.stage.setChildIndex(this.container, 0); //see why this is used
     this.resizeEvent(1);
     makeTrash(this);
 
+
     this.hide = function() {
-        createjs.Tween.get(this.container)
-            .to({alpha: 0}, 200)
-            .set({visible: false});
+        var me = this;
+        this.container.traverse(function(node){
+            if(node.material){
+                node.material.transparent = true;
+                var tween = new TWEEN.Tween( node.material )
+                .to( { opacity: 0 }, 200 )
+                .onUpdate( function () {
+                    me.refreshCanvas(1);
+                })
+                .onComplete( function(){
+                    me.container.visible = false;
+                })
+                .start();
+            }
+        });
     }
 
     this.show = function() {
-        createjs.Tween.get(this.container)
-            .to({alpha: 0.0, visible: true})
-            .to({alpha: 1.0}, 200);
+        var me = this;
+        var flag;
+        this.container.traverse(function(node){
+            if(node.material){
+                node.material.transparent = true;
+                if(!flag){
+                    flag = true;
+                    me.container.visible = true;
+                }
+                node.material.opacity = 0;
+                var tween = new TWEEN.Tween( node.material )
+                .to( { opacity: 1.0 }, 200 )
+                .onUpdate( function () {
+                    me.refreshCanvas(1);
+                })
+                .start();
+            }
+        });        
     }
 
     this.highlight = function() {
@@ -99,8 +158,7 @@ function Trashcan (canvas, stage, size, refreshCanvas) {
             last(this.container.children).visible = true;
             this.container.children[1].visible = false;
             this.container.visible = true;
-            this.container.updateCache();
-            this.refreshCanvas();
+            this.refreshCanvas(1);
         }
     }
 
@@ -109,17 +167,22 @@ function Trashcan (canvas, stage, size, refreshCanvas) {
             last(this.container.children).visible = false;
             this.container.children[1].visible = true;
             this.container.visible = true;
-            this.container.updateCache();
-            this.refreshCanvas();
+            this.refreshCanvas(1);
         }
     }
 
     this.overTrashcan = function(x, y) {
-        var tx = this.container.x;
-        var ty = this.container.y;
+        var currentTrashWidth = (TRASHWIDTH * this.size / this.iconsize);
+        var currentTrashHeight = (TRASHHEIGHT * this.size / this.iconsize);
+        var tx = this.container.position.x;
+        var ty = this.container.position.y;
+
+        tx = mouseCoorX(tx-currentTrashWidth/2);
+        ty = mouseCoorY(ty+currentTrashHeight/2);
+
         if (x < tx) {
             return false;
-        } else if (x > tx + (TRASHWIDTH * this.size / this.iconsize)) {
+        } else if (x > tx + currentTrashWidth) {
             return false;
         }
         if (y < ty) {
@@ -128,3 +191,24 @@ function Trashcan (canvas, stage, size, refreshCanvas) {
         return true;
     }
 }
+
+
+// PE : Currently the animation frame is not being cancelled, might cause multiple instances.
+
+// var requestId;
+
+
+// function startAnim() {
+//     if (!requestId) {
+//        loopAnim();
+//     }
+// }
+
+// function stopAnim() {
+//     if (requestId) {
+//        window.cancelAnimationFrame(requestId);
+//        requestId = undefined;
+//     }
+// }
+
+
