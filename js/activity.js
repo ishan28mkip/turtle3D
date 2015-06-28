@@ -9,7 +9,7 @@
     // setupBlocksContainerEvents();
 
 // TODO
-
+    // Add touch support by using on cordova
 
 
 
@@ -45,8 +45,8 @@
         //     refreshCanvas(1);
         // });
         // container.on('pressup',function(event){
-        //     px = false;
-        //     py = false;
+            // px = false;
+            // py = false;
         // });
 
         // Code to add axes to any container
@@ -69,7 +69,7 @@ define(function(require) {
     require('p5.dom');
     require('mespeak');
     require('jquery-1.11.3.min');
-    require('activity/utils');
+    // require('activity/utils');
     require('activity/artwork');
     require('activity/munsell');
     require('activity/trash');
@@ -386,14 +386,14 @@ define(function(require) {
             turtleCamera = new THREE.PerspectiveCamera( 45, turtleCameraWidth / turtleCameraHeight, 1, 2000 );
 
             // Create a scripting renderer and set the size
-            scriptingRenderer = new THREE.WebGLRenderer( { alpha: true } );
+            scriptingRenderer = new THREE.WebGLRenderer( { alpha: true, antialias : true} );
             scriptingRenderer.setSize(window.innerWidth, window.innerHeight);
             scriptingRenderer.shadowMapEnabled = true;
             document.getElementById("scriptingOutput").appendChild(scriptingRenderer.domElement);
 
 
             // Create the turtle renderer and set the size
-            turtleRenderer = new THREE.WebGLRenderer( {alpha: true} );
+            turtleRenderer = new THREE.WebGLRenderer( {alpha: true, antialias : true} );
             turtleRenderer.setSize(window.innerWidth, window.innerHeight);
             turtleRenderer.shadowMapEnabled = true;
             document.getElementById("turtleOutput").appendChild(turtleRenderer.domElement);
@@ -459,7 +459,7 @@ define(function(require) {
             blocks = new Blocks(canvas, blocksContainer, refreshCanvas, trashcan);
             palettes = initPalettes(canvas, refreshCanvas, palettesContainer, cellSize, trashcan, blocks);
 
-            // palettes.setBlocks(blocks);
+            palettes.setBlocks(blocks);
             turtles.setBlocks(blocks);
             blocks.setTurtles(turtles);
             blocks.setErrorMsg(errorMsg);
@@ -564,20 +564,11 @@ define(function(require) {
                 reader.readAsText(pluginChooser.files[0]);
             }, false);
 
-            // Workaround to chrome security issues
-            // createjs.LoadQueue(true, null, true);
+            cartesianBitmap = createGrid('images/Cartesian.svg','cartesian');
+            cartesianBitmap.visible = false;
 
-            // Enable touch interactions if supported on the current device.
-            // FIXME: voodoo
-            // createjs.Touch.enable(stage, false, true);
-            // Keep tracking the mouse even when it leaves the canvas.
-            stage.mouseMoveOutside = true;
-            // Enabled mouse over and mouse out events.
-            stage.enableMouseOver(10); // default is 20
-
-            cartesianBitmap = createGrid('images/Cartesian.svg');
-
-            polarBitmap = createGrid('images/polar.svg');
+            polarBitmap = createGrid('images/polar.svg','polar');
+            polarBitmap.visible = false;
 
             var URL = window.location.href;
             var projectName = null;
@@ -688,22 +679,46 @@ define(function(require) {
             cameraID = id;
         }
 
-        function createGrid(imagePath) {
+        function createGrid(imagePath,name) {
+            var container = new THREE.Group();
+            scriptingScene.add(container);
+            container.position.setX(0);
+            container.position.setY(0);
+
             var img = new Image();
+
+            img.onload = function() {
+
+                var canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                var context = canvas.getContext('2d');
+                context.drawImage(img, 0, 0);
+                var texture = new THREE.Texture(canvas);
+                texture.needsUpdate = true;
+                texture.minFilter = THREE.NearestFilter; 
+                var material = new THREE.MeshBasicMaterial( {map: texture, transparent : true, depthWrite : false} );
+                var bitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(img.width, img.height),material);
+                bitmap.name = name;
+                bitmap.imgWidth = img.width;
+                bitmap.imgHeight = img.height;
+
+                // TODO : Set scaling when size is different
+                // if(size != originalSize){
+                //     bitmap.scale.setX(size/originalSize);
+                //     bitmap.scale.setY(size/originalSize);
+                // }
+
+                container.add(bitmap);
+                bitmap.position.setX(0);
+                bitmap.position.setY(0);
+                bitmap.scale.setX(1);
+                bitmap.scale.setY(1);
+                bitmap.visible = true;
+                refreshCanvas(1);
+            }
             img.src = imagePath;
-            var container = new createjs.Container();
-            stage.addChild(container);
-
-            bitmap = new createjs.Bitmap(img);
-            container.addChild(bitmap);
-            bitmap.cache(0, 0, 1200, 900);
-
-            bitmap.x = (canvas.width - 1200) / 2;
-            bitmap.y = (canvas.height - 900) / 2;
-            bitmap.scaleX = bitmap.scaleY = bitmap.scale = 1;
-            bitmap.visible = false;
-            bitmap.updateCache();
-            return bitmap;
+            return container;
         };
 
 
@@ -723,6 +738,7 @@ define(function(require) {
             img.onload = function(){
                 var texture = new THREE.Texture(img) 
                 texture.needsUpdate = true;
+                texture.minFilter = THREE.NearestFilter; 
                 var material = new THREE.MeshBasicMaterial( {map: texture, side: THREE.DoubleSide} );
                 material.transparent = true;
                 var msgBlock = new THREE.Mesh(new THREE.PlaneBufferGeometry(img.width, img.height),material);
@@ -802,6 +818,7 @@ define(function(require) {
                 console.log('creating error message artwork for ' + img.src);
                 var texture = new THREE.Texture(img) 
                 texture.needsUpdate = true;
+                texture.minFilter = THREE.NearestFilter; 
                 var material = new THREE.MeshBasicMaterial( {map: texture, side: THREE.DoubleSide} );
                 material.transparent = true;
                 var artwork = new THREE.Mesh(new THREE.PlaneBufferGeometry(img.width, img.height),material);
@@ -898,7 +915,6 @@ define(function(require) {
             if (docById('labelDiv').classList.contains('hasKeyboard')) {
                 return;
             }
-
             if (!onAndroid) {
                 var w = window.innerWidth;
                 var h = window.innerHeight;
@@ -921,11 +937,31 @@ define(function(require) {
                     scale = w / 900;
                 }
             }
-            stage.scaleX = scale;
-            stage.scaleY = scale;
 
-            stage.canvas.width = w;
-            stage.canvas.height = h;
+            scriptingCameraWidth = window.innerWidth;
+            scriptingCameraHeight = window.innerHeight; 
+
+            turtleCameraWidth = window.innerWidth;
+            turtleCameraHeight = window.innerHeight;
+
+            scriptingRenderer.setSize(window.innerWidth, window.innerHeight);
+            turtleRenderer.setSize(window.innerWidth, window.innerHeight);
+
+            scriptingCamera.position.x = 0;
+            scriptingCamera.position.y = 0;
+            scriptingCamera.position.z = 1000;
+            scriptingCamera.lookAt(new THREE.Vector3(0, 0, 0));
+
+            turtleCamera.position.x = 50;
+            turtleCamera.position.y = 50;
+            turtleCamera.position.z = 50;
+            turtleCamera.lookAt(new THREE.Vector3(0,0,0));
+
+            // stage.scaleX = scale;
+            // stage.scaleY = scale;
+
+            // stage.canvas.width = w;
+            // stage.canvas.height = h;
 
             console.log('Resize: scale ' + scale +
                 ', windowW ' + w + ', windowH ' + h +
@@ -939,11 +975,11 @@ define(function(require) {
             setupAndroidToolbar();
 
             // Reposition coordinate grids.
-            cartesianBitmap.x = (canvas.width / (2 * scale)) - (600);
-            cartesianBitmap.y = (canvas.height / (2 * scale)) - (450);
-            polarBitmap.x = (canvas.width / (2 * scale)) - (600);
-            polarBitmap.y = (canvas.height / (2 * scale)) - (450);
-            update = true;
+            cartesianBitmap.position.setX(0);
+            cartesianBitmap.position.setY(0);
+            polarBitmap.position.setX(0);
+            polarBitmap.position.setY(0);
+            refreshCanvas(1);
 
             // Setup help now that we have calculated scale.
             showHelp(true);
@@ -953,6 +989,7 @@ define(function(require) {
             onResize();
         }
 
+        // TODO : Fix this function when done with blocks.js
         function restoreTrash() {
             var dx = 0;
             var dy = -cellSize * 3; // Reposition blocks about trash area.
@@ -1317,7 +1354,7 @@ define(function(require) {
                     errorArtwork['negroot'].visible = true;
                     stage.setChildIndex(errorArtwork['negroot'], stage.getNumChildren() - 1);
                     break;
-		case 'Cannot find action.':
+		        case 'Cannot find action.':
                     if (text == null) {
                         text = 'foo';
                     }
@@ -1326,7 +1363,7 @@ define(function(require) {
                     errorArtwork['nostack'].updateCache();
                     stage.setChildIndex(errorArtwork['nostack'], stage.getNumChildren() - 1);
                     break;
-		case 'Cannot find box.':
+		        case 'Cannot find box.':
                     if (text == null) {
                         text = 'foo';
                     }
@@ -1472,38 +1509,58 @@ define(function(require) {
         }
 
         function updatePasteButton() {
-            pasteContainer.removeChild(pasteContainer.children[0]);
+            // pasteContainer.remove(pasteContainer.children[0]);
+            // FIXME : How to remove children in three.js ?
             var img = new Image();
             img.onload = function() {
                 var originalSize = 55; // this is the original svg size
                 var halfSize = Math.floor(cellSize / 2);
 
-                bitmap = new createjs.Bitmap(img);
-                if (cellSize != originalSize) {
-                    bitmap.scaleX = cellSize / originalSize;
-                    bitmap.scaleY = cellSize / originalSize;
+                var canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                var context = canvas.getContext('2d');
+                context.drawImage(img, 0, 0);
+                var texture = new THREE.Texture(canvas);
+                texture.needsUpdate = true;
+                texture.minFilter = THREE.NearestFilter; 
+                var material = new THREE.MeshBasicMaterial( {map: texture, transparent : true, depthWrite : false} );
+                var bitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(img.width, img.height),material);
+                bitmap.name = 'paste-disabled-button';
+                bitmap.imgWidth = img.width;
+                bitmap.imgHeight = img.height;
+                if(size != originalSize){
+                    bitmap.scale.setX(size/originalSize);
+                    bitmap.scale.setY(size/originalSize);
                 }
-                bitmap.regX = halfSize / bitmap.scaleX;
-                bitmap.regY = halfSize / bitmap.scaleY;
-                pasteContainer.addChild(bitmap)
-                update = true;
+                pasteContainer.add(bitmap);
+                // bitmap.regX = halfSize / bitmap.scaleX; //PE : Why is this regX,regY set here?
+                // bitmap.regY = halfSize / bitmap.scaleY;
+                refreshCanvas(1);
             }
             img.src = 'icons/paste-button.svg';
         }
 
         function setupAndroidToolbar() {
             if (headerContainer !== undefined) {
-                stage.removeChild(headerContainer);
+                scriptingScene.remove(headerContainer);
                 for (i in onscreenButtons) {
-                    stage.removeChild(onscreenButtons[i]);
+                    scriptingScene.remove(onscreenButtons[i]);
                 }
             }
 
-            headerContainer = new createjs.Shape();
-            headerContainer.graphics.f('#2196f3').r(0, 0,
-                screen.width / scale, cellSize);
-            headerContainer.shadow = new createjs.Shadow('#777', 0, 2, 2);
-            stage.addChild(headerContainer);
+            headerContainer = new THREE.Group();
+            var material = new THREE.MeshBasicMaterial( {color : 0x2196f3, transparent : true, depthWrite : false} );
+            var background = new THREE.Mesh(new THREE.PlaneBufferGeometry(window.innerWidth, cellSize),material);
+            headerContainer.add(background);
+            headerContainer.position.setY(threeCoorY(cellSize/2));
+            scriptingScene.add(headerContainer);
+
+
+            // headerContainer.graphics.f('#2196f3').r(0, 0,
+            //     screen.width / scale, cellSize);
+            // headerContainer.shadow = new createjs.Shadow('#777', 0, 2, 2);
+            // stage.addChild(headerContainer);
 
             // Buttons used when running turtle programs
             var buttonNames = [
@@ -1519,8 +1576,8 @@ define(function(require) {
             ];
 
             var btnSize = cellSize;
-            var x = Math.floor(btnSize / 2);
-            var y = x;
+            var x = threeCoorX(cellSize/2);
+            var y = threeCoorY(cellSize/2);
             var dx = btnSize;
             var dy = 0;
 
@@ -1545,9 +1602,9 @@ define(function(require) {
 
         function setupRightMenu(scale) {
             if (menuContainer !== undefined) {
-                stage.removeChild(menuContainer);
+                    scriptingScene.remove(menuContainer);
                 for (i in onscreenMenu) {
-                    stage.removeChild(onscreenMenu[i]);
+                    scriptingScene.remove(onscreenMenu[i]);
                 }
             }
 
@@ -1565,8 +1622,8 @@ define(function(require) {
             ];
 
             var btnSize = cellSize;
-            var x = Math.floor(canvas.width / scale) - btnSize / 2;
-            var y = Math.floor(btnSize / 2);
+            var x = window.innerWidth/2 - cellSize/2; //PE : x is dependent on cellSize see how this works on resize
+            var y = threeCoorY(cellSize/2);
 
             var dx = 0;
             var dy = btnSize;
@@ -1577,7 +1634,7 @@ define(function(require) {
 
             for (var name in menuNames) {
                 x += dx;
-                y += dy;
+                y -= dy;
                 var container = makeButton(menuNames[name][0] + '-button',
                     x, y, btnSize);
                 loadButtonDragHandler(container, x, y, menuNames[name][1]);
@@ -1597,52 +1654,83 @@ define(function(require) {
 
             if (firstTime) {
                 if (helpContainer == null) {
-                    helpContainer = new createjs.Container();
-                    stage.addChild(helpContainer);
-                    helpContainer.x = 65;
-                    helpContainer.y = 65;
-
-                    helpContainer.on('click', function(event) {
-                        var bounds = helpContainer.getBounds();
-                        if (event.stageY < helpContainer.y + bounds.height / 2) {
-                            helpContainer.visible = false;
-                            docById('helpElem').style.visibility = 'hidden';
-                        } else {
-                            helpIdx += 1;
-                            if (helpIdx >= HELPCONTENT.length) {
-                                helpIdx = 0;
-                            }
-                            var imageScale = 55 * scale; 
-                            helpElem.innerHTML = '<img src ="' + HELPCONTENT[helpIdx][2] + '" style="height:' + imageScale + 'px; width: auto"></img> <h2>' + HELPCONTENT[helpIdx][0] + '</h2><p>' + HELPCONTENT[helpIdx][1] + '</p>'
-                        }
-                        update = true;
-                    });
+                    helpContainer = new THREE.Group();
+                    scriptingScene.add(helpContainer);
 
                     var img = new Image();
                     img.onload = function() {
-                        // console.log(scale);
-                        bitmap = new createjs.Bitmap(img);
-                        if (scale > 1) {
-                            bitmap.scaleX = bitmap.scaleY = bitmap.scale = scale;
-                        } else {
-                            bitmap.scaleX = bitmap.scaleY = bitmap.scale = 1.125;
-                        }
 
-                        helpContainer.addChild(bitmap)
-                        var bounds = helpContainer.getBounds();
-                        var hitArea = new createjs.Shape();
-                        hitArea.graphics.beginFill('#FFF').drawRect(bounds.x, bounds.y, bounds.width, bounds.height);
-                        hitArea.x = 0;
-                        hitArea.y = 0;
-                        helpContainer.hitArea = hitArea;
+                        var canvas = document.createElement('canvas');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        var context = canvas.getContext('2d');
+                        context.drawImage(img, 0, 0);
+                        var texture = new THREE.Texture(canvas);
+                        texture.needsUpdate = true;
+                        texture.minFilter = THREE.NearestFilter; 
+                        var material = new THREE.MeshBasicMaterial( {map: texture, transparent : true, depthWrite : false} );
+                        var bitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(img.width, img.height),material);
+                        bitmap.name = 'helpbitmap';
+                        bitmap.imgWidth = img.width;
+                        bitmap.imgHeight = img.height;
+
+
+                        // if(scale > 1){
+                        bitmap.scale.setX(scale); //PE : Why are these conditions used, this is working well
+                        bitmap.scale.setY(scale);
+                        bitmap.scale = scale;
+                        // }
+                        // else{
+                            // bitmap.scale.setX(1.125);
+                            // bitmap.scale.setY(1.125);
+                            // bitmap.scale = 1.125;
+                        // }
+                        helpContainer.position.setX(threeCoorX(65)+img.width*scale/2);
+                        helpContainer.position.setY(threeCoorY(65)-img.height*scale/2);
+                        helpContainer.add(bitmap);
+
+                        refreshCanvas(1);
+
+                        var bounds = helpContainer.get2DBounds(true);
+
+                        var h = bounds.height * scale; //Scaling has to be included
+                        var w = bounds.width * scale;
+                        var rectShape = new THREE.Shape();
+                        rectShape.moveTo( -w/2, h/2 );
+                        rectShape.lineTo( w/2, h/2 );
+                        rectShape.lineTo( w/2, -h/2 );
+                        rectShape.lineTo( -w/2, -h/2 );
+                        rectShape.lineTo( -w/2, h/2 );
+
+                        var rectGeom = new THREE.ShapeGeometry( rectShape );
+                        var rectMesh = new THREE.Mesh( rectGeom, new THREE.MeshBasicMaterial( { color: 0xFFE5B4 } ) ) ;   
+                        rectMesh.position.setZ(1);
+                        rectMesh.visible = false;
+                        helpContainer.add(rectMesh);
+                        helpContainer.hitmesh = rectMesh;
+                        rectMesh.parentMesh = helpContainer;
+
+                        helpContainer.on('click', function(event) {
+                            if (event.clientY < mouseCoorY(helpContainer.position.y) ) {
+                                helpContainer.visible = false;
+                                docById('helpElem').style.visibility = 'hidden';
+                            } else {
+                                helpIdx += 1;
+                                if (helpIdx >= HELPCONTENT.length) {
+                                    helpIdx = 0;
+                                }
+                                var imageScale = 55 * scale; 
+                                helpElem.innerHTML = '<img src ="' + HELPCONTENT[helpIdx][2] + '" style="height:' + imageScale + 'px; width: auto"></img> <h2>' + HELPCONTENT[helpIdx][0] + '</h2><p>' + HELPCONTENT[helpIdx][1] + '</p>'
+                            }
+                            refreshCanvas(1);
+                        });
 
                         docById('helpElem').innerHTML = '<img src ="' + HELPCONTENT[helpIdx][2] + '"</img> <h2>' + HELPCONTENT[helpIdx][0] + '</h2><p>' + HELPCONTENT[helpIdx][1] + '</p>'
                         if (!doneTour) {
                             docById('helpElem').style.visibility = 'visible';
                         }
-                        update = true;
+                        refreshCanvas(1);
                     }
-
                     img.src = 'images/help-container.svg';
                 }
 
@@ -1661,13 +1749,10 @@ define(function(require) {
                 var h = Math.min(300, 300 * scale);
                 helpElem.style.width = w + 'px';
                 helpElem.style.height = h + 'px';
-
-                if (scale > 1) {
-                    bitmap.scaleX = bitmap.scaleY = bitmap.scale = scale;
-                }
+                helpElem.style.zIndex = 100;
             }
 
-            var doneTour = localStorage.doneTour === 'true';
+            var doneTour = localStorage.doneTour === 'false';
 
             if (firstTime && doneTour) {
                 docById('helpElem').style.visibility = 'hidden';
@@ -1677,10 +1762,11 @@ define(function(require) {
                 docById('helpElem').innerHTML = '<img src ="' + HELPCONTENT[helpIdx][2] + '"</img> <h2>' + HELPCONTENT[helpIdx][0] + '</h2><p>' + HELPCONTENT[helpIdx][1] + '</p>'
                 docById('helpElem').style.visibility = 'visible';
                 helpContainer.visible = true;
-                update = true;
+                refreshCanvas(1);
 
                 // Make sure the palettes and the secondary menus are
                 // visible while help is shown.
+
                 palettes.show();
                 if (!menuButtonsVisible) {
                     doMenuAnimation(1);
@@ -1693,12 +1779,11 @@ define(function(require) {
         }
 
         function doMenuAnimation() {
-            var bitmap = last(menuContainer.children);
+            var bitmap = first(menuContainer.children);
+            // FIXME : Make the rotation a animation instead of direct change
+
             if (bitmap !== null) {
-                var r = bitmap.rotation;
-                createjs.Tween.get(bitmap)
-                    .to({rotation: r})
-                    .to({rotation: r + 90}, 500);
+                bitmap.rotation.z = -Math.PI / 2;
             } else {
                 // Race conditions during load
                 setTimeout(doMenuAnimation, 50);
@@ -1715,7 +1800,7 @@ define(function(require) {
                         onscreenMenu[button].visible = true;
                     }
                 }
-                update = true;
+                refreshCanvas(1);
             }, 500);
         }
 
@@ -1734,14 +1819,14 @@ define(function(require) {
 
         // creates a button
         function makeButton(name, x, y, size, rotation) {
-            var container = new createjs.Container();
+            var container = new THREE.Group();
             if (name == 'paste-disabled-button') {
                 pasteContainer = container;
             }
 
-            stage.addChild(container);
-            container.x = x;
-            container.y = y;
+            scriptingScene.add(container);
+            container.position.setX(x);
+            container.position.setY(y);
 
             var img = new Image();
 
@@ -1749,33 +1834,58 @@ define(function(require) {
                 var originalSize = 55; // this is the original svg size
                 var halfSize = Math.floor(size / 2);
 
-                bitmap = new createjs.Bitmap(img);
-                if (size != originalSize) {
-                    bitmap.scaleX = size / originalSize;
-                    bitmap.scaleY = size / originalSize;
+                var canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                var context = canvas.getContext('2d');
+                context.drawImage(img, 0, 0);
+                var texture = new THREE.Texture(canvas);
+                texture.needsUpdate = true;
+                texture.minFilter = THREE.NearestFilter; 
+                var material = new THREE.MeshBasicMaterial( {map: texture, transparent : true, depthWrite : false} );
+                var bitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(img.width, img.height),material);
+                bitmap.name = name;
+                bitmap.imgWidth = img.width;
+                bitmap.imgHeight = img.height;
+                if(size != originalSize){
+                    bitmap.scale.setX(size/originalSize);
+                    bitmap.scale.setY(size/originalSize);
                 }
-                bitmap.regX = halfSize / bitmap.scaleX;
-                bitmap.regY = halfSize / bitmap.scaleY;
-                if (rotation !== undefined) {
-                    bitmap.rotation = rotation;
+                container.add(bitmap);
+
+                var circleRadius = cellSize/2;
+                var circleShape = new THREE.Shape();
+                circleShape.moveTo( 0, circleRadius );
+                circleShape.quadraticCurveTo( circleRadius, circleRadius, circleRadius, 0 );
+                circleShape.quadraticCurveTo( circleRadius, -circleRadius, 0, -circleRadius );
+                circleShape.quadraticCurveTo( -circleRadius, -circleRadius, -circleRadius, 0 );
+                circleShape.quadraticCurveTo( -circleRadius, circleRadius, 0, circleRadius );
+                var circleGeometry = new THREE.ShapeGeometry( circleShape );
+                var circleMesh = new THREE.Mesh( circleGeometry, new THREE.MeshBasicMaterial( { color: 0xdddddd } ) ) ; 
+                circleMesh.position.setZ(2);
+                circleMesh.visible = false;
+                container.add(circleMesh);
+
+                container.hitmesh = circleMesh;
+                circleMesh.parentMesh = container;
+
+                if(rotation !== undefined){
+                    bitmap.rotation.z = rotation;
                 }
 
-                container.addChild(bitmap);
-                var hitArea = new createjs.Shape();
-                hitArea.graphics.beginFill('#FFF').drawEllipse(-halfSize, -halfSize, size, size);
-                hitArea.x = 0;
-                hitArea.y = 0;
-                container.hitArea = hitArea;
-                bitmap.cache(0, 0, size, size);
-                bitmap.updateCache();
-                update = true;
+                refreshCanvas(1);
+
+                // bitmap.regX = halfSize / bitmap.scaleX; //PE : Why is cache used and what is regX,regY for?
+                // bitmap.regY = halfSize / bitmap.scaleY;
+
+                // bitmap.cache(0, 0, size, size);
+                // bitmap.updateCache();
             }
-
             img.src = 'icons/' + name + '.svg';
-
             return container;
         }
 
+        // TODO : fix this event handler later
         function loadButtonDragHandler(container, ox, oy, action) {
             // Prevent multiple button presses (i.e., debounce).
             var locked = false;
@@ -1783,13 +1893,17 @@ define(function(require) {
             container.on('mousedown', function(event) {
                 var moved = true;
                 var offset = {
-                    x: container.x - Math.round(event.stageX / blocks.scale),
-                    y: container.y - Math.round(event.stageY / blocks.scale)
+                    x: container.x - Math.round(event.clientX / blocks.scale),
+                    y: container.y - Math.round(event.clientY / blocks.scale)
                 };
+                container.traverse(function(node){
+                    console.log(node);
+                });
 
-                var circles = showMaterialHighlight(ox, oy, cellSize / 2,
+                var circles = showMaterialHighlight(ox, oy, cellSize / 2, //Add circle hover on this
                                                     event, scale, stage);
-                container.on('pressup', function(event) {
+            });
+            container.on('pressup', function(event) {
                     hideMaterialHighlight(circles, stage);
 
                     container.x = ox;
@@ -1802,7 +1916,6 @@ define(function(require) {
                         action();
                     }
                     moved = false;
-                });
             });
         }
     });

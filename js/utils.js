@@ -2,9 +2,8 @@
 
 // NEWS : 
     // Fixed the get2Dbounds function and optimized a bit // 12:09 14th June
+    // Fixed bug in mouse events about pressmove not getting activated when mousedown is on // 26th June
 
-var windowHeight = window.innerHeight;
-var windowWidth = window.innerWidth;
 
 
 function canvasPixelRatio() {
@@ -103,12 +102,15 @@ function buildAxis( src, dst, colorHex, dashed ) {
 // to be used to get bounds of a container, recursively should be set to false if only no container nesting is there
 // TODO
 // Use a better algorithm here when time permits to get the maximum and minimum
+// See if traverse uses a better appoach to iterate
+// Recursive has a problem that the bounding box is giving local bounding and not global
+// FIXME : Should bounds contain the scaling factor or not?
 
 Object.defineProperty(THREE.Object3D.prototype, 'get2DBounds', {
     enumerable: false,
     configurable: false,
     writable: false,
-    value: function(container,recursively,bound){
+    value: function(recursively,bound){
         var bounds;
         var flag;
         if(bound === undefined)
@@ -120,16 +122,16 @@ Object.defineProperty(THREE.Object3D.prototype, 'get2DBounds', {
             flag = false;
         }
 
-        for(var i = 0; i<container.children.length; i++){
-            if(container.children[i].geometry !== undefined){
+        for(var i = 0; i<this.children.length; i++){
+            if(this.children[i].geometry !== undefined){
                 if(flag){
-                    container.children[i].geometry.computeBoundingBox();
-                    bounds = container.children[i].geometry.boundingBox; 
+                    this.children[i].geometry.computeBoundingBox();
+                    bounds = this.children[i].geometry.boundingBox;
                     flag = false;
                 }
                 else{
-                    container.children[i].geometry.computeBoundingBox();
-                    var newBounds = container.children[i].geometry.boundingBox;
+                    this.children[i].geometry.computeBoundingBox();
+                    var newBounds = this.children[i].geometry.boundingBox;
                     bounds.max.x = ( newBounds.max.x > bounds.max.x) ?  newBounds.max.x : bounds.max.x;
                     bounds.max.y = ( newBounds.max.y > bounds.max.y) ?  newBounds.max.y : bounds.max.y;
                     bounds.min.x = ( newBounds.min.x < bounds.min.x) ?  newBounds.min.x : bounds.min.x;
@@ -138,14 +140,20 @@ Object.defineProperty(THREE.Object3D.prototype, 'get2DBounds', {
             }
             else if(recursively){
                 if(flag){
-                    bounds = container.children[i].get2DBounds(container.children[i], true);
+                    bounds = this.children[i].get2DBounds(true);
                     flag = false;
                 }
                 else{
-                    bounds = container.children[i].get2DBounds(container.children[i], true, bounds);
+                    bounds = this.children[i].get2DBounds(true, bounds);
                 }
             }
         }
+        bounds.width = bounds.max.x - bounds.min.x;
+        bounds.height = bounds.max.y - bounds.min.y;
+        bounds.max.x += this.position.x;
+        bounds.min.x += this.position.x;
+        bounds.max.y += this.position.y;
+        bounds.min.y += this.position.y;
         return bounds;
     }
 });
@@ -330,7 +338,7 @@ function onSceneEvent(event,eventName){
                             intersects[i].object.parentMesh.dispatchEvent(setEventTypeMesh(event,'mousedown', intersects[i].object.parentMesh));
                             intersects[i].object.parentMesh._listeners.mousedown.active = true;
                         }
-                        else if(intersects[i].object.parentMesh._listeners.hasOwnProperty('pressmove')){
+                        if(intersects[i].object.parentMesh._listeners.hasOwnProperty('pressmove')){
                             intersects[i].object.parentMesh.dispatchEvent(setEventTypeMesh(event,'pressmove', intersects[i].object.parentMesh));
                             intersects[i].object.parentMesh._listeners.pressmove.active = true;
                         }
@@ -369,7 +377,7 @@ function onSceneEvent(event,eventName){
                         mousedownArray[i].parentMesh._listeners.mousedown.active = false;
                     }
                 }
-                else if(mousedownArray[i].parentMesh._listeners.hasOwnProperty('pressmove')){
+                if(mousedownArray[i].parentMesh._listeners.hasOwnProperty('pressmove')){
                     if(mousedownArray[i].parentMesh._listeners.pressmove.active){
                         if(mousedownArray[i].parentMesh.visible == true){
                             mousedownArray[i].parentMesh.dispatchEvent(setEventTypeMesh(event,'pressup', mousedownArray[i].parentMesh));
@@ -462,25 +470,25 @@ function windowHeight() {
         return window.innerHeight;
     }
 }
+// Fix this function later
+// function httpGet(projectName) {
+//     var xmlHttp = null;
 
-function httpGet(projectName) {
-    var xmlHttp = null;
+//     xmlHttp = new XMLHttpRequest();
 
-    xmlHttp = new XMLHttpRequest();
-
-    if (projectName == null) {
-        xmlHttp.open("GET", window.server, false);
-        xmlHttp.setRequestHeader('x-api-key', '3tgTzMXbbw6xEKX7');
-    } else {
-        xmlHttp.open("GET", window.server + projectName, false);
-        xmlHttp.setRequestHeader('x-api-key', '3tgTzMXbbw6xEKX7');
-    }
-    xmlHttp.send();
-    if (xmlHttp.status > 299) {
-        throw 'Error from server';
-    }
-    return xmlHttp.responseText;
-}
+//     if (projectName == null) {
+//         xmlHttp.open("GET", window.server, false);
+//         xmlHttp.setRequestHeader('x-api-key', '3tgTzMXbbw6xEKX7');
+//     } else {
+//         xmlHttp.open("GET", window.server + projectName, false);
+//         xmlHttp.setRequestHeader('x-api-key', '3tgTzMXbbw6xEKX7');
+//     }
+//     xmlHttp.send();
+//     if (xmlHttp.status > 299) {
+//         throw 'Error from server';
+//     }
+//     return xmlHttp.responseText;
+// }
 
 
 function httpPost(projectName, data) {
@@ -533,6 +541,18 @@ function last(myList) {
         return myList[i - 1];
     }
 }
+
+// Making this function to work analogous to the last function even though first element can be taken as [0]
+function first(myList){
+    var i = myList.length;
+    if(i==0){
+        return null;
+    }
+    else{
+        return myList[0];
+    }
+}
+
 
 
 function doSVG(canvas, logo, turtles, width, height, scale) {

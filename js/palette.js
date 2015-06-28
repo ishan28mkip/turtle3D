@@ -1,17 +1,4 @@
 
-// Copyright (c) 2014,15 Walter Bender
-//
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 3 of the License, or
-// (at your option) any later version.
-//
-// You should have received a copy of the GNU General Public License
-// along with this library; if not, write to the Free Software
-// Foundation, 51 Franklin Street, Suite 500 Boston, MA 02110-1335 USA
-// All things related to palettes
-require(['activity/utils']);
-
 var paletteBlocks = null;
 var PROTOBLOCKSCALE = 1.0;
 var PALETTELEFTMARGIN = 10;
@@ -24,37 +11,17 @@ var BUILTINPALETTES = ['turtle', 'pen', 'number', 'boolean', 'flow', 'blocks',
 
 
 function maxPaletteHeight(menuSize, scale) {
-    // Palettes don't start at the top of the screen and the last
-    // block in a palette cannot start at the bottom of the screen,
-    // hence - 2 * menuSize.
+    // PE : Why is STANDARDBLOCKHEIGHT / 2 added
     var h = (windowHeight() * canvasPixelRatio()) / scale - (2 * menuSize);
     return h - (h % STANDARDBLOCKHEIGHT) + (STANDARDBLOCKHEIGHT / 2);
 }
 
-// Later
+// TODO : Later when required
 function paletteBlockButtonPush(name, arg) {
     console.log('paletteBlockButtonPush: ' + name + ' ' + arg);
     blk = paletteBlocks.makeBlock(name, arg);
     return blk;
 }
-
-
-// There are several components to the palette system:
-//
-// (1) A palette button (in the Palettes.buttons dictionary) is a
-// button that envokes a palette; The buttons have artwork associated
-// with them: a bitmap and a highlighted bitmap that is shown when the
-// mouse is over the button.
-//
-// loadPaletteButtonHandler is the event handler for palette buttons.
-//
-// (2) A menu (in the Palettes.dict dictionary) is the palette
-// itself. It consists of a title bar (with an icon, label, and close
-// button), and individual containers for each protoblock on the
-// menu. There is a background behind each protoblock that is part of
-// the palette container.
-//
-// loadPaletteMenuItemHandler
 
 
 function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashcan) {
@@ -67,6 +34,7 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
     this.refreshCanvas = refreshCanvas;
     this.originalSize = 55; // this is the original svg size
     this.trashcan = trashcan;
+    this.margin = 10;
     // The collection of palettes.
     this.dict = {};
     this.buttons = {}; // The toolbar button for each palette.
@@ -74,8 +42,8 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
     this.visible = true;
     this.scale = 1.0;
 
-    this.x = -windowWidth/2 + 10; //10 pixel offset is given from the left corner
-    this.y = threeCoorY(this.cellSize);
+    this.x = -window.innerWidth/2 + this.margin; //10 pixel offset is given from the left corner
+    this.y = threeCoorY(this.cellSize + this.halfCellSize);
 
     this.current = 'turtle';
 
@@ -139,7 +107,7 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
                 // this.buttons[name].snapToPixelEnabled = true; //TODO implement a snap to pixel feature
                 this.stage.add(this.buttons[name]);
 
-                this.buttons[name].position.set(this.x + this.halfCellSize, this.y + this.scrollDiff, 10);
+                this.buttons[name].position.set(this.x + this.halfCellSize, this.y + this.scrollDiff , 1);
                 this.y -= this.cellSize;
                 var me = this;
 
@@ -159,11 +127,11 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
                     circleShape.quadraticCurveTo( -circleRadius, -circleRadius, -circleRadius, 0 );
                     circleShape.quadraticCurveTo( -circleRadius, circleRadius, 0, circleRadius );
                     var circleGeometry = new THREE.ShapeGeometry( circleShape );
-                    var circleMesh = new THREE.Mesh( circleGeometry, new THREE.MeshBasicMaterial( { color: 0x222222 } ) ) ; 
+                    var circleMesh = new THREE.Mesh( circleGeometry, new THREE.MeshBasicMaterial( { color: 0x333333 } ) ) ; 
                     me.buttons[name].add(circleMesh);
+                    circleMesh.material.opacity = 0.6;
+                    circleMesh.visible = false;
 
-                    // bitmap.hitmesh = circleMesh;
-                    // circleMesh.parentMesh = bitmap;
                     me.buttons[name].hitmesh = circleMesh;
                     circleMesh.parentMesh = me.buttons[name];
 
@@ -172,6 +140,7 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
                     me.dict[name].makeMenu(false);
                     me.dict[name].moveMenu(me.cellSize, me.cellSize);
                     me.dict[name].updateMenu(false);
+                    // TODO : Fix the click handler in palette button handlers
                     loadPaletteButtonHandler(me, name);
                 }
                 makePaletteBitmap(me, PALETTEICONS[name], name, processButtonIcon, null);
@@ -187,7 +156,7 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
         for (var name in this.dict) {
             // this.dict[name].showMenu(true);
         }
-        this.refreshCanvas();
+        this.refreshCanvas(1);
     }
 
     this.hideMenus = function() {
@@ -259,14 +228,12 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
     this.bringToTop = function() {
         // Move all the palettes to the top layer of the stage
         for (var name in this.dict) {
-            this.stage.removeChild(this.dict[name].menuContainer);
-            this.stage.addChild(this.dict[name].menuContainer);
-            for (var item in this.dict[name].protoContainers) {
-                this.stage.removeChild(this.dict[name].protoContainers[item]);
-                this.stage.addChild(this.dict[name].protoContainers[item]);
+            this.dict[name].menuContainer.position.setZ(10); //Brings the menu container to front
+            for (var item in this.dict[name].protoContainers) { 
+                this.dict[name].protoContainers[item].position.setZ(10);
             }
         }
-        this.refreshCanvas();
+        this.refreshCanvas(1);
     }
 
     this.findPalette = function(x, y) {
@@ -293,12 +260,13 @@ function loadPaletteButtonHandler(palettes, name) {
     var scrolling = false;
 
     palettes.buttons[name].on('mouseover',function(event){
-        event.target.hitmesh.material.opacity = 0.4;
+        event.target.hitmesh.visible = true;
+        // event.target.hitmesh.material.opacity = 0.6;
         palettes.refreshCanvas(1);
     });
 
     palettes.buttons[name].on('mouseout',function(event){
-        event.target.hitmesh.material.opacity = 1;
+        event.target.hitmesh.visible = false;
         palettes.refreshCanvas(1);
     });
 
@@ -376,6 +344,7 @@ function Palette(palettes, name) {
     this.scrollDiff = 0
     this.y = 0;
     this.size = 0;
+    this.padding = 5;
     this.columns = 0;
     this.draggingProtoBlock = false;
     this.mouseHandled = false;
@@ -398,95 +367,127 @@ function Palette(palettes, name) {
 
         // Create the menu button
         function processHeader(palette, name, bitmap, extras) {
-            palette.menuContainer.addChild(bitmap);
+            palette.menuContainer.add(bitmap);
+            palette.menuContainer.position.set(threeCoorX(palette.palettes.cellSize + palette.palettes.margin*2) + bitmap.imgWidth/2, threeCoorY(palette.palettes.cellSize*1.5+ palette.palettes.scrollDiff)  , 1);
+            palette.menuContainer.processHeader = {};
+            palette.menuContainer.processHeader.width = bitmap.imgWidth;
+            palette.menuContainer.processHeader.height = bitmap.imgHeight;
+            palette.menuContainer.processHeader.name = name;
 
             function processButtonIcon(palette, name, bitmap, extras) {
-                bitmap.scaleX = bitmap.scaleY = bitmap.scale = 0.8;
-                palette.menuContainer.addChild(bitmap);
-                palette.palettes.container.addChild(palette.menuContainer);
+                palette.menuContainer.add(bitmap);
+                palette.palettes.container.add(palette.menuContainer);
+                bitmap.position.set(-palette.menuContainer.processHeader.width/2 + bitmap.imgWidth*0.8/2 + palette.padding ,0,1);
+                bitmap.scale.set(0.8,0.8,1);
+
 
                 function processCloseIcon(palette, name, bitmap, extras) {
-                    bitmap.scaleX = bitmap.scaleY = bitmap.scale = 0.7;
-                    palette.menuContainer.addChild(bitmap);
-                    bitmap.x = paletteWidth - STANDARDBLOCKHEIGHT;
-                    bitmap.y = 0;
+                    bitmap.scale.set(0.7,0.7,0.7);
+                    palette.menuContainer.add(bitmap);
+                    bitmap.position.setX(palette.menuContainer.processHeader.width/2 - bitmap.imgWidth*0.7/2 - palette.padding);
+                    bitmap.position.setY(0);
 
-                    var hitArea = new createjs.Shape();
-                    hitArea.graphics.beginFill('#FFF').drawEllipse(-paletteWidth / 2, -STANDARDBLOCKHEIGHT / 2, paletteWidth, STANDARDBLOCKHEIGHT);
-                    hitArea.x = paletteWidth / 2;
-                    hitArea.y = STANDARDBLOCKHEIGHT / 2;
-                    palette.menuContainer.hitArea = hitArea;
-                    palette.menuContainer.visible = false;
+                    // TODO : Shape is not as ellipse change to ellipse
+                    var circleRadius = palette.palettes.halfCellSize;
+                    var circleShape = new THREE.Shape();
+                    circleShape.moveTo( 0, circleRadius );
+                    circleShape.quadraticCurveTo( circleRadius, circleRadius, palette.menuContainer.processHeader.width/2, 0 );
+                    circleShape.quadraticCurveTo( circleRadius, -circleRadius, 0, -circleRadius );
+                    circleShape.quadraticCurveTo( -circleRadius, -circleRadius, -palette.menuContainer.processHeader.width/2, 0 );
+                    circleShape.quadraticCurveTo( -circleRadius, circleRadius, 0, circleRadius );
+                    var circleGeometry = new THREE.ShapeGeometry( circleShape );
+                    var circleMesh = new THREE.Mesh( circleGeometry, new THREE.MeshBasicMaterial( { color: 0xdddddd } ) ) ; 
+                    circleMesh.position.setZ(2);
+                    circleMesh.visible = false;
+                    palette.menuContainer.add(circleMesh);
 
+                    palette.menuContainer.hitmesh = circleMesh;
+                    circleMesh.parentMesh = palette.menuContainer;
+
+                    // TODO fix this
                     if (!palette.mouseHandled) {
                         loadPaletteMenuHandler(palette);
                         palette.mouseHandled = true;
                     }
 
                     function processUpIcon(palette, name, bitmap, extras) {
-                        bitmap.scaleX = bitmap.scaleY = bitmap.scale = 0.7;
-                        palette.palettes.stage.addChild(bitmap);
-                        bitmap.x = palette.menuContainer.x + paletteWidth;
-                        bitmap.y = palette.menuContainer.y + STANDARDBLOCKHEIGHT;
+                        palette.palettes.stage.add(bitmap);
+                        bitmap.position.setX(palette.menuContainer.position.x + paletteWidth/2 + palette.palettes.cellSize/2);
+                        bitmap.position.setY(palette.menuContainer.position.y - STANDARDBLOCKHEIGHT);
+                        bitmap.scale.setX(0.7);
+                        bitmap.scale.setY(0.7);
 
-                        var hitArea = new createjs.Shape();
-                        hitArea.graphics.beginFill('#FFF').drawRect(0, 0, STANDARDBLOCKHEIGHT, STANDARDBLOCKHEIGHT);
-                        hitArea.x = 0;
-                        hitArea.y = 0;
-                        bitmap.hitArea = hitArea;
-                        bitmap.visible = false;
+                        // TODO : Set the hitarea for the up icon
+                        // var hitArea = new createjs.Shape();
+                        // hitArea.graphics.beginFill('#FFF').drawRect(0, 0, STANDARDBLOCKHEIGHT, STANDARDBLOCKHEIGHT);
+                        // hitArea.x = 0;
+                        // hitArea.y = 0;
+                        // bitmap.hitArea = hitArea;
+                        
+                        bitmap.visible = true;
                         palette.upButton = bitmap;
+
                         palette.upButton.on('click', function(event) {
                             palette.scrollEvent(STANDARDBLOCKHEIGHT, 10);
                         });
 
                         function processDownIcon(palette, name, bitmap, extras) {
-                            bitmap.scaleX = bitmap.scaleY = bitmap.scale = 0.7;
-                            palette.palettes.stage.addChild(bitmap);
-                            bitmap.x = palette.menuContainer.x + paletteWidth;
-                            bitmap.y = palette.getDownButtonY();
+                            // bitmap.scaleX = bitmap.scaleY = bitmap.scale = 0.7; //TODO : Add scaling
+                            palette.palettes.stage.add(bitmap);
+                            bitmap.position.setX(palette.menuContainer.position.x + paletteWidth/2 + palette.palettes.cellSize/2);
+                            bitmap.position.setY(palette.getDownButtonY());
+                            bitmap.scale.setX(0.7);
+                            bitmap.scale.setY(0.7); 
+                            
 
-                            var hitArea = new createjs.Shape();
-                            hitArea.graphics.beginFill('#FFF').drawRect(0, 0, STANDARDBLOCKHEIGHT, STANDARDBLOCKHEIGHT);
-                            hitArea.x = 0;
-                            hitArea.y = 0;
-                            bitmap.hitArea = hitArea;
-                            bitmap.visible = false;
+                            // var hitArea = new createjs.Shape(); //TODO : Create hitarea now
+                            // hitArea.graphics.beginFill('#FFF').drawRect(0, 0, STANDARDBLOCKHEIGHT, STANDARDBLOCKHEIGHT);
+                            // hitArea.x = 0;
+                            // hitArea.y = 0;
+                            // bitmap.hitArea = hitArea;
+                            
+                            bitmap.visible = true;
                             palette.downButton = bitmap;
+
                             palette.downButton.on('click', function(event) {
                                 palette.scrollEvent(-STANDARDBLOCKHEIGHT, 10);
                             });
                         } 
                         makePaletteBitmap(palette, DOWNICON, name, processDownIcon, null);
                     function makeFadedDownIcon(palette, name, bitmap, extras) {
-                            bitmap.scaleX = bitmap.scaleY = bitmap.scale = 0.7;
-                            palette.palettes.stage.addChild(bitmap);
-                            bitmap.x = palette.menuContainer.x + paletteWidth;
-                            bitmap.y = palette.getDownButtonY();
-                           
-                            var hitArea = new createjs.Shape();
-                            hitArea.graphics.beginFill('#FFF').drawRect(0, 0, STANDARDBLOCKHEIGHT, STANDARDBLOCKHEIGHT);
-                            hitArea.x = 0;
-                            hitArea.y = 0;
-                            bitmap.hitArea = hitArea;
-                            bitmap.visible = false;
-                            palette.FadedDownButton = bitmap;
+                            palette.palettes.stage.add(bitmap);
+                            bitmap.position.setX(palette.menuContainer.position.x + paletteWidth/2 + palette.palettes.cellSize/2);
+                            bitmap.position.setY(palette.getDownButtonY());
+                            bitmap.scale.setX(0.7);
+                            bitmap.scale.setY(0.7); 
                             
+                            // TODO : Create hitarea later
+                            // var hitArea = new createjs.Shape();
+                            // hitArea.graphics.beginFill('#FFF').drawRect(0, 0, STANDARDBLOCKHEIGHT, STANDARDBLOCKHEIGHT);
+                            // hitArea.x = 0;
+                            // hitArea.y = 0;
+                            // bitmap.hitArea = hitArea;
+
+                            bitmap.visible = true;
+                            palette.FadedDownButton = bitmap;
                         } 
                         makePaletteBitmap(palette, FADEDDOWNICON, name, makeFadedDownIcon, null);
-
                         function makeFadedUpIcon(palette, name, bitmap, extras) {
-                            bitmap.scaleX = bitmap.scaleY = bitmap.scale = 0.7;
-                            palette.palettes.stage.addChild(bitmap);
-                            bitmap.x = palette.menuContainer.x + paletteWidth;
-                            bitmap.y = palette.menuContainer.y + STANDARDBLOCKHEIGHT;   
+                            palette.palettes.stage.add(bitmap);
+                            bitmap.position.setX(palette.menuContainer.position.x + paletteWidth/2 + palette.palettes.cellSize/2);
+                            bitmap.position.setY(palette.menuContainer.position.y - STANDARDBLOCKHEIGHT);
+                            axes = buildAxes( 1000 );
+                            bitmap.add(axes);
+                            bitmap.scale.setX(0.7);
+                            bitmap.scale.setY(0.7);
 
-                            var hitArea = new createjs.Shape();
-                            hitArea.graphics.beginFill('#FFF').drawRect(0, 0, STANDARDBLOCKHEIGHT, STANDARDBLOCKHEIGHT);
-                            hitArea.x = 0;
-                            hitArea.y = 0;
-                            bitmap.hitArea = hitArea;
-                            bitmap.visible = false;
+                            // TODO : Create hitarea here
+                            // var hitArea = new createjs.Shape();
+                            // hitArea.graphics.beginFill('#FFF').drawRect(0, 0, STANDARDBLOCKHEIGHT, STANDARDBLOCKHEIGHT);
+                            // hitArea.x = 0;
+                            // hitArea.y = 0;
+                            // bitmap.hitArea = hitArea;
+                            bitmap.visible = true;
                             palette.FadedUpButton = bitmap;
                         } 
                         makePaletteBitmap(palette, FADEDUPICON, name, makeFadedUpIcon, null);
@@ -497,17 +498,16 @@ function Palette(palettes, name) {
             }
             makePaletteBitmap(palette, PALETTEICONS[name], name, processButtonIcon, null);
         }
-
         makePaletteBitmap(this, PALETTEHEADER.replace('fill_color', '#282828').replace('palette_label', _(this.name)).replace(/header_width/g, paletteWidth), this.name, processHeader, null);
     }
 
     this.getDownButtonY = function () {
         var h = this.y;
         var max = maxPaletteHeight(this.palettes.cellSize, this.palettes.scale);
-        if (this.y > max) {
+        if (mouseCoorY(this.y) > max) { //TODO : See where is the this.y value being edited
             h = max;
         }
-        return this.menuContainer.y + h - STANDARDBLOCKHEIGHT / 2;
+        return this.menuContainer.position.y - h + STANDARDBLOCKHEIGHT * 2 ;
     }
 
     this.resizeEvent = function() {
@@ -536,24 +536,41 @@ function Palette(palettes, name) {
         }
 
         if (this.background !== null) {
-            this.background.removeAllChildren();
+            var obj;
+            for (var i = this.background.children.length - 1; i >= 0 ; i -- ) {
+                obj = this.background.children[ i ];
+                this.background.remove(obj);
+            }
         } else {
-            this.background = new createjs.Container();
-            this.background.snapToPixelEnabled = true;
+            this.background = new THREE.Group();
+            // this.background.snapToPixelEnabled = true;
             this.background.visible = false;
-            this.palettes.stage.addChild(this.background);
+            this.palettes.stage.add(this.background);
             setupBackgroundEvents(this);
         }
 
         var h = Math.min(maxPaletteHeight(this.palettes.cellSize, this.palettes.scale), this.y);
-        var shape = new createjs.Shape();
-        shape.graphics.f('#b3b3b3').r(0, 0, MENUWIDTH, h).ef();
-        shape.width = MENUWIDTH;
-        shape.height = h;
-        this.background.addChild(shape);
+        // var shape = new createjs.Shape();
+        // shape.graphics.f('#b3b3b3').r(0, 0, MENUWIDTH, h).ef();
+        // shape.width = MENUWIDTH;
+        // shape.height = h;
+        // this.background.addChild(shape);
+        var w = MENUWIDTH;
 
-        this.background.x = this.menuContainer.x;
-        this.background.y = this.menuContainer.y + STANDARDBLOCKHEIGHT;
+        var rectShape = new THREE.Shape();
+        rectShape.moveTo( -w/2, h/2 );
+        rectShape.lineTo( w/2, h/2 );
+        rectShape.lineTo( w/2, -h/2 );
+        rectShape.lineTo( -w/2, -h/2 );
+        rectShape.lineTo( -w/2, h/2 );
+
+        var rectGeom = new THREE.ShapeGeometry( rectShape );
+        var rectMesh = new THREE.Mesh( rectGeom, new THREE.MeshBasicMaterial( { color: 0xFFE5B4 } ) ) ;   
+        this.background.add(rectMesh);
+        rectMesh.position.setZ(1);
+
+        this.background.position.setX(this.menuContainer.position.x);
+        this.background.position.setY(this.menuContainer.position.y - STANDARDBLOCKHEIGHT);
     }
 
     this.updateMenu = function(hide) {
@@ -565,7 +582,8 @@ function Palette(palettes, name) {
                 this.hide();
             }
         }
-        this.y = 0;
+        this.y = threeCoorX(0);
+
         for (var blk in this.protoList) {
             // Don't show hidden blocks on the menus
             if (this.protoList[blk].hidden) {
@@ -607,7 +625,8 @@ function Palette(palettes, name) {
             }
 
             function calculateContainerXY(palette) {
-                var y = palette.menuContainer.y + palette.y + STANDARDBLOCKHEIGHT;
+                // TODO : Fix this when you have the graphics ready
+                var y = palette.menuContainer.position.y + palette.y + STANDARDBLOCKHEIGHT;
             }
 
             function calculateHeight(palette, blkname) {
@@ -626,20 +645,22 @@ function Palette(palettes, name) {
                 } else if (['and', 'or'].indexOf(blkname) != -1) {
                     size += 1;
                 }
+                // TODO : Fix this height expression in accordance with three.js
                 var height = STANDARDBLOCKHEIGHT * size * palette.protoList[blk].scale / 2.0;
                 return height;
             }
 
             if (!this.protoContainers[modname]) {
                 // create graphics for the palette entry for this block
-                this.protoContainers[modname] = new createjs.Container();
-                this.protoContainers[modname].snapToPixelEnabled = true;
+                this.protoContainers[modname] = new THREE.Group();
+                // this.protoContainers[modname].snapToPixelEnabled = true; //TODO : How to snap to pixel?
 
-                calculateContainerXY(this)
+                calculateContainerXY(this);
 
-                this.protoContainers[modname].x = this.menuContainer.x;
-                this.protoContainers[modname].y = this.menuContainer.y + this.y + this.scrollDiff + STANDARDBLOCKHEIGHT;
-                this.palettes.stage.addChild(this.protoContainers[modname]);
+                this.protoContainers[modname].position.setX(this.menuContainer.position.x);
+                this.protoContainers[modname].position.setY(this.menuContainer.position.y + this.y + this.scrollDiff + STANDARDBLOCKHEIGHT);
+                
+                this.palettes.stage.add(this.protoContainers[modname]);
                 this.protoContainers[modname].visible = false;
 
                 var height = calculateHeight(this, blkname);
@@ -747,43 +768,59 @@ function Palette(palettes, name) {
                             break;
                     }
 
+                    // TODO : Fix this hitarea
                     function calculateBounds(palette, blk, modname) {
-                        var bounds = palette.protoContainers[modname].getBounds();
-                        palette.protoContainers[modname].cache(bounds.x, bounds.y, Math.ceil(bounds.width), Math.ceil(bounds.height));
+                        var bounds = palette.protoContainers[modname].get2DBounds();
+                        // palette.protoContainers[modname].cache(bounds.x, bounds.y, Math.ceil(bounds.width), Math.ceil(bounds.height)); // PE : Why is caching done?
 
-                        var hitArea = new createjs.Shape();
-                        // Trim the hitArea height slightly to make
-                        // it easier to select single-height blocks
-                        // below double-height blocks.
-                        hitArea.graphics.beginFill('#FFF').drawRect(0, 0, Math.ceil(bounds.width), Math.ceil(bounds.height * 0.75));
-                        palette.protoContainers[modname].hitArea = hitArea;
+                        // TODO : Create the hitarea
+                        // var hitArea = new createjs.Shape();
+                        // // Trim the hitArea height slightly to make
+                        // // it easier to select single-height blocks
+                        // // below double-height blocks.
+                        // hitArea.graphics.beginFill('#FFF').drawRect(0, 0, Math.ceil(bounds.width), Math.ceil(bounds.height * 0.75));
+                        // palette.protoContainers[modname].hitArea = hitArea;
 
                         loadPaletteMenuItemHandler(palette, blk, modname);
-                        palette.palettes.refreshCanvas();
+                        palette.palettes.refreshCanvas(1);
                     }
 
                     function processBitmap(palette, modname, bitmap, args) {
                         var myBlock = args[0];
                         var blk = args[1];
-                        palette.protoContainers[modname].addChild(bitmap);
-                        bitmap.x = PALETTELEFTMARGIN;
-                        bitmap.y = 0;
-                        bitmap.scaleX = PROTOBLOCKSCALE;
-                        bitmap.scaleY = PROTOBLOCKSCALE;
+                        palette.protoContainers[modname].add(bitmap);
+                        bitmap.position.setX(threeCoorX(PALETTELEFTMARGIN));
+                        bitmap.position.setY(threeCoorY(0));
+                        bitmap.scale.setX(PROTOBLOCKSCALE);
+                        bitmap.scale.setY(PROTOBLOCKSCALE);
                         bitmap.scale = PROTOBLOCKSCALE;
 
                         if (myBlock.image) {
-                            var image = new Image();
+                            var image = new Image(); 
                             image.onload = function() {
-                                var bitmap = new createjs.Bitmap(image);
-                                if (image.width > image.height) {
-                                    bitmap.scaleX = bitmap.scaleY = bitmap.scale = MEDIASAFEAREA[2] / image.width * (myBlock.scale / 2);
-                                } else {
-                                    bitmap.scaleX = bitmap.scaleY = bitmap.scale = MEDIASAFEAREA[3] / image.height * (myBlock.scale / 2);
+
+                                var canvas = document.createElement('canvas');
+                                canvas.width = image.width;
+                                canvas.height = image.height;
+                                var context = canvas.getContext('2d');
+                                context.drawImage(image, 0, 0);
+                                var texture = new THREE.Texture(canvas);
+                                texture.needsUpdate = true;
+                                texture.minFilter = THREE.NearestFilter; 
+                                var material = new THREE.MeshBasicMaterial( {map: texture, transparent : true, depthWrite : false} );
+                                var bitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(image.width, image.height),material);
+                                bitmap.name = 'modname';
+                                bitmap.imageWidth = image.width;
+                                bitmap.imageHeight = image.height;
+                                if(image.width > image.height){
+                                    bitmap.scale.setX(MEDIASAFEAREA[2] / image.width * (myBlock.scale / 2));
+                                    bitmap.scale.setY(MEDIASAFEAREA[2] / image.width * (myBlock.scale / 2));
+                                    bitmap.scale = (MEDIASAFEAREA[2] / image.width * (myBlock.scale / 2));
                                 }
-                                palette.protoContainers[modname].addChild(bitmap);
-                                bitmap.x = MEDIASAFEAREA[0] * (myBlock.scale / 2);
-                                bitmap.y = MEDIASAFEAREA[1] * (myBlock.scale / 2);
+
+                                palette.protoContainers[modname].add(bitmap);
+                                bitmap.position.setX(MEDIASAFEAREA[0] * (myBlock.scale / 2));
+                                bitmap.position.setY(MEDIASAFEAREA[1] * (myBlock.scale / 2));
                                 calculateBounds(palette, blk, modname);
                             }
                             image.src = myBlock.image;
@@ -832,7 +869,7 @@ function Palette(palettes, name) {
         var x = this.menuContainer.position.x;
         var y = this.menuContainer.position.y;
         this.menuContainer.position.setX(x + dx);
-        this.menuContainer.position.setY(y + dy;
+        this.menuContainer.position.setY(y + dy);
         this.moveMenuItemsRelative(dx, dy);
     }
 
@@ -1078,7 +1115,7 @@ var MODEDRAG = 1;
 var MODESCROLL = 2;
 var DECIDEDISTANCE = 20;
 
-
+// TODO : Fix the background events once the background is in place
 function setupBackgroundEvents(palette) {
     var scrolling = false;
     palette.background.on('mousedown', function(event) {
@@ -1300,11 +1337,16 @@ function loadPaletteMenuHandler(palette) {
     var locked = false;
     var trashcan = palette.palettes.trashcan;
     var paletteWidth = MENUWIDTH + (palette.columns * 160);
+    var offset;
+    var px,py;
+    var mouseCoor = new THREE.Vector3();
+    mouseCoor.setZ(1);
 
     palette.menuContainer.on('click', function(event) {
-        if (Math.round(event.stageX / palette.palettes.scale) > palette.menuContainer.x + paletteWidth - STANDARDBLOCKHEIGHT) {
+        // To code for the close button
+        if(Math.round(threeCoorX(event.clientX / palette.palettes.scale)) > palette.menuContainer.position.x + paletteWidth/2 - STANDARDBLOCKHEIGHT){
             palette.hide();
-            palette.palettes.refreshCanvas();
+            palette.palettes.refreshCanvas(1);
             return;
         }
 
@@ -1328,62 +1370,82 @@ function loadPaletteMenuHandler(palette) {
         } else {
             palette.showMenuItems(false);
         }
-        palette.palettes.refreshCanvas();
+        palette.palettes.refreshCanvas(1);
     });
 
     palette.menuContainer.on('mousedown', function(event) {
-        trashcan.show();
-        // Move them all?
-        var offset = {
-            x: palette.menuContainer.x - Math.round(event.stageX / palette.palettes.scale),
-            y: palette.menuContainer.y - Math.round(event.stageY / palette.palettes.scale)
+        trashcan.show(); //show them all?
+        offset = {
+            x: palette.menuContainer.position.x - Math.round(event.clientX / palette.palettes.scale),
+            y: palette.menuContainer.position.y - Math.round(event.clientY / palette.palettes.scale)
         };
+    });
 
-        palette.menuContainer.on('pressup', function(event) {
-            if (trashcan.overTrashcan(event.stageX / palette.palettes.scale, event.stageY / palette.palettes.scale)) {
-                palette.hide();
-                palette.palettes.refreshCanvas();
-                // Only delete plugin palettes.
-                if (BUILTINPALETTES.indexOf(palette.name) === -1) {
-                    promptPaletteDelete(palette);
-                } else if (palette.name == 'myblocks') {
-                    promptMacrosDelete(palette);
-                }
-            }
-            trashcan.hide();
-        });
+    palette.menuContainer.on('mouseover',function(event){
 
-        palette.menuContainer.on('mouseout', function(event) {
-            if (trashcan.overTrashcan(event.stageX / palette.palettes.scale, event.stageY / palette.palettes.scale)) {
-                palette.hide();
-                palette.palettes.refreshCanvas();
-            }
-            trashcan.hide();
-        });
-
-        palette.menuContainer.on('pressmove', function(event) {
-            var oldX = palette.menuContainer.x;
-            var oldY = palette.menuContainer.y;
-            palette.menuContainer.x = Math.round(event.stageX / palette.palettes.scale) + offset.x;
-            palette.menuContainer.y = Math.round(event.stageY / palette.palettes.scale) + offset.y;
-            palette.palettes.refreshCanvas();
-            var dx = palette.menuContainer.x - oldX;
-            var dy = palette.menuContainer.y - oldY;
-
-            // If we are over the trash, warn the user.
-            if (trashcan.overTrashcan(event.stageX / palette.palettes.scale, event.stageY / palette.palettes.scale)) {
-                trashcan.highlight();
-            } else {
-                trashcan.unhighlight();
-            }
-
-            // Hide the menu items while drag.
-            palette.hideMenuItems(false);
-            palette.moveMenuItemsRelative(dx, dy);
-        });
     });
 
     palette.menuContainer.on('mouseout', function(event) {
+        if (trashcan.overTrashcan(event.clientX / palette.palettes.scale, event.clientY / palette.palettes.scale)) {
+            palette.hide();
+            palette.palettes.refreshCanvas(1);
+        }
+        trashcan.hide();
+    });
+
+    palette.menuContainer.on('pressmove', function(event) {
+        if(!px || !py){
+            px = event.clientX;
+            py = event.clientY;
+        }
+        else{
+            mouseCoor.x = event.clientX - px;
+            mouseCoor.y = py - event.clientY;
+        }
+        palette.menuContainer.position.add(mouseCoor);
+        px = event.clientX;
+        py = event.clientY;
+        palette.palettes.refreshCanvas(1);
+
+        // var oldX = palette.menuContainer.x;
+        // var oldY = palette.menuContainer.y;
+        // palette.menuContainer.x = Math.round(event.stageX / palette.palettes.scale) + offset.x;
+        // palette.menuContainer.y = Math.round(event.stageY / palette.palettes.scale) + offset.y;
+        // palette.palettes.refreshCanvas(1);
+        // var dx = palette.menuContainer.x - oldX;
+        // var dy = palette.menuContainer.y - oldY;
+
+        // Calculate dx,dy to give to moveMenuItemsRelative
+
+        // If we are over the trash, warn the user.
+        if (trashcan.overTrashcan(event.clientX / palette.palettes.scale, event.clientY / palette.palettes.scale)) {
+            trashcan.highlight();
+        } else {
+            trashcan.unhighlight();
+        }
+
+        // Hide the menu items while drag.
+        // TODO : fix these functions
+        palette.hideMenuItems(false);
+        palette.moveMenuItemsRelative(dx, dy);
+
+
+    });
+
+    palette.menuContainer.on('pressup', function(event) {
+        px = false;
+        py = false;
+        if (trashcan.overTrashcan(event.clientX / palette.palettes.scale, event.clientY / palette.palettes.scale)) {
+            palette.hide();
+            palette.palettes.refreshCanvas(1);
+            // Only delete plugin palettes.
+            if (BUILTINPALETTES.indexOf(palette.name) === -1) {
+                promptPaletteDelete(palette);
+            } else if (palette.name == 'myblocks') {
+                promptMacrosDelete(palette);
+            }
+        }
+        trashcan.hide();
     });
 }
 
@@ -1408,7 +1470,6 @@ function promptPaletteDelete(palette) {
         delete pluginObjs['ARGPLUGINS'][name];
         delete pluginObjs['BLOCKPLUGINS'][name];
     }
-
     localStorage.plugins = preparePluginExports({});
 }
 
@@ -1451,6 +1512,8 @@ function makePaletteBitmap(palette, data, name, callback, extras) {
             // var bitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(me.container.scaleX*img.width, me.container.scaleY*img.height),material);
             var bitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(img.width, img.height),material);
             bitmap.name = name;
+            bitmap.imgWidth = img.width;
+            bitmap.imgHeight = img.height;
             callback(palette, name, bitmap, extras);
     }
     img.src = 'data:image/svg+xml;base64,' + window.btoa(
@@ -1463,6 +1526,5 @@ function regeneratePalette(palette) {
     palette.visible = false;
     palette.hideMenuItems();
     palette.protoContainers = {};
-
     palette.palettes.updatePalettes();
 }
