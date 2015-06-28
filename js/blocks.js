@@ -1163,11 +1163,11 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
         myBlock.postProcessArg = postProcessArg;
 
         // We need a container for the block graphics.
-        myBlock.container = new createjs.Container();
-        this.stage.addChild(myBlock.container);
-        myBlock.container.snapToPixelEnabled = true;
-        myBlock.container.x = myBlock.x;
-        myBlock.container.y = myBlock.y;
+        myBlock.container = new THREE.Group();
+        this.stage.add(myBlock.container);
+        // myBlock.container.snapToPixelEnabled = true;
+        myBlock.container.position.setX(myBlock.x);
+        myBlock.container.position.setY(myBlock.y);
 
         // and we need to load the images into the container.
         myBlock.imageLoad();
@@ -1195,7 +1195,7 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
                 var value = args[1];
                 me.blockList[thisBlock].value = value;
                 me.blockList[thisBlock].text.text = value;
-                me.blockList[thisBlock].container.updateCache();
+                // me.blockList[thisBlock].container.updateCache(); //REMOVE
             }
             postProcessArg = [thisBlock, _('text')];
         } else if (name == 'number') {
@@ -1204,7 +1204,7 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
                 var value = Number(args[1]);
                 me.blockList[thisBlock].value = value;
                 me.blockList[thisBlock].text.text = value.toString();
-                me.blockList[thisBlock].container.updateCache();
+                // me.blockList[thisBlock].container.updateCache(); //REMOVE
             }
             postProcessArg = [thisBlock, 100];
         } else if (name == 'media') {
@@ -1322,7 +1322,7 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
                             label = label.substr(0, 7) + '...';
                         }
                         me.blockList[thisBlock].text.text = label;
-                        me.blockList[thisBlock].container.updateCache();
+                        // me.blockList[thisBlock].container.updateCache();//REMOVE
                     }
                     this.makeNewBlock('text', postProcess, [thisBlock, value]);
                 } else {
@@ -1380,7 +1380,7 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
         // Generate and position the block bitmaps and labels
         this.updateBlockPositions();
         this.adjustDocks(blk, true);
-        this.refreshCanvas();
+        this.refreshCanvas(1);
 
         return blk;
     }

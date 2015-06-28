@@ -318,19 +318,19 @@ function Block(protoblock, blocks, overrideName) {
         // Create the bitmap for the block.
         function processBitmap(name, bitmap, myBlock) {
             myBlock.bitmap = bitmap;
-            myBlock.container.addChild(myBlock.bitmap);
-            myBlock.bitmap.x = 0;
-            myBlock.bitmap.y = 0;
+            myBlock.container.add(myBlock.bitmap);
+            myBlock.bitmap.position.x = 0; //PE : Check if this needs to 0 or threeCoorX(0)
+            myBlock.bitmap.position.y = 0;
             myBlock.bitmap.name = 'bmp_' + thisBlock;
             myBlock.bitmap.cursor = 'pointer';
-            myBlock.blocks.refreshCanvas();
+            myBlock.blocks.refreshCanvas(1);
 
             // Create the highlight bitmap for the block.
             function processHighlightBitmap(name, bitmap, myBlock) {
                 myBlock.highlightBitmap = bitmap;
-                myBlock.container.addChild(myBlock.highlightBitmap);
-                myBlock.highlightBitmap.x = 0;
-                myBlock.highlightBitmap.y = 0;
+                myBlock.container.add(myBlock.highlightBitmap);
+                myBlock.highlightBitmap.position.x = 0; // PE : if this needs to 0 or threeCoorX(0)
+                myBlock.highlightBitmap.position.y = 0;
                 myBlock.highlightBitmap.name = 'bmp_highlight_' + thisBlock;
                 myBlock.highlightBitmap.cursor = 'pointer';
                 // Hide it to start
@@ -348,9 +348,10 @@ function Block(protoblock, blocks, overrideName) {
                     myBlock.container.uncache();
                 }
 
-                myBlock.bounds = myBlock.container.getBounds();
-                myBlock.container.cache(myBlock.bounds.x, myBlock.bounds.y, myBlock.bounds.width, myBlock.bounds.height);
-                myBlock.blocks.refreshCanvas();
+                myBlock.bounds = myBlock.container.get2DBounds();
+                // myBlock.container.cache(myBlock.bounds.x, myBlock.bounds.y, myBlock.bounds.width, myBlock.bounds.height);
+                myBlock.container.bounds = myBlock.bounds;
+                myBlock.blocks.refreshCanvas(1);
 
                 if (firstTime) {
                     loadEventHandlers(myBlock);
