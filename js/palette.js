@@ -48,13 +48,11 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
     this.current = 'turtle';
 
     this.container = new THREE.Group();
-    // this.container.snapToPixelEnabled = true; //Find a way to implement this feature when dragging
+    // this.container.snapToPixelEnabled = true; //TODO : Find a way to implement this feature when dragging
     this.stage.add(this.container);
 
-    // LATER
     this.setScale = function(scale) {
         this.scale = scale;
-
         this.updateButtonMasks();
         for (var i in this.dict) {
             this.dict[i].resizeEvent();
@@ -66,33 +64,54 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
         this.macroDict = obj;
     }
 
+    // TODO : Fix this scrolling event when other resize events have been handled
     this.menuScrollEvent = function(direction, scrollSpeed) {
         var keys = Object.keys(this.buttons);
 
         var diff = direction * scrollSpeed;
-        if (this.buttons[keys[0]].y + diff > this.cellSize && direction > 0) {
+        if (direction < 0 && this.buttons[keys[0]].position.y + diff < threeCoorY(this.cellSize * 1.5)) {
             return;
         }
-        if (this.buttons[last(keys)].y + diff < windowHeight() / this.scale - this.cellSize && direction < 0) {
+        // if (direction > 0 && this.buttons[last(keys)].position.y + diff > windowHeight() / this.scale - this.cellSize ) {
+        //     return;
+        // }
+        // TODO : When Scaling is fixed put back the above condition
+        if (direction > 0 && this.buttons[last(keys)].position.y - diff > threeCoorY(windowHeight() - this.cellSize )) {
             return;
         }
 
         this.scrollDiff += diff;
         for (var name in this.buttons) {
-            this.buttons[name].y += diff;
+            this.buttons[name].position.y += diff;
             this.buttons[name].visible = true;
         }
         this.updateButtonMasks();
-        this.refreshCanvas();
+        this.refreshCanvas(1);
     }
 
     this.updateButtonMasks = function() {
         for (var name in this.buttons) {
-            var s = new createjs.Shape();
-            s.graphics.r(0, 0, this.cellSize, windowHeight() / this.scale);
-            s.x = 0;
-            s.y = this.cellSize / 2;
-            this.buttons[name].mask = s;
+            // var s = new createjs.Shape();
+            // s.graphics.r(0, 0, this.cellSize, windowHeight() / this.scale);
+            // s.x = 0;
+            // s.y = this.cellSize / 2;
+            // this.buttons[name].mask = s;
+
+            // TODO : See what shape this code is making and then make the same shape,
+            // also see if the mask needs to be added to the scene or not.
+
+            // var rectShape = new THREE.Shape();
+            // rectShape.moveTo( -w/2, h/2 );
+            // rectShape.lineTo( w/2, h/2 );
+            // rectShape.lineTo( w/2, -h/2 );
+            // rectShape.lineTo( -w/2, -h/2 );
+            // rectShape.lineTo( -w/2, h/2 );
+
+            // var rectGeom = new THREE.ShapeGeometry( rectShape );
+            // var rectMesh = new THREE.Mesh( rectGeom, new THREE.MeshBasicMaterial( { color: 0xaaaaaa } ) ) ;   
+            // rectMesh.position.setZ(1);
+            // rectMesh.visible = false;
+            // helpContainer.add(rectMesh);
         }
     }
 
@@ -100,7 +119,6 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
         // First, an icon/button for each palette
         for (var name in this.dict) {
             if (name in this.buttons) {
-                // LATER
                 this.dict[name].updateMenu(true);
             } else {
                 this.buttons[name] = new THREE.Group();
@@ -272,22 +290,21 @@ function loadPaletteButtonHandler(palettes, name) {
 
     palettes.buttons[name].on('mousedown', function(event) {
         scrolling = true;
-        lastY = event.stageY;
-
-        palettes.buttons[name].on('pressmove', function(event) {
-            if (!scrolling) {
-                return;
-            }
-
-            diff = event.stageY - lastY;
-            palettes.menuScrollEvent(diff, 10);
-            lastY = event.stageY;
-        });
-
-        palettes.buttons[name].on('pressup', function(event) {
-            scrolling = false;
-        }, null, true); // once = true
+        lastY = event.clientY;
     });
+
+    palettes.buttons[name].on('pressmove', function(event) {
+        if (!scrolling) {
+            return;
+        }
+        diff = event.clientY - lastY;
+        palettes.menuScrollEvent(diff, 10);
+        lastY = event.clientY;
+    });
+
+    palettes.buttons[name].on('pressup', function(event) {
+        scrolling = false;
+    }, null, true); // once = true
 
 
     // A palette button opens or closes a palette.
