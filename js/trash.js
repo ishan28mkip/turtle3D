@@ -16,7 +16,7 @@
     
     // View overtrashcan function for coordinate conversion demo
 
-require(['activity/utils']);
+// require(['activity/utils']);
 
 var TRASHWIDTH = 320;
 var TRASHHEIGHT = 120;
@@ -44,8 +44,7 @@ function Trashcan (canvas, stage, size, refreshCanvas) {
             // bounds = me.container.getBounds(); //cache feature does not make sense for webgl based rendering
             // me.container.cache(bounds.x, bounds.y, bounds.width, bounds.height);
             // Hide the trash until a block is moved
-            me.container.visible = true;
-            me.unhighlight();
+            me.container.visible = false;
             refreshCanvas(1);
         }
         img.src = 'data:image/svg+xml;base64,' + window.btoa(
@@ -116,41 +115,45 @@ function Trashcan (canvas, stage, size, refreshCanvas) {
 
     this.hide = function() {
         var me = this;
-        this.container.traverse(function(node){
-            if(node.material){
-                node.material.transparent = true;
-                var tween = new TWEEN.Tween( node.material )
-                .to( { opacity: 0 }, 200 )
-                .onUpdate( function () {
-                    me.refreshCanvas(1);
-                })
-                .onComplete( function(){
-                    me.container.visible = false;
-                })
-                .start();
-            }
-        });
+        this.container.visible = false;
+        // TODO : Fix this animation. See how to add requestAnimationFrame properly.
+        // this.container.traverse(function(node){
+        //     if(node.material){
+        //         node.material.transparent = true;
+        //         var tween = new TWEEN.Tween( node.material )
+        //         .to( { opacity: 0 }, 200 )
+        //         .onUpdate( function () {
+        //             me.refreshCanvas(1);
+        //         })
+        //         .onComplete( function(){
+        //             me.container.visible = false;
+        //         })
+        //         .start();
+        //     }
+        // });
     }
 
     this.show = function() {
         var me = this;
         var flag;
-        this.container.traverse(function(node){
-            if(node.material){
-                node.material.transparent = true;
-                if(!flag){
-                    flag = true;
-                    me.container.visible = true;
-                }
-                node.material.opacity = 0;
-                var tween = new TWEEN.Tween( node.material )
-                .to( { opacity: 1.0 }, 200 )
-                .onUpdate( function () {
-                    me.refreshCanvas(1);
-                })
-                .start();
-            }
-        });        
+        this.container.visible = true;
+        // TODO : Fix this animation. See how to add requestAnimationFrame properly.
+        // this.container.traverse(function(node){
+        //     if(node.material){
+        //         node.material.transparent = true;
+        //         if(!flag){
+        //             flag = true;
+        //             me.container.visible = true;
+        //         }
+        //         node.material.opacity = 0;
+        //         var tween = new TWEEN.Tween( node.material )
+        //         .to( { opacity: 1.0 }, 200 )
+        //         .onUpdate( function () {
+        //             me.refreshCanvas(1);
+        //         })
+        //         .start();
+        //     }
+        // });        
     }
 
     this.highlight = function() {

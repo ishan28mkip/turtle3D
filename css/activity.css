@@ -53,7 +53,7 @@ input.number {
   float: right;
   position: absolute;
   margin-top: 57px;
-  z-index: -1;
+  pointer-events: none;
 }
 
 #canvas {
