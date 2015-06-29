@@ -104,7 +104,7 @@ function Block(protoblock, blocks, overrideName) {
             }
         }
         this.container.updateCache();
-        this.blocks.refreshCanvas();
+        this.blocks.refreshCanvas(1);
     }
 
     this.unhighlight = function() {
@@ -128,7 +128,7 @@ function Block(protoblock, blocks, overrideName) {
             }
         }
         this.container.updateCache();
-        this.blocks.refreshCanvas();
+        this.blocks.refreshCanvas(1);
     }
 
     this.updateSlots = function(clamp, plusMinus, blocksToCheck) {
@@ -279,7 +279,7 @@ function Block(protoblock, blocks, overrideName) {
             bitmap.x = (MEDIASAFEAREA[0] - 10) * (myBlock.protoblock.scale / 2);
             bitmap.y = MEDIASAFEAREA[1] * (myBlock.protoblock.scale / 2);
             myBlock.container.updateCache();
-            myBlock.blocks.refreshCanvas();
+            myBlock.blocks.refreshCanvas(1);
         }
         image.src = this.image;
     }
@@ -339,7 +339,7 @@ function Block(protoblock, blocks, overrideName) {
                 if (myBlock.text != null) {
                     // Make sure text is on top.
                     z = myBlock.container.children.length - 1;
-                    myBlock.container.setChildIndex(myBlock.text, z);
+                    // myBlock.container.setChildIndex(myBlock.text, z);
                 }
 
                 // At me point, it should be safe to calculate the
@@ -378,7 +378,7 @@ function Block(protoblock, blocks, overrideName) {
                         myBlock.bitmap.visible = !myBlock.collapsed;
                         myBlock.highlightBitmap.visible = false;
                         myBlock.container.updateCache();
-                        myBlock.blocks.refreshCanvas();
+                        myBlock.blocks.refreshCanvas(1);
                     }
                     if (myBlock.postProcess != null) {
                         myBlock.postProcess(myBlock);
@@ -414,55 +414,55 @@ function Block(protoblock, blocks, overrideName) {
 
     this.finishImageLoad = function(firstTime) {
         var thisBlock = this.blocks.blockList.indexOf(this);
+        // TODO : Add text here once the graphic is done
+        // // Value blocks get a modifiable text label
+        // if (this.name == 'text' || this.name == 'number') {
+        //     if (this.value == null) {
+        //         if (this.name == 'text') {
+        //             this.value = '---';
+        //         } else {
+        //             this.value = 100;
+        //         }
+        //     }
 
-        // Value blocks get a modifiable text label
-        if (this.name == 'text' || this.name == 'number') {
-            if (this.value == null) {
-                if (this.name == 'text') {
-                    this.value = '---';
-                } else {
-                    this.value = 100;
-                }
-            }
+        //     var label = this.value.toString();
+        //     if (label.length > 8) {
+        //         label = label.substr(0, 7) + '...';
+        //     }
+        //     this.text.text = label;
+        //     this.text.textAlign = 'center';
+        //     this.text.textBaseline = 'alphabetic';
+        //     this.container.addChild(this.text);
+        //     this.text.x = VALUETEXTX * this.protoblock.scale / 2.;
+        //     this.text.y = VALUETEXTY * this.protoblock.scale / 2.;
 
-            var label = this.value.toString();
-            if (label.length > 8) {
-                label = label.substr(0, 7) + '...';
-            }
-            this.text.text = label;
-            this.text.textAlign = 'center';
-            this.text.textBaseline = 'alphabetic';
-            this.container.addChild(this.text);
-            this.text.x = VALUETEXTX * this.protoblock.scale / 2.;
-            this.text.y = VALUETEXTY * this.protoblock.scale / 2.;
+        //     // Make sure text is on top.
+        //     z = this.container.getNumChildren() - 1;
+        //     this.container.setChildIndex(this.text, z);
+        //     this.container.updateCache();
+        // } else if (this.protoblock.parameter) {
+        //     // Parameter blocks get a text label to show their current value
+        //     this.text.textBaseline = 'alphabetic';
+        //     this.container.addChild(this.text);
+        //     var bounds = this.container.getBounds();
+        //     if (this.protoblock.args == 0) {
+        //         this.text.textAlign = 'right';
+        //         this.text.x = bounds.width - 25;
+        //         this.text.y = VALUETEXTY * this.protoblock.scale / 2.;
+        //     } else if (this.isArgBlock()) {
+        //         this.text.textAlign = 'left';
+        //         this.text.x = BOXTEXTX;
+        //         if (this.docks[0][2] == 'booleanout') {
+        //             this.text.y = bounds.height - 15;
+        //         } else {
+        //             this.text.y = VALUETEXTY * this.protoblock.scale / 2.;
+        //         }
+        //     }
 
-            // Make sure text is on top.
-            z = this.container.getNumChildren() - 1;
-            this.container.setChildIndex(this.text, z);
-            this.container.updateCache();
-        } else if (this.protoblock.parameter) {
-            // Parameter blocks get a text label to show their current value
-            this.text.textBaseline = 'alphabetic';
-            this.container.addChild(this.text);
-            var bounds = this.container.getBounds();
-            if (this.protoblock.args == 0) {
-                this.text.textAlign = 'right';
-                this.text.x = bounds.width - 25;
-                this.text.y = VALUETEXTY * this.protoblock.scale / 2.;
-            } else if (this.isArgBlock()) {
-                this.text.textAlign = 'left';
-                this.text.x = BOXTEXTX;
-                if (this.docks[0][2] == 'booleanout') {
-                    this.text.y = bounds.height - 15;
-                } else {
-                    this.text.y = VALUETEXTY * this.protoblock.scale / 2.;
-                }
-            }
-
-            z = this.container.getNumChildren() - 1;
-            this.container.setChildIndex(this.text, z);
-            this.container.updateCache();
-        }
+        //     z = this.container.getNumChildren() - 1;
+        //     this.container.setChildIndex(this.text, z);
+        //     this.container.updateCache();
+        // }
 
         if (['start', 'action'].indexOf(this.name) == -1) {
             this.loadComplete = true;
@@ -470,7 +470,7 @@ function Block(protoblock, blocks, overrideName) {
                 this.postProcess(this.postProcessArg);
                 this.postProcess = null;
             }
-            this.blocks.refreshCanvas();
+            this.blocks.refreshCanvas(1);
             this.blocks.cleanupAfterLoad();
         } else {
             // Start blocks and Action blocks can collapse, so add an
@@ -504,9 +504,9 @@ function Block(protoblock, blocks, overrideName) {
             function processCollapseBitmap(name, bitmap, myBlock) {
                 myBlock.collapseBlockBitmap = bitmap;
                 myBlock.collapseBlockBitmap.name = 'collapse_' + thisBlock;
-                myBlock.container.addChild(myBlock.collapseBlockBitmap);
+                myBlock.container.add(myBlock.collapseBlockBitmap);
                 myBlock.collapseBlockBitmap.visible = myBlock.collapsed;
-                myBlock.blocks.refreshCanvas();
+                myBlock.blocks.refreshCanvas(1);
 
                 function processHighlightCollapseBitmap(name, bitmap, myBlock) {
                     myBlock.highlightCollapseBlockBitmap = bitmap;
@@ -530,7 +530,7 @@ function Block(protoblock, blocks, overrideName) {
                     ensureDecorationOnTop(myBlock);
 
                     myBlock.container.updateCache();
-                    myBlock.blocks.refreshCanvas();
+                    myBlock.blocks.refreshCanvas(1);
 
                     myBlock.collapseContainer = new createjs.Container();
                     myBlock.collapseContainer.snapToPixelEnabled = true;
@@ -558,7 +558,7 @@ function Block(protoblock, blocks, overrideName) {
                             if (postProcess != null) {
                                 postProcess(myBlock);
                             }
-                            myBlock.blocks.refreshCanvas();
+                            myBlock.blocks.refreshCanvas(1);
                             myBlock.blocks.cleanupAfterLoad();
                         }
                         image.src = 'images/expand.svg';
@@ -690,7 +690,7 @@ function Block(protoblock, blocks, overrideName) {
             bitmap.y = MEDIASAFEAREA[1] * (myBlock.protoblock.scale / 2);
 
             myBlock.container.updateCache();
-            myBlock.blocks.refreshCanvas();
+            myBlock.blocks.refreshCanvas(1);
         }
 
         if (imagePath == null) {
@@ -792,7 +792,7 @@ function Block(protoblock, blocks, overrideName) {
 
             myBlock.collapseContainer.updateCache();
             myBlock.container.updateCache();
-            myBlock.blocks.refreshCanvas();
+            myBlock.blocks.refreshCanvas(1);
         }
 
         toggle(this);
@@ -835,7 +835,7 @@ function loadCollapsibleEventHandlers(myBlock) {
     myBlock.collapseContainer.on('mouseover', function(event) {
         myBlock.blocks.highlight(thisBlock, true);
         myBlock.blocks.activeBlock = thisBlock;
-        myBlock.blocks.refreshCanvas();
+        myBlock.blocks.refreshCanvas(1);
     });
 
     var moved = false;
@@ -914,7 +914,7 @@ function loadCollapsibleEventHandlers(myBlock) {
                 }
             }
 
-            myBlock.blocks.refreshCanvas();
+            myBlock.blocks.refreshCanvas(1);
         });
     });
 
@@ -950,7 +950,7 @@ function collapseOut(blocks, myBlock, thisBlock, moved, event) {
 
     blocks.unhighlight(null);
     blocks.activeBlock = null;
-    blocks.refreshCanvas();
+    blocks.refreshCanvas(1);
 }
 
 
@@ -962,16 +962,16 @@ document.addEventListener('mousemove', function (e) {
 
 
 function calculateBlockHitArea(myBlock) {
-    var hitArea = new createjs.Shape();
-    var bounds = myBlock.container.getBounds()
+    // var hitArea = new createjs.Shape();
+    // var bounds = myBlock.container.getBounds()
 
-    // Only detect hits on top section of block.
-    if (myBlock.isClampBlock()) {
-        hitArea.graphics.beginFill('#FFF').drawRect(0, 0, bounds.width, STANDARDBLOCKHEIGHT);
-    } else {
-        hitArea.graphics.beginFill('#FFF').drawRect(0, 0, bounds.width, bounds.height * 0.75); // Shrinking the height makes it easier to grab blocks below in the stack.
-    }
-    myBlock.container.hitArea = hitArea;
+    // // Only detect hits on top section of block.
+    // if (myBlock.isClampBlock()) {
+    //     hitArea.graphics.beginFill('#FFF').drawRect(0, 0, bounds.width, STANDARDBLOCKHEIGHT);
+    // } else {
+    //     hitArea.graphics.beginFill('#FFF').drawRect(0, 0, bounds.width, bounds.height * 0.75); // Shrinking the height makes it easier to grab blocks below in the stack.
+    // }
+    // myBlock.container.hitArea = hitArea;
 }
 
 
@@ -985,7 +985,7 @@ function loadEventHandlers(myBlock) {
     myBlock.container.on('mouseover', function(event) {
         blocks.highlight(thisBlock, true);
         blocks.activeBlock = thisBlock;
-        blocks.refreshCanvas();
+        blocks.refreshCanvas(1);
     });
 
     var moved = false;
@@ -1197,7 +1197,7 @@ function loadEventHandlers(myBlock) {
                     }
                 }
             }
-            blocks.refreshCanvas();
+            blocks.refreshCanvas(1);
         });
     });
 
@@ -1233,7 +1233,7 @@ function mouseoutCallback(myBlock, event, moved) {
     } else {
         myBlock.blocks.unhighlight(null);
         myBlock.blocks.activeBlock = null;
-        myBlock.blocks.refreshCanvas();
+        myBlock.blocks.refreshCanvas(1);
     }
 }
 
@@ -1296,7 +1296,7 @@ function labelChanged(myBlock) {
         if (isNaN(myBlock.value)) {
             var thisBlock = myBlock.blocks.blockList.indexOf(myBlock);
             myBlock.blocks.errorMsg(newValue + ': Not a number', thisBlock);
-            myBlock.blocks.refreshCanvas();
+            myBlock.blocks.refreshCanvas(1);
             myBlock.value = oldValue;
         }
     } else {
@@ -1319,7 +1319,7 @@ function labelChanged(myBlock) {
     } catch (e) {
         console.log(e);
     }
-    myBlock.blocks.refreshCanvas();
+    myBlock.blocks.refreshCanvas(1);
 
     // TODO: Don't allow duplicate action names
     var c = myBlock.connections[0];

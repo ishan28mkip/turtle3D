@@ -174,7 +174,7 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
             blocks.dismissButton.visible = false;
             blocks.inLongPress = false;
             blocks.updatePasteButton();
-            blocks.refreshCanvas();
+            blocks.refreshCanvas(1);
         });
 
         this.dismissButton.on('click', function(event) {
@@ -182,7 +182,7 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
             blocks.saveStackButton.visible = false;
             blocks.dismissButton.visible = false;
             blocks.inLongPress = false;
-            blocks.refreshCanvas();
+            blocks.refreshCanvas(1);
         });
 
         this.saveStackButton.on('click', function(event) {
@@ -194,7 +194,7 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
             blocks.saveStackButton.visible = false;
             blocks.dismissButton.visible = false;
             blocks.saveStack();
-            blocks.refreshCanvas();
+            blocks.refreshCanvas(1);
         });
     }
 
@@ -765,7 +765,7 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
                 blk = blocks.insideExpandableBlock(blk);
             }
             blocks.adjustExpandableClampBlock(checkExpandableBlocks);
-            blocks.refreshCanvas();
+            blocks.refreshCanvas(1);
         }, 250);
     }
 
@@ -840,7 +840,7 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
                 this.stage.addChild(myBlock.collapseContainer);
             }
         }
-        this.refreshCanvas();
+        this.refreshCanvas(1);
     }
 
     this.moveBlock = function(blk, x, y) {
@@ -882,37 +882,38 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
     }
 
     this.updateBlockText = function(blk) {
-        // When we create new blocks, we may not have assigned the
-        // value yet.
-        var myBlock = this.blockList[blk];
-        var maxLength = 8;
-        if (myBlock.text == null) {
-            return;
-        }
-        if (myBlock.name == 'loadFile') {
-            try {
-                var label = myBlock.value[0].toString();
-            } catch (e) {
-                var label = _('open file');
-            }
-            maxLength = 10;
-        } else {
-            var label = myBlock.value.toString();
-        }
-        if (label.length > maxLength) {
-            label = label.substr(0, maxLength - 1) + '...';
-        }
-        myBlock.text.text = label;
+        // // When we create new blocks, we may not have assigned the
+        // // value yet.
+        // TODO : Fix this function and add the text utils
+        // var myBlock = this.blockList[blk];
+        // var maxLength = 8;
+        // if (myBlock.text == null) {
+        //     return;
+        // }
+        // if (myBlock.name == 'loadFile') {
+        //     try {
+        //         var label = myBlock.value[0].toString();
+        //     } catch (e) {
+        //         var label = _('open file');
+        //     }
+        //     maxLength = 10;
+        // } else {
+        //     var label = myBlock.value.toString();
+        // }
+        // if (label.length > maxLength) {
+        //     label = label.substr(0, maxLength - 1) + '...';
+        // }
+        // myBlock.text.text = label;
 
-        // Make sure text is on top.
-        z = myBlock.container.getNumChildren() - 1;
-        myBlock.container.setChildIndex(myBlock.text, z);
+        // // Make sure text is on top.
+        // z = myBlock.container.getNumChildren() - 1;
+        // myBlock.container.setChildIndex(myBlock.text, z);
 
-        if (myBlock.loadComplete) {
-            myBlock.container.updateCache();
-        } else {
-            console.log('load not yet complete for ' + blk);
-        }
+        // if (myBlock.loadComplete) {
+        //     myBlock.container.updateCache();
+        // } else {
+        //     console.log('load not yet complete for ' + blk);
+        // }
     }
 
     // understand this later when the variables are clear
@@ -1029,7 +1030,7 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
         // Expand expandable 2-arg blocks as needed.
         this.findTwoArgs();
         this.adjustExpandableTwoArgBlock(this.expandablesList);
-        this.refreshCanvas();
+        this.refreshCanvas(1);
     }
 
     this.findDoubleClamps = function() {
@@ -1055,7 +1056,7 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
             }
         }
         this.adjustExpandableClampBlock(blocksToCheck);
-        this.refreshCanvas();
+        this.refreshCanvas(1);
     }
 
     this.unhighlightAll = function() {
@@ -1699,7 +1700,7 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
             this.saveStackButton.x = myBlock.container.x + 82;
             this.saveStackButton.y = myBlock.container.y - 27;
         }
-        this.refreshCanvas();
+        this.refreshCanvas(1);
     }
 
     this.pasteStack = function() {
@@ -2297,7 +2298,7 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
                 this.blockList[blk].collapseContainer.y = this.blockList[blk].container.y + COLLAPSEBUTTONYOFF * (this.blockList[blk].protoblock.scale / 2);
             }
         }
-        this.refreshCanvas();
+        this.refreshCanvas(1);
     }
 
     this.raiseStackToTop = function (blk) {
@@ -2395,6 +2396,6 @@ function sendStackToTrash(blocks, myBlock) {
         console.log('putting ' + blocks.blockList[blk].name + ' in the trash');
         blocks.blockList[blk].trash = true;
         blocks.blockList[blk].hide();
-        blocks.refreshCanvas();
+        blocks.refreshCanvas(1);
     }
 }

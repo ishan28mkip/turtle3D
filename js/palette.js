@@ -1077,7 +1077,7 @@ this.scrollEvent = function(direction, scrollSpeed) {
 
         var stage = this.palettes.stage;
         stage.setChildIndex(this.menuContainer, stage.getNumChildren() - 1);
-        this.palettes.refreshCanvas();
+        this.palettes.refreshCanvas(1);
         this.count += 1;
     } 
 
@@ -1247,7 +1247,7 @@ function loadPaletteMenuItemHandler(palette, blk, blkname) {
                 palette.draggingProtoBlock = true;
                 palette.protoContainers[blkname].x = Math.round(event.stageX / palette.palettes.scale) - PALETTELEFTMARGIN;
                 palette.protoContainers[blkname].y = Math.round(event.stageY / palette.palettes.scale);
-                palette.palettes.refreshCanvas();
+                palette.palettes.refreshCanvas(1);
                 return;
             }
 
@@ -1342,7 +1342,7 @@ function loadPaletteMenuItemHandler(palette, blk, blkname) {
             palette.protoContainers[blkname].x = saveX;
             palette.protoContainers[blkname].y = saveY + palette.scrollDiff;
             palette.updateBlockMasks();
-            palette.palettes.refreshCanvas();
+            palette.palettes.refreshCanvas(1);
         }
     });
 }

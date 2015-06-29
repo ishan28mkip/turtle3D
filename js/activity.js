@@ -1752,7 +1752,7 @@ define(function(require) {
                 helpElem.style.zIndex = 100;
             }
 
-            var doneTour = localStorage.doneTour === 'false';
+            var doneTour = localStorage.doneTour === 'true';
 
             if (firstTime && doneTour) {
                 docById('helpElem').style.visibility = 'hidden';
