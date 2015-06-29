@@ -90,6 +90,7 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
     }
 
     this.updateButtonMasks = function() {
+        // TODO : Why are masks used?
         for (var name in this.buttons) {
             // var s = new createjs.Shape();
             // s.graphics.r(0, 0, this.cellSize, windowHeight() / this.scale);
@@ -155,9 +156,12 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
 
                     me.refreshCanvas(1);
 
+                    var paletteWidth = MENUWIDTH + (me.dict[name].columns * 160);
+
                     me.dict[name].makeMenu(false);
-                    me.dict[name].moveMenu(me.cellSize, me.cellSize);
+                    me.dict[name].moveMenu(threeCoorX(me.cellSize + me.margin*2) + paletteWidth/2, threeCoorY(me.cellSize*1.5));
                     me.dict[name].updateMenu(false);
+
                     // TODO : Fix the click handler in palette button handlers
                     loadPaletteButtonHandler(me, name);
                 }
@@ -381,12 +385,16 @@ function Palette(palettes, name) {
             return;
         };
         var paletteWidth = MENUWIDTH + (this.columns * 160);
-        // this.menuContainer.removeAllChildren();
+
+        var obj;
+        for (var i = this.menuContainer.children.length - 1; i >= 0 ; i -- ) {
+            obj = this.menuContainer.children[ i ];
+            this.menuContainer.remove(obj);
+        }
 
         // Create the menu button
         function processHeader(palette, name, bitmap, extras) {
             palette.menuContainer.add(bitmap);
-            palette.menuContainer.position.set(threeCoorX(palette.palettes.cellSize + palette.palettes.margin*2) + bitmap.imgWidth/2, threeCoorY(palette.palettes.cellSize*1.5+ palette.palettes.scrollDiff)  , 1);
             palette.menuContainer.processHeader = {};
             palette.menuContainer.processHeader.width = bitmap.imgWidth;
             palette.menuContainer.processHeader.height = bitmap.imgHeight;
@@ -674,8 +682,8 @@ function Palette(palettes, name) {
                 this.protoContainers[modname] = new THREE.Group();
                 // this.protoContainers[modname].snapToPixelEnabled = true; //TODO : How to snap to pixel?
 
-                calculateContainerXY(this);
-                
+                calculateContainerXY(this); //What is this doing?
+
                 this.protoContainers[modname].position.setX(this.menuContainer.position.x);
                 this.protoContainers[modname].position.setY(this.menuContainer.position.y + this.y + this.scrollDiff + STANDARDBLOCKHEIGHT);
                 
@@ -887,8 +895,8 @@ function Palette(palettes, name) {
     this.moveMenuRelative = function(dx, dy) {
         var x = this.menuContainer.position.x;
         var y = this.menuContainer.position.y;
-        this.menuContainer.position.setX(x + dx);
-        this.menuContainer.position.setY(y + dy);
+        // this.menuContainer.position.setX(x + dx);
+        // this.menuContainer.position.setY(y + dy);
         this.moveMenuItemsRelative(dx, dy);
     }
 
@@ -964,22 +972,22 @@ function Palette(palettes, name) {
 
     this.moveMenuItemsRelative = function(dx, dy) {
         for (var i in this.protoContainers) {
-            this.protoContainers[i].x += dx;
-            this.protoContainers[i].y += dy;
+            this.protoContainers[i].position.x += dx;
+            this.protoContainers[i].position.y += dy;
         }
         if (this.background !== null) {
-            this.background.x += dx;
-            this.background.y += dy;
+            this.background.position.x += dx;
+            this.background.position.y += dy;
         }
         if (this.upButton !== null) {
-            this.upButton.x += dx;
-            this.upButton.y += dy;
-            this.downButton.x += dx;
-            this.downButton.y += dy;
-            this.FadedUpButton.x += dx;
-            this.FadedUpButton.y += dy;
-            this.FadedDownButton.x += dx;
-            this.FadedDownButton.y += dy;
+            this.upButton.position.x += dx;
+            this.upButton.position.y += dy;
+            this.downButton.position.x += dx;
+            this.downButton.position.y += dy;
+            this.FadedUpButton.position.x += dx;
+            this.FadedUpButton.position.y += dy;
+            this.FadedDownButton.position.x += dx;
+            this.FadedDownButton.position.y += dy;
         }
     }
 this.scrollEvent = function(direction, scrollSpeed) {
@@ -1076,7 +1084,7 @@ this.scrollEvent = function(direction, scrollSpeed) {
         this.updateBlockMasks();
 
         var stage = this.palettes.stage;
-        stage.setChildIndex(this.menuContainer, stage.getNumChildren() - 1);
+        // stage.setChildIndex(this.menuContainer, stage.getNumChildren() - 1); // PE : See why is index being set 
         this.palettes.refreshCanvas(1);
         this.count += 1;
     } 
@@ -1163,8 +1171,8 @@ function loadPaletteMenuItemHandler(palette, blk, blkname) {
     // A menu item is a protoblock that is used to create a new block.
     var locked = false;
     var moved = false;
-    var saveX = palette.protoContainers[blkname].x;
-    var saveY = palette.protoContainers[blkname].y;
+    var saveX = palette.protoContainers[blkname].position.x;
+    var saveY = palette.protoContainers[blkname].position.y;
     var bgScrolling = false;
 
     function makeBlockFromPalette(blk, blkname, palette, callback) {
@@ -1357,9 +1365,7 @@ function loadPaletteMenuHandler(palette) {
     var trashcan = palette.palettes.trashcan;
     var paletteWidth = MENUWIDTH + (palette.columns * 160);
     var offset;
-    var px,py;
-    var mouseCoor = new THREE.Vector3();
-    mouseCoor.setZ(1);
+    var px,py,dx,dy;
 
     palette.menuContainer.on('click', function(event) {
         // To code for the close button
@@ -1394,10 +1400,11 @@ function loadPaletteMenuHandler(palette) {
 
     palette.menuContainer.on('mousedown', function(event) {
         trashcan.show(); //show them all?
-        offset = {
-            x: palette.menuContainer.position.x - Math.round(event.clientX / palette.palettes.scale),
-            y: palette.menuContainer.position.y - Math.round(event.clientY / palette.palettes.scale)
-        };
+        // Why is this offset used?
+        // offset = {
+        //     x: palette.menuContainer.position.x - Math.round(event.clientX / palette.palettes.scale),
+        //     y: palette.menuContainer.position.y - Math.round(event.clientY / palette.palettes.scale)
+        // };
     });
 
     palette.menuContainer.on('mouseover',function(event){
@@ -1413,21 +1420,28 @@ function loadPaletteMenuHandler(palette) {
     });
 
     palette.menuContainer.on('pressmove', function(event) {
+        // TODO : When scaling is active throughout then put it here as well
+        // just divide event.clientX and event.clientY with palette.palettes.scale 
         if(!px || !py){
             px = event.clientX;
             py = event.clientY;
+            dx = 0;
+            dy = 0;
         }
         else{
-            mouseCoor.x = event.clientX - px;
-            mouseCoor.y = py - event.clientY;
+            dx = event.clientX - px;
+            dy = py - event.clientY;
         }
-        palette.menuContainer.position.add(mouseCoor);
-        px = event.clientX;
-        py = event.clientY;
+
+        palette.menuContainer.position.setX(palette.menuContainer.position.x  + dx);
+        palette.menuContainer.position.setY(palette.menuContainer.position.y  + dy);
         palette.palettes.refreshCanvas(1);
 
-        // var oldX = palette.menuContainer.x;
-        // var oldY = palette.menuContainer.y;
+        px = event.clientX;
+        py = event.clientY;
+
+        // var oldX = palette.menuContainer.position.x;
+        // var oldY = palette.menuContainer.position.y;
         // palette.menuContainer.x = Math.round(event.stageX / palette.palettes.scale) + offset.x;
         // palette.menuContainer.y = Math.round(event.stageY / palette.palettes.scale) + offset.y;
         // palette.palettes.refreshCanvas(1);
@@ -1442,13 +1456,10 @@ function loadPaletteMenuHandler(palette) {
         } else {
             trashcan.unhighlight();
         }
-
         // Hide the menu items while drag.
         // TODO : fix these functions
         palette.hideMenuItems(false);
         palette.moveMenuItemsRelative(dx, dy);
-
-
     });
 
     palette.menuContainer.on('pressup', function(event) {

@@ -103,7 +103,6 @@ function Block(protoblock, blocks, overrideName) {
                 }
             }
         }
-        this.container.updateCache();
         this.blocks.refreshCanvas(1);
     }
 
@@ -511,29 +510,29 @@ function Block(protoblock, blocks, overrideName) {
                 function processHighlightCollapseBitmap(name, bitmap, myBlock) {
                     myBlock.highlightCollapseBlockBitmap = bitmap;
                     myBlock.highlightCollapseBlockBitmap.name = 'highlight_collapse_' + thisBlock;
-                    myBlock.container.addChild(myBlock.highlightCollapseBlockBitmap);
+                    myBlock.container.add(myBlock.highlightCollapseBlockBitmap);
                     myBlock.highlightCollapseBlockBitmap.visible = false;
 
-                    var fontSize = 10 * myBlock.protoblock.scale;
-                    if (myBlock.name == 'action') {
-                        myBlock.collapseText = new createjs.Text(_('action'), fontSize + 'px Sans', '#000000');
-                    } else {
-                        myBlock.collapseText = new createjs.Text(_('start'), fontSize + 'px Sans', '#000000');
-                    }
-                    myBlock.collapseText.x = COLLAPSETEXTX * (myBlock.protoblock.scale / 2);
-                    myBlock.collapseText.y = COLLAPSETEXTY * (myBlock.protoblock.scale / 2);
-                    myBlock.collapseText.textAlign = 'left';
-                    myBlock.collapseText.textBaseline = 'alphabetic';
-                    myBlock.container.addChild(myBlock.collapseText);
-                    myBlock.collapseText.visible = myBlock.collapsed;
+                    // var fontSize = 10 * myBlock.protoblock.scale;
+                    // if (myBlock.name == 'action') {
+                    //     myBlock.collapseText = new createjs.Text(_('action'), fontSize + 'px Sans', '#000000');
+                    // } else {
+                    //     myBlock.collapseText = new createjs.Text(_('start'), fontSize + 'px Sans', '#000000');
+                    // }
+                    // myBlock.collapseText.x = COLLAPSETEXTX * (myBlock.protoblock.scale / 2);
+                    // myBlock.collapseText.y = COLLAPSETEXTY * (myBlock.protoblock.scale / 2);
+                    // myBlock.collapseText.textAlign = 'left';
+                    // myBlock.collapseText.textBaseline = 'alphabetic';
+                    // myBlock.container.addChild(myBlock.collapseText);
+                    // myBlock.collapseText.visible = myBlock.collapsed;
 
                     ensureDecorationOnTop(myBlock);
 
-                    myBlock.container.updateCache();
+                    // myBlock.container.updateCache();
                     myBlock.blocks.refreshCanvas(1);
 
-                    myBlock.collapseContainer = new createjs.Container();
-                    myBlock.collapseContainer.snapToPixelEnabled = true;
+                    myBlock.collapseContainer = new THREE.Group();
+                    // myBlock.collapseContainer.snapToPixelEnabled = true;
 
                     var image = new Image();
                     image.onload = function() {
