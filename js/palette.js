@@ -185,7 +185,7 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
         for (var name in this.dict) {
             this.dict[name].hideMenu(true);
         }
-        this.refreshCanvas();
+        this.refreshCanvas(1);
     }
 
     this.getInfo = function() {
@@ -201,10 +201,10 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
             setTimeout(function() {
                 myPalettes.dict[showPalette].showMenu();
                 myPalettes.dict[showPalette].showMenuItems();
-                myPalettes.refreshCanvas();
+                myPalettes.refreshCanvas(1);
             }, 250);
         } else {
-            this.refreshCanvas();
+            this.refreshCanvas(1);
         }
     }
 
@@ -227,20 +227,21 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
         return this;
     }
 
+    // TODO : Fix this function
     this.remove = function(name) {
-        if (!(name in this.buttons)) {
-            console.log('Palette.remove: Cannot find palette ' + name);
-            return;
-        }
-        this.buttons[name].removeAllChildren();
-        var btnKeys = Object.keys(this.dict);
-        for (var btnKey = btnKeys.indexOf(name) + 1; btnKey < btnKeys.length; btnKey++) {
-            this.buttons[btnKeys[btnKey]].y -= this.cellSize;
-        }
-        delete this.buttons[name];
-        delete this.dict[name];
-        this.y -= this.cellSize;
-        this.makePalettes();
+        // if (!(name in this.buttons)) {
+        //     console.log('Palette.remove: Cannot find palette ' + name);
+        //     return;
+        // }
+        // this.buttons[name].removeAllChildren();
+        // var btnKeys = Object.keys(this.dict);
+        // for (var btnKey = btnKeys.indexOf(name) + 1; btnKey < btnKeys.length; btnKey++) {
+        //     this.buttons[btnKeys[btnKey]].y -= this.cellSize;
+        // }
+        // delete this.buttons[name];
+        // delete this.dict[name];
+        // this.y -= this.cellSize;
+        // this.makePalettes();
     }
 
     this.bringToTop = function() {
@@ -255,16 +256,16 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
     }
 
     this.findPalette = function(x, y) {
-        for (var name in this.dict) {
-            var px = this.dict[name].menuContainer.x;
-            var py = this.dict[name].menuContainer.y;
-            var height = Math.min(maxPaletteHeight(this.cellSize, this.scale), this.dict[name].y);
-            if (this.dict[name].menuContainer.visible && px < x &&
-                x < px + MENUWIDTH && py < y && y < py + height) {
-                return this.dict[name];
-            }
-        }
-        return null;
+        // for (var name in this.dict) {
+        //     var px = this.dict[name].menuContainer.x;
+        //     var py = this.dict[name].menuContainer.y;
+        //     var height = Math.min(maxPaletteHeight(this.cellSize, this.scale), this.dict[name].y);
+        //     if (this.dict[name].menuContainer.visible && px < x &&
+        //         x < px + MENUWIDTH && py < y && y < py + height) {
+        //         return this.dict[name];
+        //     }
+        // }
+        // return null;
     }
 
     return this;
@@ -536,15 +537,16 @@ function Palette(palettes, name) {
         }
     }
 
+    // TODO : Fix this function
     this.updateBlockMasks = function() {
-        var h = Math.min(maxPaletteHeight(this.palettes.cellSize, this.palettes.scale), this.y);
-        for (var i in this.protoContainers) {
-            var s = new createjs.Shape();
-            s.graphics.r(0, 0, MENUWIDTH, h);
-            s.x = this.background.x;
-            s.y = this.background.y;
-            this.protoContainers[i].mask = s;
-        }
+        // var h = Math.min(maxPaletteHeight(this.palettes.cellSize, this.palettes.scale), this.y);
+        // for (var i in this.protoContainers) {
+        //     var s = new createjs.Shape();
+        //     s.graphics.r(0, 0, MENUWIDTH, h);
+        //     s.x = this.background.x;
+        //     s.y = this.background.y;
+        //     this.protoContainers[i].mask = s;
+        // }
     }
 
     this.updateBackground = function() {
@@ -582,7 +584,7 @@ function Palette(palettes, name) {
         rectShape.lineTo( -w/2, h/2 );
 
         var rectGeom = new THREE.ShapeGeometry( rectShape );
-        var rectMesh = new THREE.Mesh( rectGeom, new THREE.MeshBasicMaterial( { color: 0xFFE5B4 } ) ) ;   
+        var rectMesh = new THREE.Mesh( rectGeom, new THREE.MeshBasicMaterial( { color: 0x555555 } ) ) ;   
         this.background.add(rectMesh);
         rectMesh.position.setZ(1);
 
@@ -673,7 +675,7 @@ function Palette(palettes, name) {
                 // this.protoContainers[modname].snapToPixelEnabled = true; //TODO : How to snap to pixel?
 
                 calculateContainerXY(this);
-
+                
                 this.protoContainers[modname].position.setX(this.menuContainer.position.x);
                 this.protoContainers[modname].position.setY(this.menuContainer.position.y + this.y + this.scrollDiff + STANDARDBLOCKHEIGHT);
                 

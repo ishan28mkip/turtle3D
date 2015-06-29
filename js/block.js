@@ -338,7 +338,7 @@ function Block(protoblock, blocks, overrideName) {
 
                 if (myBlock.text != null) {
                     // Make sure text is on top.
-                    z = myBlock.container.getNumChildren() - 1;
+                    z = myBlock.container.children.length - 1;
                     myBlock.container.setChildIndex(myBlock.text, z);
                 }
 
@@ -1249,17 +1249,36 @@ function ensureDecorationOnTop(myBlock) {
 }
 
 
+
 function makeBitmap(data, name, callback, args) {
     // Async creation of bitmap from SVG data
     // Works with Chrome, Safari, Firefox (untested on IE)
     var img = new Image();
-    img.onload = function() {
-        bitmap = new createjs.Bitmap(img);
-        callback(name, bitmap, args);
+        img.onload = function () {
+            var canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            var context = canvas.getContext('2d');
+            context.drawImage(img, 0, 0);
+            var texture = new THREE.Texture(canvas);
+            texture.needsUpdate = true;
+            texture.minFilter = THREE.NearestFilter; 
+            var material = new THREE.MeshBasicMaterial( {map: texture} );
+            material.transparent = true;
+            material.depthWrite = false;
+            // me.container.scaleX = size/me.iconsize; //See if the scale variable is required here
+            // me.container.scaleY = size/me.iconsize;
+            // var bitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(me.container.scaleX*img.width, me.container.scaleY*img.height),material);
+            var bitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(img.width, img.height),material);
+            bitmap.name = name;
+            bitmap.imgWidth = img.width;
+            bitmap.imgHeight = img.height;
+            callback(name, bitmap, args);
     }
     img.src = 'data:image/svg+xml;base64,' + window.btoa(
         unescape(encodeURIComponent(data)));
 }
+
 
 
 function labelChanged(myBlock) {
