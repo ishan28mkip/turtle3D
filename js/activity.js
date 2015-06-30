@@ -35,7 +35,7 @@
         //         px = event.clientX;
         //         py = event.clientY;
         //     }
-        //     else{
+            // else{
         //         coor.x = event.clientX - px;
         //         coor.y = py - event.clientY;
         //     }
@@ -492,12 +492,13 @@ define(function(require) {
             blocks.setMacroDictionary(macroDict);
             palettes.setMacroDictionary(macroDict);
 
+            // FIXME : Activate this local storage retrive when everything else works fine
             // Load any plugins saved in local storage.
-            var pluginData = localStorage.getItem('plugins');
-            if (pluginData != null) {
-                var obj = processPluginData(pluginData, palettes, blocks, logo.evalFlowDict, logo.evalArgDict, logo.evalParameterDict, logo.evalSetterDict);
-                updatePluginObj(obj);
-            }
+            // var pluginData = localStorage.getItem('plugins');
+            // if (pluginData != null) {
+            //     var obj = processPluginData(pluginData, palettes, blocks, logo.evalFlowDict, logo.evalArgDict, logo.evalParameterDict, logo.evalSetterDict);
+            //     updatePluginObj(obj);
+            // }
 
             fileChooser.addEventListener('click', function(event) { this.value = null; });
             fileChooser.addEventListener('change', function(event) {

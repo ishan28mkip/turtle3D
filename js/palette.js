@@ -157,6 +157,7 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
                     me.refreshCanvas(1);
 
                     var paletteWidth = MENUWIDTH + (me.dict[name].columns * 160);
+                    me.dict[name].paletteWidth = paletteWidth;
 
                     me.dict[name].makeMenu(false);
                     me.dict[name].moveMenu(threeCoorX(me.cellSize + me.margin*2) + paletteWidth/2, threeCoorY(me.cellSize*1.5));
@@ -251,9 +252,9 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
     this.bringToTop = function() {
         // Move all the palettes to the top layer of the stage
         for (var name in this.dict) {
-            this.dict[name].menuContainer.position.setZ(10); //Brings the menu container to front
+            this.dict[name].menuContainer.position.setZ(1); //Brings the menu container to front
             for (var item in this.dict[name].protoContainers) { 
-                this.dict[name].protoContainers[item].position.setZ(10);
+                this.dict[name].protoContainers[item].position.setZ(1);
             }
         }
         this.refreshCanvas(1);
@@ -502,8 +503,6 @@ function Palette(palettes, name) {
                             palette.palettes.stage.add(bitmap);
                             bitmap.position.setX(palette.menuContainer.position.x + paletteWidth/2 + palette.palettes.cellSize/2);
                             bitmap.position.setY(palette.menuContainer.position.y - STANDARDBLOCKHEIGHT);
-                            axes = buildAxes( 1000 );
-                            bitmap.add(axes);
                             bitmap.scale.setX(0.7);
                             bitmap.scale.setY(0.7);
 
@@ -582,6 +581,7 @@ function Palette(palettes, name) {
         // shape.width = MENUWIDTH;
         // shape.height = h;
         // this.background.addChild(shape);
+
         var w = MENUWIDTH;
 
         var rectShape = new THREE.Shape();
@@ -592,12 +592,12 @@ function Palette(palettes, name) {
         rectShape.lineTo( -w/2, h/2 );
 
         var rectGeom = new THREE.ShapeGeometry( rectShape );
-        var rectMesh = new THREE.Mesh( rectGeom, new THREE.MeshBasicMaterial( { color: 0x555555 } ) ) ;   
+        var rectMesh = new THREE.Mesh( rectGeom, new THREE.MeshBasicMaterial( { color: 0x8888888 } ) ) ;   
         this.background.add(rectMesh);
         rectMesh.position.setZ(1);
 
         this.background.position.setX(this.menuContainer.position.x);
-        this.background.position.setY(this.menuContainer.position.y - STANDARDBLOCKHEIGHT);
+        this.background.position.setY(this.menuContainer.position.y - STANDARDBLOCKHEIGHT/2 -h/2);
     }
 
     this.updateMenu = function(hide) {
@@ -609,9 +609,10 @@ function Palette(palettes, name) {
                 this.hide();
             }
         }
-        this.y = threeCoorX(0);
+        this.y = 0;
 
         for (var blk in this.protoList) {
+
             // Don't show hidden blocks on the menus
             if (this.protoList[blk].hidden) {
                 continue;
@@ -680,23 +681,24 @@ function Palette(palettes, name) {
             if (!this.protoContainers[modname]) {
                 // create graphics for the palette entry for this block
                 this.protoContainers[modname] = new THREE.Group();
+
                 // this.protoContainers[modname].snapToPixelEnabled = true; //TODO : How to snap to pixel?
+                // calculateContainerXY(this); //What is this doing?
 
-                calculateContainerXY(this); //What is this doing?
+                this.protoContainers[modname].position.setX(this.menuContainer.position.x + PALETTELEFTMARGIN);
+                this.protoContainers[modname].position.setY(this.menuContainer.position.y - this.y - STANDARDBLOCKHEIGHT);
 
-                this.protoContainers[modname].position.setX(this.menuContainer.position.x);
-                this.protoContainers[modname].position.setY(this.menuContainer.position.y + this.y + this.scrollDiff + STANDARDBLOCKHEIGHT);
-                
+
                 this.palettes.stage.add(this.protoContainers[modname]);
                 this.protoContainers[modname].visible = false;
 
                 var height = calculateHeight(this, blkname);
                 this.size += Math.ceil(height * PROTOBLOCKSCALE);
                 this.y += Math.ceil(height * PROTOBLOCKSCALE);
-                this.updateBackground();
+                this.updateBackground(); // PE : Why is update background called again and again? Shouldn't it be called just once
 
                 function processFiller(palette, modname, bitmap, extras) {
-                    bitmap.y = 0;
+                    // TODO : Set bitmap position here
                     var blkname = extras[0];
                     var blk = extras[1];
                     var myBlock = paletteBlocks.protoBlockDict[blkname];
@@ -815,9 +817,10 @@ function Palette(palettes, name) {
                     function processBitmap(palette, modname, bitmap, args) {
                         var myBlock = args[0];
                         var blk = args[1];
+                        console.log(bitmap);
                         palette.protoContainers[modname].add(bitmap);
-                        bitmap.position.setX(threeCoorX(PALETTELEFTMARGIN));
-                        bitmap.position.setY(threeCoorY(0));
+                        bitmap.position.setX(0);
+                        bitmap.position.setY(0);
                         bitmap.scale.setX(PROTOBLOCKSCALE);
                         bitmap.scale.setY(PROTOBLOCKSCALE);
                         bitmap.scale = PROTOBLOCKSCALE;
@@ -825,7 +828,6 @@ function Palette(palettes, name) {
                         if (myBlock.image) {
                             var image = new Image(); 
                             image.onload = function() {
-
                                 var canvas = document.createElement('canvas');
                                 canvas.width = image.width;
                                 canvas.height = image.height;
@@ -836,7 +838,7 @@ function Palette(palettes, name) {
                                 texture.minFilter = THREE.NearestFilter; 
                                 var material = new THREE.MeshBasicMaterial( {map: texture, transparent : true, depthWrite : false} );
                                 var bitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(image.width, image.height),material);
-                                bitmap.name = 'modname';
+                                bitmap.name = modname;
                                 bitmap.imageWidth = image.width;
                                 bitmap.imageHeight = image.height;
                                 if(image.width > image.height){
@@ -846,6 +848,7 @@ function Palette(palettes, name) {
                                 }
 
                                 palette.protoContainers[modname].add(bitmap);
+                                // FIXME : fix the image positions or just add these in the mesh
                                 bitmap.position.setX(MEDIASAFEAREA[0] * (myBlock.scale / 2));
                                 bitmap.position.setY(MEDIASAFEAREA[1] * (myBlock.scale / 2));
                                 calculateBounds(palette, blk, modname);
@@ -870,10 +873,8 @@ function Palette(palettes, name) {
                     for (var i = 1; i < myBlock.staticLabels.length; i++) {
                         artwork = artwork.replace('arg_label_' + i, myBlock.staticLabels[i]);
                     }
-
                     makePaletteBitmap(palette, artwork, modname, processBitmap, [myBlock, blk]);
                 }
-
                 makePaletteBitmap(this, PALETTEFILLER.replace(/filler_height/g, height.toString()), modname, processFiller, [blkname, blk]);
             } else {
                 calculateContainerXY(this)
@@ -895,8 +896,8 @@ function Palette(palettes, name) {
     this.moveMenuRelative = function(dx, dy) {
         var x = this.menuContainer.position.x;
         var y = this.menuContainer.position.y;
-        // this.menuContainer.position.setX(x + dx);
-        // this.menuContainer.position.setY(y + dy);
+        this.menuContainer.position.setX(x + dx);
+        this.menuContainer.position.setY(y + dy);
         this.moveMenuItemsRelative(dx, dy);
     }
 
@@ -921,7 +922,7 @@ function Palette(palettes, name) {
             this.menuContainer.visible = false;
             this.hideMenuItems(true);
         }
-        this.moveMenu(this.palettes.cellSize, this.palettes.cellSize);
+        this.moveMenu(threeCoorX(this.palettes.cellSize + this.palettes.margin*2) + this.paletteWidth/2, threeCoorY(this.palettes.cellSize*1.5));
     }
 
     this.showMenu = function() {
@@ -961,16 +962,17 @@ function Palette(palettes, name) {
 
     this.moveMenuItems = function(x, y) {
         for (var i in this.protoContainers) {
-            this.protoContainers[i].x = x;
-            this.protoContainers[i].y = y;
+            this.protoContainers[i].position.x = x;
+            this.protoContainers[i].position.y = y;
         }
         if (this.background !== null) {
-            this.background.x = x;
-            this.background.y = y;
+            this.background.position.x = x;
+            this.background.position.y = y;
         }
     }
 
     this.moveMenuItemsRelative = function(dx, dy) {
+        // 
         for (var i in this.protoContainers) {
             this.protoContainers[i].position.x += dx;
             this.protoContainers[i].position.y += dy;
@@ -1104,7 +1106,6 @@ this.scrollEvent = function(direction, scrollSpeed) {
         }
         return this;
     }
-
     return this;
 };
 
@@ -1368,7 +1369,7 @@ function loadPaletteMenuHandler(palette) {
     var px,py,dx,dy;
 
     palette.menuContainer.on('click', function(event) {
-        // To code for the close button
+        // To code for the close button //FIXME : Change the code to include scaling factor
         if(Math.round(threeCoorX(event.clientX / palette.palettes.scale)) > palette.menuContainer.position.x + paletteWidth/2 - STANDARDBLOCKHEIGHT){
             palette.hide();
             palette.palettes.refreshCanvas(1);
@@ -1544,6 +1545,7 @@ function makePaletteBitmap(palette, data, name, callback, extras) {
             bitmap.name = name;
             bitmap.imgWidth = img.width;
             bitmap.imgHeight = img.height;
+
             callback(palette, name, bitmap, extras);
     }
     img.src = 'data:image/svg+xml;base64,' + window.btoa(
