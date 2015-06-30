@@ -964,7 +964,6 @@ function initBasicProtoBlocks(palettes, blocks) {
             blocks.protoBlockDict[protoblock].palette.add(blocks.protoBlockDict[protoblock]);
         }
     }
-
     // Populate the lists of block types.
     blocks.findBlockTypes();
 }

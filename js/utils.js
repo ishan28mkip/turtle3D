@@ -54,7 +54,7 @@ function threeCoorY(y){
     if(y <= window.innerHeight/2)
         return (window.innerHeight/2 - y);
     else
-        return (y-window.innerHeight/2);
+        return -(y-window.innerHeight/2);
 }
 
 function mouseCoorX(x){

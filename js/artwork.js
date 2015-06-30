@@ -30,6 +30,7 @@ var MEDIASAFEAREA = [40, 4, 108, 80];
 var HIGHLIGHTCOLOR = '#FFFFFF';
 var ACTIVECOLOR = '#212121';
 
+// TODO : Fix these functions 
 function showMaterialHighlight(x, y, r, event, scale, stage) {
     var circles = {
         highlight: new createjs.Shape(),

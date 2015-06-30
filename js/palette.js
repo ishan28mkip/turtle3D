@@ -48,13 +48,11 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
     this.current = 'turtle';
 
     this.container = new THREE.Group();
-    // this.container.snapToPixelEnabled = true; //Find a way to implement this feature when dragging
+    // this.container.snapToPixelEnabled = true; //TODO : Find a way to implement this feature when dragging
     this.stage.add(this.container);
 
-    // LATER
     this.setScale = function(scale) {
         this.scale = scale;
-
         this.updateButtonMasks();
         for (var i in this.dict) {
             this.dict[i].resizeEvent();
@@ -66,33 +64,55 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
         this.macroDict = obj;
     }
 
+    // TODO : Fix this scrolling event when other resize events have been handled
     this.menuScrollEvent = function(direction, scrollSpeed) {
         var keys = Object.keys(this.buttons);
 
         var diff = direction * scrollSpeed;
-        if (this.buttons[keys[0]].y + diff > this.cellSize && direction > 0) {
+        if (direction < 0 && this.buttons[keys[0]].position.y + diff < threeCoorY(this.cellSize * 1.5)) {
             return;
         }
-        if (this.buttons[last(keys)].y + diff < windowHeight() / this.scale - this.cellSize && direction < 0) {
+        // if (direction > 0 && this.buttons[last(keys)].position.y + diff > windowHeight() / this.scale - this.cellSize ) {
+        //     return;
+        // }
+        // TODO : When Scaling is fixed put back the above condition
+        if (direction > 0 && this.buttons[last(keys)].position.y - diff > threeCoorY(windowHeight() - this.cellSize )) {
             return;
         }
 
         this.scrollDiff += diff;
         for (var name in this.buttons) {
-            this.buttons[name].y += diff;
+            this.buttons[name].position.y += diff;
             this.buttons[name].visible = true;
         }
         this.updateButtonMasks();
-        this.refreshCanvas();
+        this.refreshCanvas(1);
     }
 
     this.updateButtonMasks = function() {
+        // TODO : Why are masks used?
         for (var name in this.buttons) {
-            var s = new createjs.Shape();
-            s.graphics.r(0, 0, this.cellSize, windowHeight() / this.scale);
-            s.x = 0;
-            s.y = this.cellSize / 2;
-            this.buttons[name].mask = s;
+            // var s = new createjs.Shape();
+            // s.graphics.r(0, 0, this.cellSize, windowHeight() / this.scale);
+            // s.x = 0;
+            // s.y = this.cellSize / 2;
+            // this.buttons[name].mask = s;
+
+            // TODO : See what shape this code is making and then make the same shape,
+            // also see if the mask needs to be added to the scene or not.
+
+            // var rectShape = new THREE.Shape();
+            // rectShape.moveTo( -w/2, h/2 );
+            // rectShape.lineTo( w/2, h/2 );
+            // rectShape.lineTo( w/2, -h/2 );
+            // rectShape.lineTo( -w/2, -h/2 );
+            // rectShape.lineTo( -w/2, h/2 );
+
+            // var rectGeom = new THREE.ShapeGeometry( rectShape );
+            // var rectMesh = new THREE.Mesh( rectGeom, new THREE.MeshBasicMaterial( { color: 0xaaaaaa } ) ) ;   
+            // rectMesh.position.setZ(1);
+            // rectMesh.visible = false;
+            // helpContainer.add(rectMesh);
         }
     }
 
@@ -100,7 +120,6 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
         // First, an icon/button for each palette
         for (var name in this.dict) {
             if (name in this.buttons) {
-                // LATER
                 this.dict[name].updateMenu(true);
             } else {
                 this.buttons[name] = new THREE.Group();
@@ -137,9 +156,13 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
 
                     me.refreshCanvas(1);
 
+                    var paletteWidth = MENUWIDTH + (me.dict[name].columns * 160);
+                    me.dict[name].paletteWidth = paletteWidth;
+
                     me.dict[name].makeMenu(false);
-                    me.dict[name].moveMenu(me.cellSize, me.cellSize);
+                    me.dict[name].moveMenu(threeCoorX(me.cellSize + me.margin*2) + paletteWidth/2, threeCoorY(me.cellSize*1.5));
                     me.dict[name].updateMenu(false);
+
                     // TODO : Fix the click handler in palette button handlers
                     loadPaletteButtonHandler(me, name);
                 }
@@ -167,7 +190,7 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
         for (var name in this.dict) {
             this.dict[name].hideMenu(true);
         }
-        this.refreshCanvas();
+        this.refreshCanvas(1);
     }
 
     this.getInfo = function() {
@@ -183,10 +206,10 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
             setTimeout(function() {
                 myPalettes.dict[showPalette].showMenu();
                 myPalettes.dict[showPalette].showMenuItems();
-                myPalettes.refreshCanvas();
+                myPalettes.refreshCanvas(1);
             }, 250);
         } else {
-            this.refreshCanvas();
+            this.refreshCanvas(1);
         }
     }
 
@@ -209,44 +232,45 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
         return this;
     }
 
+    // TODO : Fix this function
     this.remove = function(name) {
-        if (!(name in this.buttons)) {
-            console.log('Palette.remove: Cannot find palette ' + name);
-            return;
-        }
-        this.buttons[name].removeAllChildren();
-        var btnKeys = Object.keys(this.dict);
-        for (var btnKey = btnKeys.indexOf(name) + 1; btnKey < btnKeys.length; btnKey++) {
-            this.buttons[btnKeys[btnKey]].y -= this.cellSize;
-        }
-        delete this.buttons[name];
-        delete this.dict[name];
-        this.y -= this.cellSize;
-        this.makePalettes();
+        // if (!(name in this.buttons)) {
+        //     console.log('Palette.remove: Cannot find palette ' + name);
+        //     return;
+        // }
+        // this.buttons[name].removeAllChildren();
+        // var btnKeys = Object.keys(this.dict);
+        // for (var btnKey = btnKeys.indexOf(name) + 1; btnKey < btnKeys.length; btnKey++) {
+        //     this.buttons[btnKeys[btnKey]].y -= this.cellSize;
+        // }
+        // delete this.buttons[name];
+        // delete this.dict[name];
+        // this.y -= this.cellSize;
+        // this.makePalettes();
     }
 
     this.bringToTop = function() {
         // Move all the palettes to the top layer of the stage
         for (var name in this.dict) {
-            this.dict[name].menuContainer.position.setZ(10); //Brings the menu container to front
+            this.dict[name].menuContainer.position.setZ(1); //Brings the menu container to front
             for (var item in this.dict[name].protoContainers) { 
-                this.dict[name].protoContainers[item].position.setZ(10);
+                this.dict[name].protoContainers[item].position.setZ(1);
             }
         }
         this.refreshCanvas(1);
     }
 
     this.findPalette = function(x, y) {
-        for (var name in this.dict) {
-            var px = this.dict[name].menuContainer.x;
-            var py = this.dict[name].menuContainer.y;
-            var height = Math.min(maxPaletteHeight(this.cellSize, this.scale), this.dict[name].y);
-            if (this.dict[name].menuContainer.visible && px < x &&
-                x < px + MENUWIDTH && py < y && y < py + height) {
-                return this.dict[name];
-            }
-        }
-        return null;
+        // for (var name in this.dict) {
+        //     var px = this.dict[name].menuContainer.x;
+        //     var py = this.dict[name].menuContainer.y;
+        //     var height = Math.min(maxPaletteHeight(this.cellSize, this.scale), this.dict[name].y);
+        //     if (this.dict[name].menuContainer.visible && px < x &&
+        //         x < px + MENUWIDTH && py < y && y < py + height) {
+        //         return this.dict[name];
+        //     }
+        // }
+        // return null;
     }
 
     return this;
@@ -272,22 +296,21 @@ function loadPaletteButtonHandler(palettes, name) {
 
     palettes.buttons[name].on('mousedown', function(event) {
         scrolling = true;
-        lastY = event.stageY;
-
-        palettes.buttons[name].on('pressmove', function(event) {
-            if (!scrolling) {
-                return;
-            }
-
-            diff = event.stageY - lastY;
-            palettes.menuScrollEvent(diff, 10);
-            lastY = event.stageY;
-        });
-
-        palettes.buttons[name].on('pressup', function(event) {
-            scrolling = false;
-        }, null, true); // once = true
+        lastY = event.clientY;
     });
+
+    palettes.buttons[name].on('pressmove', function(event) {
+        if (!scrolling) {
+            return;
+        }
+        diff = event.clientY - lastY;
+        palettes.menuScrollEvent(diff, 10);
+        lastY = event.clientY;
+    });
+
+    palettes.buttons[name].on('pressup', function(event) {
+        scrolling = false;
+    }, null, true); // once = true
 
 
     // A palette button opens or closes a palette.
@@ -363,12 +386,16 @@ function Palette(palettes, name) {
             return;
         };
         var paletteWidth = MENUWIDTH + (this.columns * 160);
-        // this.menuContainer.removeAllChildren();
+
+        var obj;
+        for (var i = this.menuContainer.children.length - 1; i >= 0 ; i -- ) {
+            obj = this.menuContainer.children[ i ];
+            this.menuContainer.remove(obj);
+        }
 
         // Create the menu button
         function processHeader(palette, name, bitmap, extras) {
             palette.menuContainer.add(bitmap);
-            palette.menuContainer.position.set(threeCoorX(palette.palettes.cellSize + palette.palettes.margin*2) + bitmap.imgWidth/2, threeCoorY(palette.palettes.cellSize*1.5+ palette.palettes.scrollDiff)  , 1);
             palette.menuContainer.processHeader = {};
             palette.menuContainer.processHeader.width = bitmap.imgWidth;
             palette.menuContainer.processHeader.height = bitmap.imgHeight;
@@ -476,8 +503,6 @@ function Palette(palettes, name) {
                             palette.palettes.stage.add(bitmap);
                             bitmap.position.setX(palette.menuContainer.position.x + paletteWidth/2 + palette.palettes.cellSize/2);
                             bitmap.position.setY(palette.menuContainer.position.y - STANDARDBLOCKHEIGHT);
-                            axes = buildAxes( 1000 );
-                            bitmap.add(axes);
                             bitmap.scale.setX(0.7);
                             bitmap.scale.setY(0.7);
 
@@ -519,15 +544,16 @@ function Palette(palettes, name) {
         }
     }
 
+    // TODO : Fix this function
     this.updateBlockMasks = function() {
-        var h = Math.min(maxPaletteHeight(this.palettes.cellSize, this.palettes.scale), this.y);
-        for (var i in this.protoContainers) {
-            var s = new createjs.Shape();
-            s.graphics.r(0, 0, MENUWIDTH, h);
-            s.x = this.background.x;
-            s.y = this.background.y;
-            this.protoContainers[i].mask = s;
-        }
+        // var h = Math.min(maxPaletteHeight(this.palettes.cellSize, this.palettes.scale), this.y);
+        // for (var i in this.protoContainers) {
+        //     var s = new createjs.Shape();
+        //     s.graphics.r(0, 0, MENUWIDTH, h);
+        //     s.x = this.background.x;
+        //     s.y = this.background.y;
+        //     this.protoContainers[i].mask = s;
+        // }
     }
 
     this.updateBackground = function() {
@@ -555,6 +581,7 @@ function Palette(palettes, name) {
         // shape.width = MENUWIDTH;
         // shape.height = h;
         // this.background.addChild(shape);
+
         var w = MENUWIDTH;
 
         var rectShape = new THREE.Shape();
@@ -565,12 +592,12 @@ function Palette(palettes, name) {
         rectShape.lineTo( -w/2, h/2 );
 
         var rectGeom = new THREE.ShapeGeometry( rectShape );
-        var rectMesh = new THREE.Mesh( rectGeom, new THREE.MeshBasicMaterial( { color: 0xFFE5B4 } ) ) ;   
+        var rectMesh = new THREE.Mesh( rectGeom, new THREE.MeshBasicMaterial( { color: 0x8888888 } ) ) ;   
         this.background.add(rectMesh);
         rectMesh.position.setZ(1);
 
         this.background.position.setX(this.menuContainer.position.x);
-        this.background.position.setY(this.menuContainer.position.y - STANDARDBLOCKHEIGHT);
+        this.background.position.setY(this.menuContainer.position.y - STANDARDBLOCKHEIGHT/2 -h/2);
     }
 
     this.updateMenu = function(hide) {
@@ -582,9 +609,10 @@ function Palette(palettes, name) {
                 this.hide();
             }
         }
-        this.y = threeCoorX(0);
+        this.y = 0;
 
         for (var blk in this.protoList) {
+
             // Don't show hidden blocks on the menus
             if (this.protoList[blk].hidden) {
                 continue;
@@ -653,23 +681,24 @@ function Palette(palettes, name) {
             if (!this.protoContainers[modname]) {
                 // create graphics for the palette entry for this block
                 this.protoContainers[modname] = new THREE.Group();
+
                 // this.protoContainers[modname].snapToPixelEnabled = true; //TODO : How to snap to pixel?
+                // calculateContainerXY(this); //What is this doing?
 
-                calculateContainerXY(this);
+                this.protoContainers[modname].position.setX(this.menuContainer.position.x + PALETTELEFTMARGIN);
+                this.protoContainers[modname].position.setY(this.menuContainer.position.y - this.y - STANDARDBLOCKHEIGHT);
 
-                this.protoContainers[modname].position.setX(this.menuContainer.position.x);
-                this.protoContainers[modname].position.setY(this.menuContainer.position.y + this.y + this.scrollDiff + STANDARDBLOCKHEIGHT);
-                
+
                 this.palettes.stage.add(this.protoContainers[modname]);
                 this.protoContainers[modname].visible = false;
 
                 var height = calculateHeight(this, blkname);
                 this.size += Math.ceil(height * PROTOBLOCKSCALE);
                 this.y += Math.ceil(height * PROTOBLOCKSCALE);
-                this.updateBackground();
+                this.updateBackground(); // PE : Why is update background called again and again? Shouldn't it be called just once
 
                 function processFiller(palette, modname, bitmap, extras) {
-                    bitmap.y = 0;
+                    // TODO : Set bitmap position here
                     var blkname = extras[0];
                     var blk = extras[1];
                     var myBlock = paletteBlocks.protoBlockDict[blkname];
@@ -788,9 +817,10 @@ function Palette(palettes, name) {
                     function processBitmap(palette, modname, bitmap, args) {
                         var myBlock = args[0];
                         var blk = args[1];
+                        console.log(bitmap);
                         palette.protoContainers[modname].add(bitmap);
-                        bitmap.position.setX(threeCoorX(PALETTELEFTMARGIN));
-                        bitmap.position.setY(threeCoorY(0));
+                        bitmap.position.setX(0);
+                        bitmap.position.setY(0);
                         bitmap.scale.setX(PROTOBLOCKSCALE);
                         bitmap.scale.setY(PROTOBLOCKSCALE);
                         bitmap.scale = PROTOBLOCKSCALE;
@@ -798,7 +828,6 @@ function Palette(palettes, name) {
                         if (myBlock.image) {
                             var image = new Image(); 
                             image.onload = function() {
-
                                 var canvas = document.createElement('canvas');
                                 canvas.width = image.width;
                                 canvas.height = image.height;
@@ -809,7 +838,7 @@ function Palette(palettes, name) {
                                 texture.minFilter = THREE.NearestFilter; 
                                 var material = new THREE.MeshBasicMaterial( {map: texture, transparent : true, depthWrite : false} );
                                 var bitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(image.width, image.height),material);
-                                bitmap.name = 'modname';
+                                bitmap.name = modname;
                                 bitmap.imageWidth = image.width;
                                 bitmap.imageHeight = image.height;
                                 if(image.width > image.height){
@@ -819,6 +848,7 @@ function Palette(palettes, name) {
                                 }
 
                                 palette.protoContainers[modname].add(bitmap);
+                                // FIXME : fix the image positions or just add these in the mesh
                                 bitmap.position.setX(MEDIASAFEAREA[0] * (myBlock.scale / 2));
                                 bitmap.position.setY(MEDIASAFEAREA[1] * (myBlock.scale / 2));
                                 calculateBounds(palette, blk, modname);
@@ -843,10 +873,8 @@ function Palette(palettes, name) {
                     for (var i = 1; i < myBlock.staticLabels.length; i++) {
                         artwork = artwork.replace('arg_label_' + i, myBlock.staticLabels[i]);
                     }
-
                     makePaletteBitmap(palette, artwork, modname, processBitmap, [myBlock, blk]);
                 }
-
                 makePaletteBitmap(this, PALETTEFILLER.replace(/filler_height/g, height.toString()), modname, processFiller, [blkname, blk]);
             } else {
                 calculateContainerXY(this)
@@ -894,7 +922,7 @@ function Palette(palettes, name) {
             this.menuContainer.visible = false;
             this.hideMenuItems(true);
         }
-        this.moveMenu(this.palettes.cellSize, this.palettes.cellSize);
+        this.moveMenu(threeCoorX(this.palettes.cellSize + this.palettes.margin*2) + this.paletteWidth/2, threeCoorY(this.palettes.cellSize*1.5));
     }
 
     this.showMenu = function() {
@@ -934,33 +962,34 @@ function Palette(palettes, name) {
 
     this.moveMenuItems = function(x, y) {
         for (var i in this.protoContainers) {
-            this.protoContainers[i].x = x;
-            this.protoContainers[i].y = y;
+            this.protoContainers[i].position.x = x;
+            this.protoContainers[i].position.y = y;
         }
         if (this.background !== null) {
-            this.background.x = x;
-            this.background.y = y;
+            this.background.position.x = x;
+            this.background.position.y = y;
         }
     }
 
     this.moveMenuItemsRelative = function(dx, dy) {
+        // 
         for (var i in this.protoContainers) {
-            this.protoContainers[i].x += dx;
-            this.protoContainers[i].y += dy;
+            this.protoContainers[i].position.x += dx;
+            this.protoContainers[i].position.y += dy;
         }
         if (this.background !== null) {
-            this.background.x += dx;
-            this.background.y += dy;
+            this.background.position.x += dx;
+            this.background.position.y += dy;
         }
         if (this.upButton !== null) {
-            this.upButton.x += dx;
-            this.upButton.y += dy;
-            this.downButton.x += dx;
-            this.downButton.y += dy;
-            this.FadedUpButton.x += dx;
-            this.FadedUpButton.y += dy;
-            this.FadedDownButton.x += dx;
-            this.FadedDownButton.y += dy;
+            this.upButton.position.x += dx;
+            this.upButton.position.y += dy;
+            this.downButton.position.x += dx;
+            this.downButton.position.y += dy;
+            this.FadedUpButton.position.x += dx;
+            this.FadedUpButton.position.y += dy;
+            this.FadedDownButton.position.x += dx;
+            this.FadedDownButton.position.y += dy;
         }
     }
 this.scrollEvent = function(direction, scrollSpeed) {
@@ -1057,8 +1086,8 @@ this.scrollEvent = function(direction, scrollSpeed) {
         this.updateBlockMasks();
 
         var stage = this.palettes.stage;
-        stage.setChildIndex(this.menuContainer, stage.getNumChildren() - 1);
-        this.palettes.refreshCanvas();
+        // stage.setChildIndex(this.menuContainer, stage.getNumChildren() - 1); // PE : See why is index being set 
+        this.palettes.refreshCanvas(1);
         this.count += 1;
     } 
 
@@ -1077,7 +1106,6 @@ this.scrollEvent = function(direction, scrollSpeed) {
         }
         return this;
     }
-
     return this;
 };
 
@@ -1144,8 +1172,8 @@ function loadPaletteMenuItemHandler(palette, blk, blkname) {
     // A menu item is a protoblock that is used to create a new block.
     var locked = false;
     var moved = false;
-    var saveX = palette.protoContainers[blkname].x;
-    var saveY = palette.protoContainers[blkname].y;
+    var saveX = palette.protoContainers[blkname].position.x;
+    var saveY = palette.protoContainers[blkname].position.y;
     var bgScrolling = false;
 
     function makeBlockFromPalette(blk, blkname, palette, callback) {
@@ -1228,7 +1256,7 @@ function loadPaletteMenuItemHandler(palette, blk, blkname) {
                 palette.draggingProtoBlock = true;
                 palette.protoContainers[blkname].x = Math.round(event.stageX / palette.palettes.scale) - PALETTELEFTMARGIN;
                 palette.protoContainers[blkname].y = Math.round(event.stageY / palette.palettes.scale);
-                palette.palettes.refreshCanvas();
+                palette.palettes.refreshCanvas(1);
                 return;
             }
 
@@ -1323,7 +1351,7 @@ function loadPaletteMenuItemHandler(palette, blk, blkname) {
             palette.protoContainers[blkname].x = saveX;
             palette.protoContainers[blkname].y = saveY + palette.scrollDiff;
             palette.updateBlockMasks();
-            palette.palettes.refreshCanvas();
+            palette.palettes.refreshCanvas(1);
         }
     });
 }
@@ -1338,12 +1366,10 @@ function loadPaletteMenuHandler(palette) {
     var trashcan = palette.palettes.trashcan;
     var paletteWidth = MENUWIDTH + (palette.columns * 160);
     var offset;
-    var px,py;
-    var mouseCoor = new THREE.Vector3();
-    mouseCoor.setZ(1);
+    var px,py,dx,dy;
 
     palette.menuContainer.on('click', function(event) {
-        // To code for the close button
+        // To code for the close button //FIXME : Change the code to include scaling factor
         if(Math.round(threeCoorX(event.clientX / palette.palettes.scale)) > palette.menuContainer.position.x + paletteWidth/2 - STANDARDBLOCKHEIGHT){
             palette.hide();
             palette.palettes.refreshCanvas(1);
@@ -1375,10 +1401,11 @@ function loadPaletteMenuHandler(palette) {
 
     palette.menuContainer.on('mousedown', function(event) {
         trashcan.show(); //show them all?
-        offset = {
-            x: palette.menuContainer.position.x - Math.round(event.clientX / palette.palettes.scale),
-            y: palette.menuContainer.position.y - Math.round(event.clientY / palette.palettes.scale)
-        };
+        // Why is this offset used?
+        // offset = {
+        //     x: palette.menuContainer.position.x - Math.round(event.clientX / palette.palettes.scale),
+        //     y: palette.menuContainer.position.y - Math.round(event.clientY / palette.palettes.scale)
+        // };
     });
 
     palette.menuContainer.on('mouseover',function(event){
@@ -1394,21 +1421,28 @@ function loadPaletteMenuHandler(palette) {
     });
 
     palette.menuContainer.on('pressmove', function(event) {
+        // TODO : When scaling is active throughout then put it here as well
+        // just divide event.clientX and event.clientY with palette.palettes.scale 
         if(!px || !py){
             px = event.clientX;
             py = event.clientY;
+            dx = 0;
+            dy = 0;
         }
         else{
-            mouseCoor.x = event.clientX - px;
-            mouseCoor.y = py - event.clientY;
+            dx = event.clientX - px;
+            dy = py - event.clientY;
         }
-        palette.menuContainer.position.add(mouseCoor);
-        px = event.clientX;
-        py = event.clientY;
+
+        palette.menuContainer.position.setX(palette.menuContainer.position.x  + dx);
+        palette.menuContainer.position.setY(palette.menuContainer.position.y  + dy);
         palette.palettes.refreshCanvas(1);
 
-        // var oldX = palette.menuContainer.x;
-        // var oldY = palette.menuContainer.y;
+        px = event.clientX;
+        py = event.clientY;
+
+        // var oldX = palette.menuContainer.position.x;
+        // var oldY = palette.menuContainer.position.y;
         // palette.menuContainer.x = Math.round(event.stageX / palette.palettes.scale) + offset.x;
         // palette.menuContainer.y = Math.round(event.stageY / palette.palettes.scale) + offset.y;
         // palette.palettes.refreshCanvas(1);
@@ -1423,13 +1457,10 @@ function loadPaletteMenuHandler(palette) {
         } else {
             trashcan.unhighlight();
         }
-
         // Hide the menu items while drag.
         // TODO : fix these functions
         palette.hideMenuItems(false);
         palette.moveMenuItemsRelative(dx, dy);
-
-
     });
 
     palette.menuContainer.on('pressup', function(event) {
@@ -1514,6 +1545,7 @@ function makePaletteBitmap(palette, data, name, callback, extras) {
             bitmap.name = name;
             bitmap.imgWidth = img.width;
             bitmap.imgHeight = img.height;
+
             callback(palette, name, bitmap, extras);
     }
     img.src = 'data:image/svg+xml;base64,' + window.btoa(
