@@ -272,7 +272,6 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
         // }
         // return null;
     }
-
     return this;
 }
 
@@ -311,7 +310,6 @@ function loadPaletteButtonHandler(palettes, name) {
     palettes.buttons[name].on('pressup', function(event) {
         scrolling = false;
     }, null, true); // once = true
-
 
     // A palette button opens or closes a palette.
     // TODO : Add this highlight function back later
@@ -353,7 +351,6 @@ function loadPaletteButtonHandler(palettes, name) {
         palettes.refreshCanvas(1);
     });
 }
-
 
 // Define objects for individual palettes.
 function Palette(palettes, name) {
@@ -401,6 +398,9 @@ function Palette(palettes, name) {
             palette.menuContainer.processHeader.height = bitmap.imgHeight;
             palette.menuContainer.processHeader.name = name;
             palette.menuContainer.visible = false;
+            
+            palette.menuContainer.hitmesh = bitmap;
+            bitmap.parentMesh = palette.menuContainer;
 
             function processButtonIcon(palette, name, bitmap, extras) {
                 palette.menuContainer.add(bitmap);
@@ -409,28 +409,13 @@ function Palette(palettes, name) {
                 bitmap.scale.set(0.8,0.8,1);
 
 
+
+
                 function processCloseIcon(palette, name, bitmap, extras) {
                     bitmap.scale.set(0.7,0.7,0.7);
                     palette.menuContainer.add(bitmap);
                     bitmap.position.setX(palette.menuContainer.processHeader.width/2 - bitmap.imgWidth*0.7/2 - palette.padding);
                     bitmap.position.setY(0);
-
-                    // TODO : Shape is not as ellipse change to ellipse
-                    var circleRadius = palette.palettes.halfCellSize;
-                    var circleShape = new THREE.Shape();
-                    circleShape.moveTo( 0, circleRadius );
-                    circleShape.quadraticCurveTo( circleRadius, circleRadius, palette.menuContainer.processHeader.width/2, 0 );
-                    circleShape.quadraticCurveTo( circleRadius, -circleRadius, 0, -circleRadius );
-                    circleShape.quadraticCurveTo( -circleRadius, -circleRadius, -palette.menuContainer.processHeader.width/2, 0 );
-                    circleShape.quadraticCurveTo( -circleRadius, circleRadius, 0, circleRadius );
-                    var circleGeometry = new THREE.ShapeGeometry( circleShape );
-                    var circleMesh = new THREE.Mesh( circleGeometry, new THREE.MeshBasicMaterial( { color: 0xdddddd } ) ) ; 
-                    circleMesh.position.setZ(2);
-                    circleMesh.visible = false;
-                    palette.menuContainer.add(circleMesh);
-
-                    palette.menuContainer.hitmesh = circleMesh;
-                    circleMesh.parentMesh = palette.menuContainer;
 
                     // TODO fix this
                     if (!palette.mouseHandled) {
@@ -445,13 +430,6 @@ function Palette(palettes, name) {
                         bitmap.scale.setX(0.7);
                         bitmap.scale.setY(0.7);
 
-                        // TODO : Set the hitarea for the up icon
-                        // var hitArea = new createjs.Shape();
-                        // hitArea.graphics.beginFill('#FFF').drawRect(0, 0, STANDARDBLOCKHEIGHT, STANDARDBLOCKHEIGHT);
-                        // hitArea.x = 0;
-                        // hitArea.y = 0;
-                        // bitmap.hitArea = hitArea;
-                        
                         bitmap.visible = false;
                         palette.upButton = bitmap;
 
@@ -467,13 +445,6 @@ function Palette(palettes, name) {
                             bitmap.scale.setX(0.7);
                             bitmap.scale.setY(0.7); 
                             
-
-                            // var hitArea = new createjs.Shape(); //TODO : Create hitarea now
-                            // hitArea.graphics.beginFill('#FFF').drawRect(0, 0, STANDARDBLOCKHEIGHT, STANDARDBLOCKHEIGHT);
-                            // hitArea.x = 0;
-                            // hitArea.y = 0;
-                            // bitmap.hitArea = hitArea;
-                            
                             bitmap.visible = false;
                             palette.downButton = bitmap;
 
@@ -488,13 +459,6 @@ function Palette(palettes, name) {
                             bitmap.position.setY(palette.getDownButtonY());
                             bitmap.scale.setX(0.7);
                             bitmap.scale.setY(0.7); 
-                            
-                            // TODO : Create hitarea later
-                            // var hitArea = new createjs.Shape();
-                            // hitArea.graphics.beginFill('#FFF').drawRect(0, 0, STANDARDBLOCKHEIGHT, STANDARDBLOCKHEIGHT);
-                            // hitArea.x = 0;
-                            // hitArea.y = 0;
-                            // bitmap.hitArea = hitArea;
 
                             bitmap.visible = false;
                             palette.FadedDownButton = bitmap;
@@ -507,12 +471,6 @@ function Palette(palettes, name) {
                             bitmap.scale.setX(0.7);
                             bitmap.scale.setY(0.7);
 
-                            // TODO : Create hitarea here
-                            // var hitArea = new createjs.Shape();
-                            // hitArea.graphics.beginFill('#FFF').drawRect(0, 0, STANDARDBLOCKHEIGHT, STANDARDBLOCKHEIGHT);
-                            // hitArea.x = 0;
-                            // hitArea.y = 0;
-                            // bitmap.hitArea = hitArea;
                             bitmap.visible = false;
                             palette.FadedUpButton = bitmap;
                         } 
@@ -973,7 +931,6 @@ function Palette(palettes, name) {
     }
 
     this.moveMenuItemsRelative = function(dx, dy) {
-        // 
         for (var i in this.protoContainers) {
             this.protoContainers[i].position.x += dx;
             this.protoContainers[i].position.y += dy;
@@ -1013,7 +970,6 @@ this.scrollEvent = function(direction, scrollSpeed) {
                 this.upButton.visible = false;
                 this.FadedUpButton.visible = true;
                 this.FadedDownButton.visible = false;
-                
                 return;
             }
             
@@ -1472,7 +1428,9 @@ function loadPaletteMenuHandler(palette) {
     palette.menuContainer.on('pressup', function(event) {
         px = false;
         py = false;
-        if (trashcan.overTrashcan(event.clientX / palette.palettes.scale, event.clientY / palette.palettes.scale)) {
+        // FIXME : Add scaling factor here
+        // if (trashcan.overTrashcan(event.clientX / palette.palettes.scale, event.clientY / palette.palettes.scale)) {
+        if (trashcan.overTrashcan(event.clientX , event.clientY )) {
             palette.hide();
             palette.palettes.refreshCanvas(1);
             // Only delete plugin palettes.
