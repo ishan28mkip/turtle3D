@@ -400,6 +400,7 @@ function Palette(palettes, name) {
             palette.menuContainer.processHeader.width = bitmap.imgWidth;
             palette.menuContainer.processHeader.height = bitmap.imgHeight;
             palette.menuContainer.processHeader.name = name;
+            palette.menuContainer.visible = false;
 
             function processButtonIcon(palette, name, bitmap, extras) {
                 palette.menuContainer.add(bitmap);
@@ -451,7 +452,7 @@ function Palette(palettes, name) {
                         // hitArea.y = 0;
                         // bitmap.hitArea = hitArea;
                         
-                        bitmap.visible = true;
+                        bitmap.visible = false;
                         palette.upButton = bitmap;
 
                         palette.upButton.on('click', function(event) {
@@ -473,7 +474,7 @@ function Palette(palettes, name) {
                             // hitArea.y = 0;
                             // bitmap.hitArea = hitArea;
                             
-                            bitmap.visible = true;
+                            bitmap.visible = false;
                             palette.downButton = bitmap;
 
                             palette.downButton.on('click', function(event) {
@@ -495,7 +496,7 @@ function Palette(palettes, name) {
                             // hitArea.y = 0;
                             // bitmap.hitArea = hitArea;
 
-                            bitmap.visible = true;
+                            bitmap.visible = false;
                             palette.FadedDownButton = bitmap;
                         } 
                         makePaletteBitmap(palette, FADEDDOWNICON, name, makeFadedDownIcon, null);
@@ -512,7 +513,7 @@ function Palette(palettes, name) {
                             // hitArea.x = 0;
                             // hitArea.y = 0;
                             // bitmap.hitArea = hitArea;
-                            bitmap.visible = true;
+                            bitmap.visible = false;
                             palette.FadedUpButton = bitmap;
                         } 
                         makePaletteBitmap(palette, FADEDUPICON, name, makeFadedUpIcon, null);
@@ -674,7 +675,8 @@ function Palette(palettes, name) {
                     size += 1;
                 }
                 // TODO : Fix this height expression in accordance with three.js
-                var height = STANDARDBLOCKHEIGHT * size * palette.protoList[blk].scale / 2.0;
+                var height = STANDARDBLOCKHEIGHT * size;
+                // * palette.protoList[blk].scale / 2.0; add scaling later on
                 return height;
             }
 
@@ -817,7 +819,6 @@ function Palette(palettes, name) {
                     function processBitmap(palette, modname, bitmap, args) {
                         var myBlock = args[0];
                         var blk = args[1];
-                        console.log(bitmap);
                         palette.protoContainers[modname].add(bitmap);
                         bitmap.position.setX(0);
                         bitmap.position.setY(0);
@@ -1369,8 +1370,12 @@ function loadPaletteMenuHandler(palette) {
     var px,py,dx,dy;
 
     palette.menuContainer.on('click', function(event) {
-        // To code for the close button //FIXME : Change the code to include scaling factor
-        if(Math.round(threeCoorX(event.clientX / palette.palettes.scale)) > palette.menuContainer.position.x + paletteWidth/2 - STANDARDBLOCKHEIGHT){
+        // To code for the close button 
+        //FIXME : Change the code to include scaling factor
+        // if(Math.round(threeCoorX(event.clientX / palette.palettes.scale)) > palette.menuContainer.position.x + paletteWidth/2 - STANDARDBLOCKHEIGHT){
+
+        if(Math.round(threeCoorX(event.clientX)) > palette.menuContainer.position.x + paletteWidth/2 - STANDARDBLOCKHEIGHT){
+            console.log('hello');
             palette.hide();
             palette.palettes.refreshCanvas(1);
             return;
@@ -1422,7 +1427,7 @@ function loadPaletteMenuHandler(palette) {
 
     palette.menuContainer.on('pressmove', function(event) {
         // TODO : When scaling is active throughout then put it here as well
-        // just divide event.clientX and event.clientY with palette.palettes.scale 
+        // just divide event.clientX and event.clientY with palette.palettes.scale         
         if(!px || !py){
             px = event.clientX;
             py = event.clientY;
