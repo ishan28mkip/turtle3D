@@ -1375,7 +1375,6 @@ function loadPaletteMenuHandler(palette) {
         // if(Math.round(threeCoorX(event.clientX / palette.palettes.scale)) > palette.menuContainer.position.x + paletteWidth/2 - STANDARDBLOCKHEIGHT){
 
         if(Math.round(threeCoorX(event.clientX)) > palette.menuContainer.position.x + paletteWidth/2 - STANDARDBLOCKHEIGHT){
-            console.log('hello');
             palette.hide();
             palette.palettes.refreshCanvas(1);
             return;
@@ -1457,7 +1456,9 @@ function loadPaletteMenuHandler(palette) {
         // Calculate dx,dy to give to moveMenuItemsRelative
 
         // If we are over the trash, warn the user.
-        if (trashcan.overTrashcan(event.clientX / palette.palettes.scale, event.clientY / palette.palettes.scale)) {
+        // if (trashcan.overTrashcan(event.clientX / palette.palettes.scale, event.clientY / palette.palettes.scale)) {
+        // FIXME : add this condition when scaling is activated
+        if (trashcan.overTrashcan(event.clientX, event.clientY)) {
             trashcan.highlight();
         } else {
             trashcan.unhighlight();

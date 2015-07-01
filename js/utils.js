@@ -58,7 +58,7 @@ function threeCoorY(y){
 }
 
 function mouseCoorX(x){
-    return (x + window.innerHeight/2);
+    return (x + window.innerWidth/2);
 }
 
 function mouseCoorY(y){
