@@ -272,7 +272,6 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
         // }
         // return null;
     }
-
     return this;
 }
 
@@ -311,7 +310,6 @@ function loadPaletteButtonHandler(palettes, name) {
     palettes.buttons[name].on('pressup', function(event) {
         scrolling = false;
     }, null, true); // once = true
-
 
     // A palette button opens or closes a palette.
     // TODO : Add this highlight function back later
@@ -354,7 +352,6 @@ function loadPaletteButtonHandler(palettes, name) {
     });
 }
 
-
 // Define objects for individual palettes.
 function Palette(palettes, name) {
     this.palettes = palettes;
@@ -376,6 +373,7 @@ function Palette(palettes, name) {
     this.FadedUpButton = null;
     this.FadedDownButton = null;
     this.count = 0;
+    this.backgroundEvents = false;
 
     this.makeMenu = function(createHeader) {
         if (this.menuContainer == null) {
@@ -400,11 +398,16 @@ function Palette(palettes, name) {
             palette.menuContainer.processHeader.width = bitmap.imgWidth;
             palette.menuContainer.processHeader.height = bitmap.imgHeight;
             palette.menuContainer.processHeader.name = name;
+            palette.menuContainer.visible = false;
+            bitmap.position.setZ(2);
+            
+            palette.menuContainer.hitmesh = bitmap;
+            bitmap.parentMesh = palette.menuContainer;
 
             function processButtonIcon(palette, name, bitmap, extras) {
                 palette.menuContainer.add(bitmap);
                 palette.palettes.container.add(palette.menuContainer);
-                bitmap.position.set(-palette.menuContainer.processHeader.width/2 + bitmap.imgWidth*0.8/2 + palette.padding ,0,1);
+                bitmap.position.set(-palette.menuContainer.processHeader.width/2 + bitmap.imgWidth*0.8/2 + palette.padding ,0,2);
                 bitmap.scale.set(0.8,0.8,1);
 
 
@@ -413,23 +416,6 @@ function Palette(palettes, name) {
                     palette.menuContainer.add(bitmap);
                     bitmap.position.setX(palette.menuContainer.processHeader.width/2 - bitmap.imgWidth*0.7/2 - palette.padding);
                     bitmap.position.setY(0);
-
-                    // TODO : Shape is not as ellipse change to ellipse
-                    var circleRadius = palette.palettes.halfCellSize;
-                    var circleShape = new THREE.Shape();
-                    circleShape.moveTo( 0, circleRadius );
-                    circleShape.quadraticCurveTo( circleRadius, circleRadius, palette.menuContainer.processHeader.width/2, 0 );
-                    circleShape.quadraticCurveTo( circleRadius, -circleRadius, 0, -circleRadius );
-                    circleShape.quadraticCurveTo( -circleRadius, -circleRadius, -palette.menuContainer.processHeader.width/2, 0 );
-                    circleShape.quadraticCurveTo( -circleRadius, circleRadius, 0, circleRadius );
-                    var circleGeometry = new THREE.ShapeGeometry( circleShape );
-                    var circleMesh = new THREE.Mesh( circleGeometry, new THREE.MeshBasicMaterial( { color: 0xdddddd } ) ) ; 
-                    circleMesh.position.setZ(2);
-                    circleMesh.visible = false;
-                    palette.menuContainer.add(circleMesh);
-
-                    palette.menuContainer.hitmesh = circleMesh;
-                    circleMesh.parentMesh = palette.menuContainer;
 
                     // TODO fix this
                     if (!palette.mouseHandled) {
@@ -444,14 +430,7 @@ function Palette(palettes, name) {
                         bitmap.scale.setX(0.7);
                         bitmap.scale.setY(0.7);
 
-                        // TODO : Set the hitarea for the up icon
-                        // var hitArea = new createjs.Shape();
-                        // hitArea.graphics.beginFill('#FFF').drawRect(0, 0, STANDARDBLOCKHEIGHT, STANDARDBLOCKHEIGHT);
-                        // hitArea.x = 0;
-                        // hitArea.y = 0;
-                        // bitmap.hitArea = hitArea;
-                        
-                        bitmap.visible = true;
+                        bitmap.visible = false;
                         palette.upButton = bitmap;
 
                         palette.upButton.on('click', function(event) {
@@ -466,14 +445,7 @@ function Palette(palettes, name) {
                             bitmap.scale.setX(0.7);
                             bitmap.scale.setY(0.7); 
                             
-
-                            // var hitArea = new createjs.Shape(); //TODO : Create hitarea now
-                            // hitArea.graphics.beginFill('#FFF').drawRect(0, 0, STANDARDBLOCKHEIGHT, STANDARDBLOCKHEIGHT);
-                            // hitArea.x = 0;
-                            // hitArea.y = 0;
-                            // bitmap.hitArea = hitArea;
-                            
-                            bitmap.visible = true;
+                            bitmap.visible = false;
                             palette.downButton = bitmap;
 
                             palette.downButton.on('click', function(event) {
@@ -487,15 +459,8 @@ function Palette(palettes, name) {
                             bitmap.position.setY(palette.getDownButtonY());
                             bitmap.scale.setX(0.7);
                             bitmap.scale.setY(0.7); 
-                            
-                            // TODO : Create hitarea later
-                            // var hitArea = new createjs.Shape();
-                            // hitArea.graphics.beginFill('#FFF').drawRect(0, 0, STANDARDBLOCKHEIGHT, STANDARDBLOCKHEIGHT);
-                            // hitArea.x = 0;
-                            // hitArea.y = 0;
-                            // bitmap.hitArea = hitArea;
 
-                            bitmap.visible = true;
+                            bitmap.visible = false;
                             palette.FadedDownButton = bitmap;
                         } 
                         makePaletteBitmap(palette, FADEDDOWNICON, name, makeFadedDownIcon, null);
@@ -506,13 +471,7 @@ function Palette(palettes, name) {
                             bitmap.scale.setX(0.7);
                             bitmap.scale.setY(0.7);
 
-                            // TODO : Create hitarea here
-                            // var hitArea = new createjs.Shape();
-                            // hitArea.graphics.beginFill('#FFF').drawRect(0, 0, STANDARDBLOCKHEIGHT, STANDARDBLOCKHEIGHT);
-                            // hitArea.x = 0;
-                            // hitArea.y = 0;
-                            // bitmap.hitArea = hitArea;
-                            bitmap.visible = true;
+                            bitmap.visible = false;
                             palette.FadedUpButton = bitmap;
                         } 
                         makePaletteBitmap(palette, FADEDUPICON, name, makeFadedUpIcon, null);
@@ -544,7 +503,7 @@ function Palette(palettes, name) {
         }
     }
 
-    // TODO : Fix this function
+    // TODO : Why is this block mask made
     this.updateBlockMasks = function() {
         // var h = Math.min(maxPaletteHeight(this.palettes.cellSize, this.palettes.scale), this.y);
         // for (var i in this.protoContainers) {
@@ -572,16 +531,10 @@ function Palette(palettes, name) {
             // this.background.snapToPixelEnabled = true;
             this.background.visible = false;
             this.palettes.stage.add(this.background);
-            setupBackgroundEvents(this);
+            
         }
 
         var h = Math.min(maxPaletteHeight(this.palettes.cellSize, this.palettes.scale), this.y);
-        // var shape = new createjs.Shape();
-        // shape.graphics.f('#b3b3b3').r(0, 0, MENUWIDTH, h).ef();
-        // shape.width = MENUWIDTH;
-        // shape.height = h;
-        // this.background.addChild(shape);
-
         var w = MENUWIDTH;
 
         var rectShape = new THREE.Shape();
@@ -594,7 +547,15 @@ function Palette(palettes, name) {
         var rectGeom = new THREE.ShapeGeometry( rectShape );
         var rectMesh = new THREE.Mesh( rectGeom, new THREE.MeshBasicMaterial( { color: 0x8888888 } ) ) ;   
         this.background.add(rectMesh);
-        rectMesh.position.setZ(1);
+
+        this.background.hitmesh = rectMesh;
+        rectMesh.parentMesh = this.background;
+        rectMesh.position.setZ(2);
+
+        if(!this.backgroundEvents){
+            setupBackgroundEvents(this);
+            this.backgroundEvents = true;
+        }
 
         this.background.position.setX(this.menuContainer.position.x);
         this.background.position.setY(this.menuContainer.position.y - STANDARDBLOCKHEIGHT/2 -h/2);
@@ -659,6 +620,7 @@ function Palette(palettes, name) {
 
             function calculateHeight(palette, blkname) {
                 var size = palette.protoList[blk].size;
+                
                 if (['if', 'while', 'until', 'ifthenelse', 'waitFor'].indexOf(modname) != -1) {
                     // Some blocks are not shown full-size on the palette.
                     size = 1;
@@ -674,7 +636,8 @@ function Palette(palettes, name) {
                     size += 1;
                 }
                 // TODO : Fix this height expression in accordance with three.js
-                var height = STANDARDBLOCKHEIGHT * size * palette.protoList[blk].scale / 2.0;
+                var height = STANDARDBLOCKHEIGHT * size;
+                // * palette.protoList[blk].scale / 2.0; add scaling later on
                 return height;
             }
 
@@ -685,9 +648,8 @@ function Palette(palettes, name) {
                 // this.protoContainers[modname].snapToPixelEnabled = true; //TODO : How to snap to pixel?
                 // calculateContainerXY(this); //What is this doing?
 
-                this.protoContainers[modname].position.setX(this.menuContainer.position.x + PALETTELEFTMARGIN);
-                this.protoContainers[modname].position.setY(this.menuContainer.position.y - this.y - STANDARDBLOCKHEIGHT);
-
+                this.protoContainers[modname].position.setX(this.menuContainer.position.x - this.paletteWidth/2 + PALETTELEFTMARGIN);
+                this.protoContainers[modname].position.setY(this.menuContainer.position.y - this.y - STANDARDBLOCKHEIGHT/2);
 
                 this.palettes.stage.add(this.protoContainers[modname]);
                 this.protoContainers[modname].visible = false;
@@ -698,7 +660,7 @@ function Palette(palettes, name) {
                 this.updateBackground(); // PE : Why is update background called again and again? Shouldn't it be called just once
 
                 function processFiller(palette, modname, bitmap, extras) {
-                    // TODO : Set bitmap position here
+                    // TODO : Set bitmap position 
                     var blkname = extras[0];
                     var blk = extras[1];
                     var myBlock = paletteBlocks.protoBlockDict[blkname];
@@ -797,33 +759,50 @@ function Palette(palettes, name) {
                             break;
                     }
 
-                    // TODO : Fix this hitarea
-                    function calculateBounds(palette, blk, modname) {
-                        var bounds = palette.protoContainers[modname].get2DBounds();
-                        // palette.protoContainers[modname].cache(bounds.x, bounds.y, Math.ceil(bounds.width), Math.ceil(bounds.height)); // PE : Why is caching done?
+                    // // TODO : Fix this hitarea
+                    // function calculateBounds(palette, blk, modname) {
+                    //     var bounds = palette.protoContainers[modname].get2DBounds();
+                    //     // palette.protoContainers[modname].cache(bounds.x, bounds.y, Math.ceil(bounds.width), Math.ceil(bounds.height)); // PE : Why is caching done?
 
-                        // TODO : Create the hitarea
-                        // var hitArea = new createjs.Shape();
-                        // // Trim the hitArea height slightly to make
-                        // // it easier to select single-height blocks
-                        // // below double-height blocks.
-                        // hitArea.graphics.beginFill('#FFF').drawRect(0, 0, Math.ceil(bounds.width), Math.ceil(bounds.height * 0.75));
-                        // palette.protoContainers[modname].hitArea = hitArea;
+                    //     // TODO : Create the hitarea
+                    //     // var hitArea = new createjs.Shape();
+                    //     // // Trim the hitArea height slightly to make
+                    //     // // it easier to select single-height blocks
+                    //     // // below double-height blocks.
+                    //     // hitArea.graphics.beginFill('#FFF').drawRect(0, 0, Math.ceil(bounds.width), Math.ceil(bounds.height * 0.75));
+                    //     // palette.protoContainers[modname].hitArea = hitArea;
 
-                        loadPaletteMenuItemHandler(palette, blk, modname);
-                        palette.palettes.refreshCanvas(1);
-                    }
+                        
+                    //     palette.palettes.refreshCanvas(1);
+                    // }
 
                     function processBitmap(palette, modname, bitmap, args) {
                         var myBlock = args[0];
                         var blk = args[1];
-                        console.log(bitmap);
                         palette.protoContainers[modname].add(bitmap);
-                        bitmap.position.setX(0);
-                        bitmap.position.setY(0);
+                        bitmap.position.setX(bitmap.imgWidth/2);
+                        bitmap.position.setY(-bitmap.imgHeight/2);
+                        bitmap.position.setZ(2);
+
                         bitmap.scale.setX(PROTOBLOCKSCALE);
                         bitmap.scale.setY(PROTOBLOCKSCALE);
                         bitmap.scale = PROTOBLOCKSCALE;
+
+                        // TODO :
+                        // // Trim the hitArea height slightly to make
+                        // // it easier to select single-height blocks
+                        // // below double-height blocks.
+                        
+                        palette.protoContainers[modname].hitmesh = bitmap;
+                        bitmap.parentMesh = palette.protoContainers[modname];
+
+                        var bounds = palette.background.get2DBounds(false);
+
+                        // Fix this function, continuity is lost and also implement this is the scroll event
+                        // if(palette.protoContainers[modname].position.y - bitmap.imgHeight/2 < bounds.min.y)
+                        // {
+                        //     bitmap.visible = false;
+                        // }
 
                         if (myBlock.image) {
                             var image = new Image(); 
@@ -842,20 +821,26 @@ function Palette(palettes, name) {
                                 bitmap.imageWidth = image.width;
                                 bitmap.imageHeight = image.height;
                                 if(image.width > image.height){
-                                    bitmap.scale.setX(MEDIASAFEAREA[2] / image.width * (myBlock.scale / 2));
-                                    bitmap.scale.setY(MEDIASAFEAREA[2] / image.width * (myBlock.scale / 2));
-                                    bitmap.scale = (MEDIASAFEAREA[2] / image.width * (myBlock.scale / 2));
+                                    // FIXME : Fix the scaling issues together
+                                    bitmap.scale.setX(MEDIASAFEAREA[2] / image.width);
+                                    bitmap.scale.setY(MEDIASAFEAREA[2] / image.width );
+                                    bitmap.scale = (MEDIASAFEAREA[2] / image.width );
+                                    // bitmap.scale.setX(MEDIASAFEAREA[2] / image.width * (myBlock.scale / 2));
+                                    // bitmap.scale.setY(MEDIASAFEAREA[2] / image.width * (myBlock.scale / 2));
+                                    // bitmap.scale = (MEDIASAFEAREA[2] / image.width * (myBlock.scale / 2));
                                 }
 
                                 palette.protoContainers[modname].add(bitmap);
                                 // FIXME : fix the image positions or just add these in the mesh
-                                bitmap.position.setX(MEDIASAFEAREA[0] * (myBlock.scale / 2));
-                                bitmap.position.setY(MEDIASAFEAREA[1] * (myBlock.scale / 2));
-                                calculateBounds(palette, blk, modname);
+                                // bitmap.position.setX(MEDIASAFEAREA[0] * (myBlock.scale / 2));
+                                // bitmap.position.setY(MEDIASAFEAREA[1] * (myBlock.scale / 2));
+                                bitmap.position.setX(MEDIASAFEAREA[0]);
+                                bitmap.position.setY(MEDIASAFEAREA[1]);
+                                loadPaletteMenuItemHandler(palette, blk, modname); //Here the calculate bounds function call was there
                             }
                             image.src = myBlock.image;
                         } else {
-                            calculateBounds(palette, blk, modname);
+                            loadPaletteMenuItemHandler(palette, blk, modname); //Here the calculate bounds function call was there
                         }
                     }
 
@@ -881,6 +866,7 @@ function Palette(palettes, name) {
                 var height = calculateHeight(this, blkname);
                 this.y += Math.ceil(height * PROTOBLOCKSCALE);
             }
+
         }
         this.makeMenu(true);
     }
@@ -972,7 +958,6 @@ function Palette(palettes, name) {
     }
 
     this.moveMenuItemsRelative = function(dx, dy) {
-        // 
         for (var i in this.protoContainers) {
             this.protoContainers[i].position.x += dx;
             this.protoContainers[i].position.y += dy;
@@ -1012,7 +997,6 @@ this.scrollEvent = function(direction, scrollSpeed) {
                 this.upButton.visible = false;
                 this.FadedUpButton.visible = true;
                 this.FadedDownButton.visible = false;
-                
                 return;
             }
             
@@ -1146,23 +1130,29 @@ var DECIDEDISTANCE = 20;
 // TODO : Fix the background events once the background is in place
 function setupBackgroundEvents(palette) {
     var scrolling = false;
+    var lastY;
+    
+    palette.background.on('click',function(event){
+        console.log('click');
+    });
+
     palette.background.on('mousedown', function(event) {
+        console.log('mousedown');
         scrolling = true;
-        var lastY = event.stageY;
+        lastY = event.clientY;
+    });
+    
+    palette.background.on('pressmove', function(event) {
+        if (!scrolling) {
+            return;
+        }
+        var diff = event.clientY - lastY;
+        palette.scrollEvent(diff, 10);
+        lastY = event.clientY;
+    });
 
-        palette.background.on('pressmove', function(event) {
-            if (!scrolling) {
-                return;
-            }
-
-            var diff = event.stageY - lastY;
-            palette.scrollEvent(diff, 10);
-            lastY = event.stageY;
-        });
-
-        palette.background.on('pressup', function(event) {
-            scrolling = false;
-        }, null, true); // once = true
+    palette.background.on('pressup', function(event) {
+        scrolling = false;
     });
 }
 
@@ -1175,6 +1165,10 @@ function loadPaletteMenuItemHandler(palette, blk, blkname) {
     var saveX = palette.protoContainers[blkname].position.x;
     var saveY = palette.protoContainers[blkname].position.y;
     var bgScrolling = false;
+    
+    var startX;
+    var startY;
+    var lastY;
 
     function makeBlockFromPalette(blk, blkname, palette, callback) {
         if (locked) {
@@ -1227,132 +1221,133 @@ function loadPaletteMenuItemHandler(palette, blk, blkname) {
     }
 
     palette.protoContainers[blkname].on('mousedown', function(event) {
-        var stage = palette.palettes.stage;
-        stage.setChildIndex(palette.protoContainers[blkname], stage.getNumChildren() - 1);
-        palette.protoContainers[blkname].mask = null;
+        // var stage = palette.palettes.stage;
+        // // stage.setChildIndex(palette.protoContainers[blkname], stage.getNumChildren() - 1);
+        // // palette.protoContainers[blkname].mask = null;
 
-        moved = false;
-        saveX = palette.protoContainers[blkname].x;
-        saveY = palette.protoContainers[blkname].y - palette.scrollDiff;
-        var startX = event.stageX;
-        var startY = event.stageY;
-        var lastY = event.stageY;
-        if (palette.draggingProtoBlock) {
-            return;
-        }
-        if (locked) {
-            return;
-        }
-        locked = true;
-        setTimeout(function() {
-            locked = false;
-        }, 500);
+        // moved = false;
+        // saveX = palette.protoContainers[blkname].position.x;
+        // saveY = palette.protoContainers[blkname].position.y - palette.scrollDiff; //What is current value of scrollDiff
+        // var startX = event.clientX;
+        // var startY = event.clientY;
+        // var lastY = event.clientY;
+        // if (palette.draggingProtoBlock) {
+        //     return;
+        // }
+        // if (locked) {
+        //     return;
+        // }
+        // locked = true;
+        // setTimeout(function() {
+        //     locked = false;
+        // }, 500);
 
-        var mode = window.hasMouse ? MODEDRAG : MODEUNSURE;
+        // var mode = window.hasMouse ? MODEDRAG : MODEUNSURE; //PE : Don't know what this function does
+    });
 
-        palette.protoContainers[blkname].on('pressmove', function(event) {
-            if (mode === MODEDRAG) {
-                moved = true;
-                palette.draggingProtoBlock = true;
-                palette.protoContainers[blkname].x = Math.round(event.stageX / palette.palettes.scale) - PALETTELEFTMARGIN;
-                palette.protoContainers[blkname].y = Math.round(event.stageY / palette.palettes.scale);
-                palette.palettes.refreshCanvas(1);
-                return;
-            }
+    palette.protoContainers[blkname].on('pressmove', function(event) {
+            // if (mode === MODEDRAG) {
+            //     moved = true;
+            //     palette.draggingProtoBlock = true;
+            //     palette.protoContainers[blkname].x = Math.round(event.stageX / palette.palettes.scale) - PALETTELEFTMARGIN;
+            //     palette.protoContainers[blkname].y = Math.round(event.stageY / palette.palettes.scale);
+            //     palette.palettes.refreshCanvas(1);
+            //     return;
+            // }
 
-            if (mode === MODESCROLL) {
-                var diff = event.stageY - lastY;
-                palette.scrollEvent(diff, 10);
-                lastY = event.stageY;
-                return;
-            }
+            // if (mode === MODESCROLL) {
+            //     var diff = event.stageY - lastY;
+            //     palette.scrollEvent(diff, 10);
+            //     lastY = event.stageY;
+            //     return;
+            // }
 
-            var xd = Math.abs(event.stageX - startX);
-            var yd = Math.abs(event.stageY - startY);
-            var diff = Math.sqrt(xd * xd + yd * yd);
-            if (mode === MODEUNSURE && diff > DECIDEDISTANCE) {
-                mode = yd > xd ? MODESCROLL : MODEDRAG;
-            }
-        });
+            // var xd = Math.abs(event.stageX - startX);
+            // var yd = Math.abs(event.stageY - startY);
+            // var diff = Math.sqrt(xd * xd + yd * yd);
+            // if (mode === MODEUNSURE && diff > DECIDEDISTANCE) {
+            //     mode = yd > xd ? MODESCROLL : MODEDRAG;
+            // }
     });
 
     palette.protoContainers[blkname].on('pressup', function(event) {
-        if (moved) {
-            moved = false;
-            palette.draggingProtoBlock = false;
-            if (palette.name == 'myblocks') {
-                // If we are on the myblocks palette, it is a macro.
-                var macroName = blkname.replace('macro_', '');
+        // if (moved) {
+        //     moved = false;
+        //     palette.draggingProtoBlock = false;
+        //     if (palette.name == 'myblocks') {
+        //         // If we are on the myblocks palette, it is a macro.
+        //         var macroName = blkname.replace('macro_', '');
 
-                // We need to copy the macro data so it is not overwritten.
-                var obj = [];
-                for (var b = 0; b < palette.palettes.macroDict[macroName].length; b++) {
-                    var valueEntry = palette.palettes.macroDict[macroName][b][1];
-                    var newValue = [];
-                    if (typeof(valueEntry) == 'string') {
-                        newValue = valueEntry;
-                    } else if (typeof(valueEntry[1]) == 'string') {
-                        if (valueEntry[0] == 'number') {
-                            newValue = [valueEntry[0], Number(valueEntry[1])];
-                        } else {
-                            newValue = [valueEntry[0], valueEntry[1]];
-                        }
-                    } else if (typeof(valueEntry[1]) == 'number') {
-                        if (valueEntry[0] == 'number') {
-                            newValue = [valueEntry[0], valueEntry[1]];
-                        } else {
-                            newValue = [valueEntry[0], valueEntry[1].toString()];
-                        }
-                    } else {
-                        if (valueEntry[0] == 'number') {
-                            newValue = [valueEntry[0], Number(valueEntry[1]['value'])];
-                        } else {
-                            newValue = [valueEntry[0], {'value': valueEntry[1]['value']}];
-                        }
-                    }
-                    var newBlock = [palette.palettes.macroDict[macroName][b][0],
-                                    newValue,
-                                    palette.palettes.macroDict[macroName][b][2],
-                                    palette.palettes.macroDict[macroName][b][3],
-                                    palette.palettes.macroDict[macroName][b][4]];
-                    obj.push(newBlock);
-                }
+        //         // We need to copy the macro data so it is not overwritten.
+        //         var obj = [];
 
-                // Set the position of the top block in the stack
-                // before loading.
-                obj[0][2] = palette.protoContainers[blkname].x;
-                obj[0][3] = palette.protoContainers[blkname].y;
-                console.log('loading macro ' + macroName);
-                paletteBlocks.loadNewBlocks(obj);
+        //         for (var b = 0; b < palette.palettes.macroDict[macroName].length; b++) {
+        //             var valueEntry = palette.palettes.macroDict[macroName][b][1];
+        //             var newValue = [];
+        //             if (typeof(valueEntry) == 'string') {
+        //                 newValue = valueEntry;
+        //             } else if (typeof(valueEntry[1]) == 'string') {
+        //                 if (valueEntry[0] == 'number') {
+        //                     newValue = [valueEntry[0], Number(valueEntry[1])];
+        //                 } else {
+        //                     newValue = [valueEntry[0], valueEntry[1]];
+        //                 }
+        //             } else if (typeof(valueEntry[1]) == 'number') {
+        //                 if (valueEntry[0] == 'number') {
+        //                     newValue = [valueEntry[0], valueEntry[1]];
+        //                 } else {
+        //                     newValue = [valueEntry[0], valueEntry[1].toString()];
+        //                 }
+        //             } else {
+        //                 if (valueEntry[0] == 'number') {
+        //                     newValue = [valueEntry[0], Number(valueEntry[1]['value'])];
+        //                 } else {
+        //                     newValue = [valueEntry[0], {'value': valueEntry[1]['value']}];
+        //                 }
+        //             }
+        //             var newBlock = [palette.palettes.macroDict[macroName][b][0],
+        //                             newValue,
+        //                             palette.palettes.macroDict[macroName][b][2],
+        //                             palette.palettes.macroDict[macroName][b][3],
+        //                             palette.palettes.macroDict[macroName][b][4]];
+        //             obj.push(newBlock);
+        //         }
 
-                // Ensure collapse state of new stack is set properly.
-                var thisBlock = paletteBlocks.blockList.length - 1;
-                var topBlk = paletteBlocks.findTopBlock(thisBlock);
-                setTimeout(function() {
-                    paletteBlocks.blockList[topBlk].collapseToggle();
-                }, 500);
-            } else {
-                // Create the block.
-                function myCallback (newBlock) {
-                    // Move the drag group under the cursor.
-                    paletteBlocks.findDragGroup(newBlock);
-                    for (var i in paletteBlocks.dragGroup) {
-                        paletteBlocks.moveBlockRelative(paletteBlocks.dragGroup[i], Math.round(event.stageX / palette.palettes.scale) - paletteBlocks.stage.x, Math.round(event.stageY / palette.palettes.scale) - paletteBlocks.stage.y);
-                    }
-                    // Dock with other blocks if needed
-                    console.log('new block moved ' + newBlock);
-                    blocks.blockMoved(newBlock);
-                }
+        //         // Set the position of the top block in the stack
+        //         // before loading.
+        //         obj[0][2] = palette.protoContainers[blkname].position.x;
+        //         obj[0][3] = palette.protoContainers[blkname].position.y;
+        //         console.log('loading macro ' + macroName);
+        //         paletteBlocks.loadNewBlocks(obj);
 
-                var newBlock = makeBlockFromPalette(blk, blkname, palette, myCallback);
-            }
+        //         // Ensure collapse state of new stack is set properly.
+        //         var thisBlock = paletteBlocks.blockList.length - 1;
+        //         var topBlk = paletteBlocks.findTopBlock(thisBlock);
+        //         setTimeout(function() {
+        //             paletteBlocks.blockList[topBlk].collapseToggle();
+        //         }, 500);
+        //     } else {
+        //         // Create the block.
+        //         function myCallback (newBlock) {
+        //             // Move the drag group under the cursor.
+        //             paletteBlocks.findDragGroup(newBlock);
+        //             for (var i in paletteBlocks.dragGroup) {
+        //                 paletteBlocks.moveBlockRelative(paletteBlocks.dragGroup[i], Math.round(event.stageX / palette.palettes.scale) - paletteBlocks.stage.x, Math.round(event.stageY / palette.palettes.scale) - paletteBlocks.stage.y);
+        //             }
+        //             // Dock with other blocks if needed
+        //             console.log('new block moved ' + newBlock);
+        //             blocks.blockMoved(newBlock);
+        //         }
 
-            // Return protoblock we've been dragging back to the palette.
-            palette.protoContainers[blkname].x = saveX;
-            palette.protoContainers[blkname].y = saveY + palette.scrollDiff;
-            palette.updateBlockMasks();
-            palette.palettes.refreshCanvas(1);
-        }
+        //         var newBlock = makeBlockFromPalette(blk, blkname, palette, myCallback);
+        //     }
+
+        //     // Return protoblock we've been dragging back to the palette.
+        //     palette.protoContainers[blkname].position.x = saveX;
+        //     palette.protoContainers[blkname].position.y = saveY + palette.scrollDiff;
+        //     // palette.updateBlockMasks(); //Why is this update being done
+        //     palette.palettes.refreshCanvas(1);
+        // }
     });
 }
 
@@ -1369,8 +1364,11 @@ function loadPaletteMenuHandler(palette) {
     var px,py,dx,dy;
 
     palette.menuContainer.on('click', function(event) {
-        // To code for the close button //FIXME : Change the code to include scaling factor
-        if(Math.round(threeCoorX(event.clientX / palette.palettes.scale)) > palette.menuContainer.position.x + paletteWidth/2 - STANDARDBLOCKHEIGHT){
+        // To code for the close button 
+        //FIXME : Change the code to include scaling factor
+        // if(Math.round(threeCoorX(event.clientX / palette.palettes.scale)) > palette.menuContainer.position.x + paletteWidth/2 - STANDARDBLOCKHEIGHT){
+
+        if(Math.round(threeCoorX(event.clientX)) > palette.menuContainer.position.x + paletteWidth/2 - STANDARDBLOCKHEIGHT){
             palette.hide();
             palette.palettes.refreshCanvas(1);
             return;
@@ -1422,7 +1420,7 @@ function loadPaletteMenuHandler(palette) {
 
     palette.menuContainer.on('pressmove', function(event) {
         // TODO : When scaling is active throughout then put it here as well
-        // just divide event.clientX and event.clientY with palette.palettes.scale 
+        // just divide event.clientX and event.clientY with palette.palettes.scale         
         if(!px || !py){
             px = event.clientX;
             py = event.clientY;
@@ -1452,7 +1450,9 @@ function loadPaletteMenuHandler(palette) {
         // Calculate dx,dy to give to moveMenuItemsRelative
 
         // If we are over the trash, warn the user.
-        if (trashcan.overTrashcan(event.clientX / palette.palettes.scale, event.clientY / palette.palettes.scale)) {
+        // if (trashcan.overTrashcan(event.clientX / palette.palettes.scale, event.clientY / palette.palettes.scale)) {
+        // FIXME : add this condition when scaling is activated
+        if (trashcan.overTrashcan(event.clientX, event.clientY)) {
             trashcan.highlight();
         } else {
             trashcan.unhighlight();
@@ -1466,7 +1466,9 @@ function loadPaletteMenuHandler(palette) {
     palette.menuContainer.on('pressup', function(event) {
         px = false;
         py = false;
-        if (trashcan.overTrashcan(event.clientX / palette.palettes.scale, event.clientY / palette.palettes.scale)) {
+        // FIXME : Add scaling factor here
+        // if (trashcan.overTrashcan(event.clientX / palette.palettes.scale, event.clientY / palette.palettes.scale)) {
+        if (trashcan.overTrashcan(event.clientX , event.clientY )) {
             palette.hide();
             palette.palettes.refreshCanvas(1);
             // Only delete plugin palettes.
@@ -1551,7 +1553,6 @@ function makePaletteBitmap(palette, data, name, callback, extras) {
     img.src = 'data:image/svg+xml;base64,' + window.btoa(
         unescape(encodeURIComponent(data)));
 }
-
 
 
 function regeneratePalette(palette) {

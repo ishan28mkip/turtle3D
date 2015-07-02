@@ -58,7 +58,7 @@ function threeCoorY(y){
 }
 
 function mouseCoorX(x){
-    return (x + window.innerHeight/2);
+    return (x + window.innerWidth/2);
 }
 
 function mouseCoorY(y){
@@ -339,7 +339,6 @@ function onSceneEvent(event,eventName){
                             intersects[i].object.parentMesh._listeners.mousedown.active = true;
                         }
                         if(intersects[i].object.parentMesh._listeners.hasOwnProperty('pressmove')){
-                            intersects[i].object.parentMesh.dispatchEvent(setEventTypeMesh(event,'pressmove', intersects[i].object.parentMesh));
                             intersects[i].object.parentMesh._listeners.pressmove.active = true;
                         }
                         break;
