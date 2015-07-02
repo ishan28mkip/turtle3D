@@ -182,7 +182,6 @@ function Trashcan (canvas, stage, size, refreshCanvas) {
         var ty = this.container.position.y;
         tx = mouseCoorX(tx-currentTrashWidth/2);
         ty = mouseCoorY(ty+currentTrashHeight/2);
-        console.log(tx,ty);
 
         if (x < tx) {
             return false;
