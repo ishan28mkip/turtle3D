@@ -496,24 +496,12 @@ function Palette(palettes, name) {
 
     this.resizeEvent = function() {
         this.updateBackground();
-        this.updateBlockMasks();
 
         if (this.downButton !== null) {
             this.downButton.y = this.getDownButtonY();
         }
     }
 
-    // TODO : Why is this block mask made
-    this.updateBlockMasks = function() {
-        // var h = Math.min(maxPaletteHeight(this.palettes.cellSize, this.palettes.scale), this.y);
-        // for (var i in this.protoContainers) {
-        //     var s = new createjs.Shape();
-        //     s.graphics.r(0, 0, MENUWIDTH, h);
-        //     s.x = this.background.x;
-        //     s.y = this.background.y;
-        //     this.protoContainers[i].mask = s;
-        // }
-    }
 
     this.updateBackground = function() {
         if (this.menuContainer === null) {
@@ -897,7 +885,6 @@ function Palette(palettes, name) {
         for (var i in this.protoContainers) {
             this.protoContainers[i].visible = true;
         }
-        this.updateBlockMasks();
         if (this.background !== null) {
             this.background.visible = true;
         }
@@ -937,7 +924,6 @@ function Palette(palettes, name) {
         for (var i in this.protoContainers) {
             this.protoContainers[i].visible = true;
         }
-        this.updateBlockMasks();
         if (this.background !== null) {
             this.background.visible = true;
         }
@@ -1067,7 +1053,6 @@ this.scrollEvent = function(direction, scrollSpeed) {
             this.protoContainers[i].visible = true;
             }
         }
-        this.updateBlockMasks();
 
         var stage = this.palettes.stage;
         // stage.setChildIndex(this.menuContainer, stage.getNumChildren() - 1); // PE : See why is index being set 
@@ -1131,7 +1116,7 @@ var DECIDEDISTANCE = 20;
 function setupBackgroundEvents(palette) {
     var scrolling = false;
     var lastY;
-    
+
     palette.background.on('click',function(event){
         console.log('click');
     });
@@ -1345,7 +1330,6 @@ function loadPaletteMenuItemHandler(palette, blk, blkname) {
         //     // Return protoblock we've been dragging back to the palette.
         //     palette.protoContainers[blkname].position.x = saveX;
         //     palette.protoContainers[blkname].position.y = saveY + palette.scrollDiff;
-        //     // palette.updateBlockMasks(); //Why is this update being done
         //     palette.palettes.refreshCanvas(1);
         // }
     });

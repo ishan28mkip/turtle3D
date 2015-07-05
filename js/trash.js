@@ -91,7 +91,6 @@ function Trashcan (canvas, stage, size, refreshCanvas) {
             var bitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(me.container.scaleX*img.width, me.container.scaleY*img.height),material);
             me.container.add(bitmap);
             bitmap.name = 'trashIcon';
-
             // var axes = buildAxes( 1000 );
             // me.container.add( axes );
             // me.iconsize = bitmap.getBounds().width; //PE : see why is this done
