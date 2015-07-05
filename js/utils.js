@@ -231,28 +231,81 @@ Object.defineProperty(THREE.Object3D.prototype, 'off', {
     configurable: false,
     writable: false,
     value: function(eventName,callback,listener){
+        if(eventName === undefined){
+            for(var eventName in this._listeners)
+                this.off(eventName);
+        }
         if(listener === undefined){
             if ( this._listeners === undefined ){
-                callback(false);
+                if(typeof(callback) === 'function')
+                    callback(false);
             }
             else if(this._listeners.hasOwnProperty(eventName)){
                 this._listeners[eventName] = undefined;
-                if (clickArray.indexOf(this.hitmesh) > -1) {
-                    clickArray.splice(clickArray.indexOf(this.hitmesh), 1);
+                switch(eventName){
+                    case 'click': 
+                    if (clickArray.indexOf(this.hitmesh) > -1) {
+                        clickArray.splice(clickArray.indexOf(this.hitmesh), 1);
+                    }
+                    break;
+                    case 'dblclick':
+                    if (dblClickArray.indexOf(this.hitmesh) > -1) {
+                        dblClickArray.splice(dblClickArray.indexOf(this.hitmesh), 1);
+                    }
+                    break;
+                    case 'mousedown' :
+                    if (mousedownArray.indexOf(this.hitmesh) > -1) {
+                        mousedownArray.splice(mousedownArray.indexOf(this.hitmesh), 1);
+                    }
+                    break;
+                    case 'mouseup' :
+                    if (mouseupArray.indexOf(this.hitmesh) > -1) {
+                        mouseupArray.splice(mouseupArray.indexOf(this.hitmesh), 1);
+                    }
+                    break;
+                    case 'mousemove' :
+                    if (mousemotionArray.indexOf(this.hitmesh) > -1) {
+                        mousemotionArray.splice(mousemotionArray.indexOf(this.hitmesh), 1);
+                    }
+                    break;
+                    case 'mouseover' :
+                    if (mousemotionArray.indexOf(this.hitmesh) > -1) {
+                        mousemotionArray.splice(mousemotionArray.indexOf(this.hitmesh), 1);
+                    }
+                    break;
+                    case 'mouseout' :
+                    if (mousemotionArray.indexOf(this.hitmesh) > -1) {
+                        mousemotionArray.splice(mousemotionArray.indexOf(this.hitmesh), 1);
+                    }
+                    break;
+                    case 'pressmove' :
+                    if (mousedownArray.indexOf(this.hitmesh) > -1) {
+                        mousedownArray.splice(mousedownArray.indexOf(this.hitmesh), 1);
+                    }
+                    break;
+                    case 'pressup' :
+                    if (mouseupArray.indexOf(this.hitmesh) > -1) {
+                        mouseupArray.splice(mouseupArray.indexOf(this.hitmesh), 1);
+                    }
+                    break;
                 }
-                callback(true);
+
+                if(typeof(callback) === 'function')
+                    callback(true);
             }  
         }
         else{
             if ( this._listeners === undefined )
-                callback(false);
+                if(typeof(callback) === 'function')
+                    callback(false);
             var listeners = this._listeners;
             var listenerArray = listeners[ type ];
             if ( listenerArray !== undefined ) {
                 var index = listenerArray.indexOf( listener );
                 if ( index !== - 1 ) {
                     listenerArray.splice( index, 1 );
-                    callback(true);
+                    if(typeof(callback) === 'function')
+                        callback(true); 
                 }
             }
         }

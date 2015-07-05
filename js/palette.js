@@ -1081,10 +1081,10 @@ function setupBackgroundEvents(palette) {
     var lastY;
 
     palette.background.on('click',function(event){
-        console.log(clickArray.length);
-        palette.background.off('click',function(success){
-            console.log(clickArray.length);
-        });
+        console.log('click');
+        palette.background.off();
+        // console.log(palette.background._listeners);
+        // console.log(clickArray.indexOf(palette.background.hitmesh));
     });
 
     palette.background.on('mousedown', function(event) {
@@ -1105,6 +1105,10 @@ function setupBackgroundEvents(palette) {
     palette.background.on('pressup', function(event) {
         scrolling = false;
     });
+}
+
+function removeBackgroundEvents(palette){
+    palette.background.off();
 }
 
 
