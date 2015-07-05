@@ -237,6 +237,9 @@ Object.defineProperty(THREE.Object3D.prototype, 'off', {
             }
             else if(this._listeners.hasOwnProperty(eventName)){
                 this._listeners[eventName] = undefined;
+                if (clickArray.indexOf(this.hitmesh) > -1) {
+                    clickArray.splice(clickArray.indexOf(this.hitmesh), 1);
+                }
                 callback(true);
             }  
         }

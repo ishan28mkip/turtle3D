@@ -53,7 +53,6 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
 
     this.setScale = function(scale) {
         this.scale = scale;
-        this.updateButtonMasks();
         for (var i in this.dict) {
             this.dict[i].resizeEvent();
         }
@@ -85,36 +84,9 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
             this.buttons[name].position.y += diff;
             this.buttons[name].visible = true;
         }
-        this.updateButtonMasks();
         this.refreshCanvas(1);
     }
 
-    this.updateButtonMasks = function() {
-        // TODO : Why are masks used?
-        for (var name in this.buttons) {
-            // var s = new createjs.Shape();
-            // s.graphics.r(0, 0, this.cellSize, windowHeight() / this.scale);
-            // s.x = 0;
-            // s.y = this.cellSize / 2;
-            // this.buttons[name].mask = s;
-
-            // TODO : See what shape this code is making and then make the same shape,
-            // also see if the mask needs to be added to the scene or not.
-
-            // var rectShape = new THREE.Shape();
-            // rectShape.moveTo( -w/2, h/2 );
-            // rectShape.lineTo( w/2, h/2 );
-            // rectShape.lineTo( w/2, -h/2 );
-            // rectShape.lineTo( -w/2, -h/2 );
-            // rectShape.lineTo( -w/2, h/2 );
-
-            // var rectGeom = new THREE.ShapeGeometry( rectShape );
-            // var rectMesh = new THREE.Mesh( rectGeom, new THREE.MeshBasicMaterial( { color: 0xaaaaaa } ) ) ;   
-            // rectMesh.position.setZ(1);
-            // rectMesh.visible = false;
-            // helpContainer.add(rectMesh);
-        }
-    }
 
     this.makePalettes = function() {
         // First, an icon/button for each palette
@@ -373,7 +345,6 @@ function Palette(palettes, name) {
     this.FadedUpButton = null;
     this.FadedDownButton = null;
     this.count = 0;
-    this.backgroundEvents = false;
 
     this.makeMenu = function(createHeader) {
         if (this.menuContainer == null) {
@@ -416,6 +387,7 @@ function Palette(palettes, name) {
                     palette.menuContainer.add(bitmap);
                     bitmap.position.setX(palette.menuContainer.processHeader.width/2 - bitmap.imgWidth*0.7/2 - palette.padding);
                     bitmap.position.setY(0);
+                    bitmap.position.setZ(2);
 
                     // TODO fix this
                     if (!palette.mouseHandled) {
@@ -510,6 +482,7 @@ function Palette(palettes, name) {
 
         if (this.background !== null) {
             var obj;
+            removeBackgroundEvents(this);
             for (var i = this.background.children.length - 1; i >= 0 ; i -- ) {
                 obj = this.background.children[ i ];
                 this.background.remove(obj);
@@ -519,7 +492,6 @@ function Palette(palettes, name) {
             // this.background.snapToPixelEnabled = true;
             this.background.visible = false;
             this.palettes.stage.add(this.background);
-            
         }
 
         var h = Math.min(maxPaletteHeight(this.palettes.cellSize, this.palettes.scale), this.y);
@@ -533,17 +505,15 @@ function Palette(palettes, name) {
         rectShape.lineTo( -w/2, h/2 );
 
         var rectGeom = new THREE.ShapeGeometry( rectShape );
-        var rectMesh = new THREE.Mesh( rectGeom, new THREE.MeshBasicMaterial( { color: 0x8888888 } ) ) ;   
+        var rectMesh = new THREE.Mesh( rectGeom, new THREE.MeshBasicMaterial( { color: 0x888888 } ) ) ;   
         this.background.add(rectMesh);
 
         this.background.hitmesh = rectMesh;
         rectMesh.parentMesh = this.background;
+
         rectMesh.position.setZ(2);
 
-        if(!this.backgroundEvents){
-            setupBackgroundEvents(this);
-            this.backgroundEvents = true;
-        }
+        setupBackgroundEvents(this);
 
         this.background.position.setX(this.menuContainer.position.x);
         this.background.position.setY(this.menuContainer.position.y - STANDARDBLOCKHEIGHT/2 -h/2);
@@ -561,7 +531,6 @@ function Palette(palettes, name) {
         this.y = 0;
 
         for (var blk in this.protoList) {
-
             // Don't show hidden blocks on the menus
             if (this.protoList[blk].hidden) {
                 continue;
@@ -601,11 +570,6 @@ function Palette(palettes, name) {
                     break;
             }
 
-            function calculateContainerXY(palette) {
-                // TODO : Fix this when you have the graphics ready
-                var y = palette.menuContainer.position.y + palette.y + STANDARDBLOCKHEIGHT;
-            }
-
             function calculateHeight(palette, blkname) {
                 var size = palette.protoList[blk].size;
                 
@@ -634,7 +598,6 @@ function Palette(palettes, name) {
                 this.protoContainers[modname] = new THREE.Group();
 
                 // this.protoContainers[modname].snapToPixelEnabled = true; //TODO : How to snap to pixel?
-                // calculateContainerXY(this); //What is this doing?
 
                 this.protoContainers[modname].position.setX(this.menuContainer.position.x - this.paletteWidth/2 + PALETTELEFTMARGIN);
                 this.protoContainers[modname].position.setY(this.menuContainer.position.y - this.y - STANDARDBLOCKHEIGHT/2);
@@ -645,7 +608,9 @@ function Palette(palettes, name) {
                 var height = calculateHeight(this, blkname);
                 this.size += Math.ceil(height * PROTOBLOCKSCALE);
                 this.y += Math.ceil(height * PROTOBLOCKSCALE);
-                this.updateBackground(); // PE : Why is update background called again and again? Shouldn't it be called just once
+                if(blk == this.protoList.length - 1){
+                    this.updateBackground(); // PE : Why is update background called again and again? Shouldn't it be called just once
+                }
 
                 function processFiller(palette, modname, bitmap, extras) {
                     // TODO : Set bitmap position 
@@ -784,7 +749,6 @@ function Palette(palettes, name) {
                         palette.protoContainers[modname].hitmesh = bitmap;
                         bitmap.parentMesh = palette.protoContainers[modname];
 
-                        var bounds = palette.background.get2DBounds(false);
 
                         // Fix this function, continuity is lost and also implement this is the scroll event
                         // if(palette.protoContainers[modname].position.y - bitmap.imgHeight/2 < bounds.min.y)
@@ -850,7 +814,6 @@ function Palette(palettes, name) {
                 }
                 makePaletteBitmap(this, PALETTEFILLER.replace(/filler_height/g, height.toString()), modname, processFiller, [blkname, blk]);
             } else {
-                calculateContainerXY(this)
                 var height = calculateHeight(this, blkname);
                 this.y += Math.ceil(height * PROTOBLOCKSCALE);
             }
@@ -1118,7 +1081,10 @@ function setupBackgroundEvents(palette) {
     var lastY;
 
     palette.background.on('click',function(event){
-        console.log('click');
+        console.log(clickArray.length);
+        palette.background.off('click',function(success){
+            console.log(clickArray.length);
+        });
     });
 
     palette.background.on('mousedown', function(event) {
@@ -1383,11 +1349,6 @@ function loadPaletteMenuHandler(palette) {
 
     palette.menuContainer.on('mousedown', function(event) {
         trashcan.show(); //show them all?
-        // Why is this offset used?
-        // offset = {
-        //     x: palette.menuContainer.position.x - Math.round(event.clientX / palette.palettes.scale),
-        //     y: palette.menuContainer.position.y - Math.round(event.clientY / palette.palettes.scale)
-        // };
     });
 
     palette.menuContainer.on('mouseover',function(event){
@@ -1423,15 +1384,6 @@ function loadPaletteMenuHandler(palette) {
         px = event.clientX;
         py = event.clientY;
 
-        // var oldX = palette.menuContainer.position.x;
-        // var oldY = palette.menuContainer.position.y;
-        // palette.menuContainer.x = Math.round(event.stageX / palette.palettes.scale) + offset.x;
-        // palette.menuContainer.y = Math.round(event.stageY / palette.palettes.scale) + offset.y;
-        // palette.palettes.refreshCanvas(1);
-        // var dx = palette.menuContainer.x - oldX;
-        // var dy = palette.menuContainer.y - oldY;
-
-        // Calculate dx,dy to give to moveMenuItemsRelative
 
         // If we are over the trash, warn the user.
         // if (trashcan.overTrashcan(event.clientX / palette.palettes.scale, event.clientY / palette.palettes.scale)) {
