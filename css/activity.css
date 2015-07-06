@@ -242,4 +242,19 @@ img.icon:hover {
   z-index: 0;
 }
 
+#mousePositionIndicator{
+  position: absolute;
+  z-index: 100;
+  right: 100px;
+  top: 100px;
+  color: #fff;
+  background-color: #222;
+  padding: 10px;
+}
+
+#mousePositionIndicator span{
+  color: #ff9999;
+}
+
+
 

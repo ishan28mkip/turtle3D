@@ -1,4 +1,8 @@
 // TODO : Add 3D version to getBounds and add 2D version to intersect, using get2Dbounds
+// TODO : Fix the bug that if a object is present infront of a clickable object the object will still be clicked,
+//        this should not happen but if all objects on screen are again and again checked for clicks than the
+//        library will become very slow, so instead we will just add a new event handler to objects known as
+//        canObstruct which will be added in all arrays. 
 
 // NEWS : 
     // Fixed the get2Dbounds function and optimized a bit // 12:09 14th June
@@ -125,13 +129,11 @@ Object.defineProperty(THREE.Object3D.prototype, 'get2DBounds', {
         for(var i = 0; i<this.children.length; i++){
             if(this.children[i].geometry !== undefined){
                 if(flag){
-                    this.children[i].geometry.computeBoundingBox();
-                    bounds = this.children[i].geometry.boundingBox;
+                    bounds = returnGlobalBounds(this,i);
                     flag = false;
                 }
                 else{
-                    this.children[i].geometry.computeBoundingBox();
-                    var newBounds = this.children[i].geometry.boundingBox;
+                    var newBounds = returnGlobalBounds(this,i);
                     bounds.max.x = ( newBounds.max.x > bounds.max.x) ?  newBounds.max.x : bounds.max.x;
                     bounds.max.y = ( newBounds.max.y > bounds.max.y) ?  newBounds.max.y : bounds.max.y;
                     bounds.min.x = ( newBounds.min.x < bounds.min.x) ?  newBounds.min.x : bounds.min.x;
@@ -150,14 +152,37 @@ Object.defineProperty(THREE.Object3D.prototype, 'get2DBounds', {
         }
         bounds.width = bounds.max.x - bounds.min.x;
         bounds.height = bounds.max.y - bounds.min.y;
-        bounds.max.x += this.position.x;
-        bounds.min.x += this.position.x;
-        bounds.max.y += this.position.y;
-        bounds.min.y += this.position.y;
         return bounds;
     }
 });
 
+function returnGlobalBounds(container, i){
+    container.children[i].geometry.computeBoundingBox();
+    var bounds = container.children[i].geometry.boundingBox;
+    bounds.max.x = bounds.max.x + container.children[i].position.x + globalX(container);
+    bounds.min.x = bounds.min.x + container.children[i].position.x + globalX(container);
+    bounds.max.y = bounds.max.y + container.children[i].position.y + globalY(container);
+    bounds.min.y = bounds.min.y + container.children[i].position.y + globalY(container);
+    return bounds;
+}
+
+function globalX(container){
+    if(container.parent === undefined){
+        return 0; 
+    }
+    else{
+        return container.position.x + globalX(container.parent);
+    }
+}
+
+function globalY(container){
+    if(container.parent === undefined){
+        return 0; 
+    }
+    else{
+        return container.position.y + globalY(container.parent);
+    }
+}
 
 
 // Gets the 3D bound of any object
@@ -344,6 +369,11 @@ function initMouseEvents(events, renderer, camera){
             }, false ); 
             break;
             case 'mousemove' : renderer.domElement.addEventListener( 'mousemove',  function(event){
+                // Adding code to update the mouse coordinate helper window
+                document.getElementById('mouseCoorX').innerHTML = event.clientX;
+                document.getElementById('mouseCoorY').innerHTML = event.clientY;
+                document.getElementById('threeCoorX').innerHTML = threeCoorX(event.clientX);
+                document.getElementById('threeCoorY').innerHTML = threeCoorY(event.clientY);
                 if(mousemotionArray.length > 0 || mousedownArray.length > 0){
                     onSceneEvent(event,'mousemotion');
                 }
@@ -512,6 +542,24 @@ function setEventTypeMesh(event,type, mesh){
     return eventObject;
 }
 
+function createBoundingBitmap(container,scene){
+    var bounds = container.get2DBounds(true);
+
+    var hexColor = '#'+Math.floor(Math.random()*16777215).toString(16);
+    var material = new THREE.LineBasicMaterial({
+        color: hexColor,
+        linewidth: 3
+    });
+    var geometry = new THREE.Geometry();
+    geometry.vertices.push(new THREE.Vector3(bounds.min.x, bounds.min.y, 10));
+    geometry.vertices.push(new THREE.Vector3(bounds.max.x, bounds.min.y, 10));
+    geometry.vertices.push(new THREE.Vector3(bounds.max.x, bounds.max.y, 10));
+    geometry.vertices.push(new THREE.Vector3(bounds.min.x, bounds.max.y, 10));
+    geometry.vertices.push(new THREE.Vector3(bounds.min.x, bounds.min.y, 10));
+
+    var line = new THREE.Line(geometry, material);
+    scene.add(line);
+}
 
 
 

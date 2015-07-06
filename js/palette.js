@@ -221,17 +221,6 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
         // this.makePalettes();
     }
 
-    this.bringToTop = function() {
-        // Move all the palettes to the top layer of the stage
-        for (var name in this.dict) {
-            this.dict[name].menuContainer.position.setZ(1); //Brings the menu container to front
-            for (var item in this.dict[name].protoContainers) { 
-                this.dict[name].protoContainers[item].position.setZ(1);
-            }
-        }
-        this.refreshCanvas(1);
-    }
-
     this.findPalette = function(x, y) {
         // for (var name in this.dict) {
         //     var px = this.dict[name].menuContainer.x;
@@ -532,7 +521,11 @@ function Palette(palettes, name) {
 
         for (var blk in this.protoList) {
             // Don't show hidden blocks on the menus
+
             if (this.protoList[blk].hidden) {
+                if(blk == this.protoList.length - 1){
+                    this.updateBackground();
+                }
                 continue;
             }
 
@@ -608,8 +601,9 @@ function Palette(palettes, name) {
                 var height = calculateHeight(this, blkname);
                 this.size += Math.ceil(height * PROTOBLOCKSCALE);
                 this.y += Math.ceil(height * PROTOBLOCKSCALE);
+
                 if(blk == this.protoList.length - 1){
-                    this.updateBackground(); // PE : Why is update background called again and again? Shouldn't it be called just once
+                    this.updateBackground();
                 }
 
                 function processFiller(palette, modname, bitmap, extras) {
@@ -748,6 +742,11 @@ function Palette(palettes, name) {
                         
                         palette.protoContainers[modname].hitmesh = bitmap;
                         bitmap.parentMesh = palette.protoContainers[modname];
+
+
+                        // if(palette.name == 'turtle')
+                        //     createBoundingBitmap(palette.protoContainers[modname],palette.palettes.stage.parent);
+
 
 
                         // Fix this function, continuity is lost and also implement this is the scroll event
@@ -897,33 +896,33 @@ function Palette(palettes, name) {
 
     this.moveMenuItems = function(x, y) {
         for (var i in this.protoContainers) {
-            this.protoContainers[i].position.x = x;
-            this.protoContainers[i].position.y = y;
+            this.protoContainers[i].position.setX(x);
+            this.protoContainers[i].position.setY(y);
         }
         if (this.background !== null) {
-            this.background.position.x = x;
-            this.background.position.y = y;
+            this.background.position.setX(x);
+            this.background.position.setY(y);
         }
     }
 
     this.moveMenuItemsRelative = function(dx, dy) {
         for (var i in this.protoContainers) {
-            this.protoContainers[i].position.x += dx;
-            this.protoContainers[i].position.y += dy;
+            this.protoContainers[i].position.setX(this.protoContainers[i].position.x + dx);
+            this.protoContainers[i].position.setY(this.protoContainers[i].position.y + dy);
         }
         if (this.background !== null) {
-            this.background.position.x += dx;
-            this.background.position.y += dy;
+            this.background.position.setX(this.background.position.x + dx);
+            this.background.position.setY(this.background.position.y + dy);
         }
         if (this.upButton !== null) {
-            this.upButton.position.x += dx;
-            this.upButton.position.y += dy;
-            this.downButton.position.x += dx;
-            this.downButton.position.y += dy;
-            this.FadedUpButton.position.x += dx;
-            this.FadedUpButton.position.y += dy;
-            this.FadedDownButton.position.x += dx;
-            this.FadedDownButton.position.y += dy;
+            this.upButton.position.setX(this.upButton.position.x + dx);
+            this.upButton.position.setY(this.upButton.position.y + dy);
+            this.downButton.position.setX(this.downButton.position.x + dx);
+            this.downButton.position.setY(this.downButton.position.y + dy);
+            this.FadedUpButton.position.setX(this.FadedUpButton.position.x + dx);
+            this.FadedUpButton.position.setY(this.FadedUpButton.position.y + dy);
+            this.FadedDownButton.position.setX(this.FadedDownButton.position.x + dx);
+            this.FadedDownButton.position.setY(this.FadedDownButton.position.y + dy);
         }
     }
 this.scrollEvent = function(direction, scrollSpeed) {
@@ -1064,7 +1063,6 @@ function initPalettes(canvas, refreshCanvas, stage, cellSize, trashcan, b) {
     // Give the palettes time to load.
     setTimeout(function() {
         palettes.show();
-        palettes.bringToTop();
     }, 2000);
     return palettes;
 }
@@ -1081,14 +1079,11 @@ function setupBackgroundEvents(palette) {
     var lastY;
 
     palette.background.on('click',function(event){
-        console.log('click');
-        palette.background.off();
-        // console.log(palette.background._listeners);
-        // console.log(clickArray.indexOf(palette.background.hitmesh));
+        // console.log('click');
     });
 
     palette.background.on('mousedown', function(event) {
-        console.log('mousedown');
+        // console.log('mousedown');
         scrolling = true;
         lastY = event.clientY;
     });
@@ -1176,6 +1171,9 @@ function loadPaletteMenuItemHandler(palette, blk, blkname) {
     }
 
     palette.protoContainers[blkname].on('mousedown', function(event) {
+        console.log('mousedown:' + blkname);
+        createBoundingBitmap(palette.protoContainers[blkname],palette.palettes.stage.parent);
+        palette.palettes.refreshCanvas(1);
         // var stage = palette.palettes.stage;
         // // stage.setChildIndex(palette.protoContainers[blkname], stage.getNumChildren() - 1);
         // // palette.protoContainers[blkname].mask = null;
@@ -1467,6 +1465,10 @@ function promptMacrosDelete(palette) {
 function makePaletteBitmap(palette, data, name, callback, extras) {
     // Async creation of bitmap from SVG data
     // Works with Chrome, Safari, Firefox (untested on IE)
+    if(name == "setCursorPositionX"){
+        console.log('data:image/svg+xml;base64,' + window.btoa(
+        unescape(encodeURIComponent(data))));
+    }
     var img = new Image();
         img.onload = function () {
             var canvas = document.createElement('canvas');
@@ -1487,7 +1489,6 @@ function makePaletteBitmap(palette, data, name, callback, extras) {
             bitmap.name = name;
             bitmap.imgWidth = img.width;
             bitmap.imgHeight = img.height;
-
             callback(palette, name, bitmap, extras);
     }
     img.src = 'data:image/svg+xml;base64,' + window.btoa(
