@@ -756,7 +756,6 @@ define(function(require) {
                 container.add(textMesh);
 
                 container.hitmesh = msgBlock;
-                container.hitmesh.parentMesh = container;
 
                 // container.on('click',function(){
                 //     container.visible = false;
@@ -836,7 +835,6 @@ define(function(require) {
                 container.add(textMesh);
 
                 container.hitmesh = artwork;
-                container.hitmesh.parentMesh = container;
 
                 container.on('click', function(event) {
                     container.visible = false;
@@ -1709,7 +1707,6 @@ define(function(require) {
                         rectMesh.visible = false;
                         helpContainer.add(rectMesh);
                         helpContainer.hitmesh = rectMesh;
-                        rectMesh.parentMesh = helpContainer;
 
                         helpContainer.on('click', function(event) {
                             if (event.clientY < mouseCoorY(helpContainer.position.y) ) {
@@ -1868,7 +1865,6 @@ define(function(require) {
                 container.add(circleMesh);
 
                 container.hitmesh = circleMesh;
-                circleMesh.parentMesh = container;
 
                 if(rotation !== undefined){
                     bitmap.rotation.z = rotation;

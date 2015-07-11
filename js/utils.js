@@ -208,6 +208,7 @@ var mouseTHREECoordinates = new THREE.Vector2();
 var raycaster = new THREE.Raycaster();
 var scriptingRenderer;
 var scriptingCamera;
+var num = 0;
 
 // Binding the on event to Object3D prototype
 Object.defineProperty(THREE.Object3D.prototype, 'on', {
@@ -221,7 +222,8 @@ Object.defineProperty(THREE.Object3D.prototype, 'on', {
                 this.hitmesh.parentMesh = this;
             }
         }
-        if(this.hasOwnProperty('hitmesh') && this.hitmesh.type == 'Mesh' && this.hitmesh.hasOwnProperty('parentMesh') && this.hitmesh.parentMesh !== undefined){
+        if(this.hasOwnProperty('hitmesh') && this.hitmesh.type == 'Mesh'){
+            this.hitmesh.parentMesh = this;
             this.addEventListener(eventName, function(event){
                 callback(event);
             });
@@ -230,20 +232,62 @@ Object.defineProperty(THREE.Object3D.prototype, 'on', {
                 break;
                 case 'dblclick': dblclickArray.push(this.hitmesh);
                 break;
-                case 'mousedown' : mousedownArray.push(this.hitmesh);
-                break;
-                case 'mouseup' : mouseupArray.push(this.hitmesh);
-                break;
-                case 'mousemove' : mousemotionArray.push(this.hitmesh);
-                break;
-                case 'mouseover' : mousemotionArray.push(this.hitmesh);
-                break;
-                case 'mouseout' : mousemotionArray.push(this.hitmesh);
-                break;
-                case 'pressmove' : mousedownArray.push(this.hitmesh);
-                break;
-                case 'pressup' : mouseupArray.push(this.hitmesh);
-                break;
+                case 'mousedown' : 
+                    if(this._listeners.hasOwnProperty('pressmove')){
+                        break;
+                    }
+                    else{
+                        mousedownArray.push(this.hitmesh);
+                        break;
+                    }
+                case 'mouseup' : 
+                    if(this._listeners.hasOwnProperty('pressup')){
+                        break;
+                    }
+                    else{
+                        mouseupArray.push(this.hitmesh);
+                        break;
+                    }
+                case 'mousemove' : 
+                    if(this._listeners.hasOwnProperty('mouseover') || this._listeners.hasOwnProperty('mouseout')){
+                        break;
+                    }
+                    else{
+                        mousemotionArray.push(this.hitmesh);
+                        break;
+                    }
+                case 'mouseover' : 
+                    if(this._listeners.hasOwnProperty('mousemove') || this._listeners.hasOwnProperty('mouseout')){
+                        break;
+                    }
+                    else{
+                        mousemotionArray.push(this.hitmesh);
+                        break;
+                    }
+                case 'mouseout' :
+                    if(this._listeners.hasOwnProperty('mousemove') || this._listeners.hasOwnProperty('mouseover')){
+                        break;
+                    }
+                    else{
+                        mousemotionArray.push(this.hitmesh);
+                        break;
+                    }
+                case 'pressmove' : 
+                    if(this._listeners.hasOwnProperty('mousedown')){
+                        break;
+                    }
+                    else{
+                        mousedownArray.push(this.hitmesh);
+                        break;
+                    }
+                case 'pressup' : 
+                    if(this._listeners.hasOwnProperty('mouseup')){
+                        break;
+                    }
+                    else{
+                        mouseupArray.push(this.hitmesh);
+                        break;
+                    }
                 default : callback(false);
             }
         }
@@ -396,7 +440,7 @@ function onSceneEvent(event,eventName){
         case 'click': 
             intersects = raycaster.intersectObjects(clickArray);
             if(intersects.length > 0){
-                for(var i = intersects.length - 1 ; i >=0 ; i--){
+                for(var i = 0; i < intersects.length ; i++){
                     if(intersects[i].object.parentMesh.visible == true){
                         intersects[i].object.parentMesh.dispatchEvent(setEventTypeMesh(event,'click', intersects[i].object.parentMesh));
                         break;
@@ -407,7 +451,7 @@ function onSceneEvent(event,eventName){
         case 'dblclick':
             intersects = raycaster.intersectObjects(dblclickArray);
             if(intersects.length > 0){
-                for(var i = intersects.length - 1 ; i >=0 ; i--){
+                for(var i = 0; i < intersects.length ; i++){
                     if(intersects[i].object.parentMesh.visible == true){
                         intersects[i].object.parentMesh.dispatchEvent(setEventTypeMesh(event,'dblclick', intersects[i].object.parentMesh));
                         break;
@@ -418,7 +462,7 @@ function onSceneEvent(event,eventName){
         case 'mousedown' :
             intersects = raycaster.intersectObjects(mousedownArray);
             if(intersects.length > 0){
-                for(var i=intersects.length-1; i>=0; i--){
+                for(var i = 0; i < intersects.length ; i++){
                     if(intersects[i].object.parentMesh.visible == true){
                         if(intersects[i].object.parentMesh._listeners.hasOwnProperty('mousedown')){
                             intersects[i].object.parentMesh.dispatchEvent(setEventTypeMesh(event,'mousedown', intersects[i].object.parentMesh));
@@ -435,7 +479,7 @@ function onSceneEvent(event,eventName){
         case 'mouseup' : 
             intersects = raycaster.intersectObjects(mouseupArray);
             if(intersects.length > 0){
-                for(var i=intersects.length - 1; i>=0; i--){
+                for(var i = 0; i < intersects.length ; i++){
                     if(intersects[i].object.parentMesh.visible == true){
                         if(intersects[i].object.parentMesh._listeners.hasOwnProperty('mousedown')){
                             if(intersects[i].object.parentMesh._listeners.mousedown.active){
@@ -484,7 +528,7 @@ function onSceneEvent(event,eventName){
             }
             intersects = raycaster.intersectObjects(mousemotionArray);
             if(intersects.length > 0){
-                for(var i=intersects.length - 1; i>=0; i--){
+                for(var i = 0; i < intersects.length ; i++){
                     if(intersects[i].object.parentMesh.visible == true){
                         intersected = intersects[i].object;
                         break;
