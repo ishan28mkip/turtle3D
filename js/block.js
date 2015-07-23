@@ -1,13 +1,5 @@
-// Copyright (c) 2014,2015 Walter Bender
-//
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 3 of the License, or
-// (at your option) any later version.
-//
-// You should have received a copy of the GNU General Public License
-// along with this library; if not, write to the Free Software
-// Foundation, 51 Franklin Street, Suite 500 Boston, MA 02110-1335 USA
+// Fix scaling along with coding in blocks so only palette and main screen scaling is required to be fixed later on.
+
 
 // Length of a long touch
 var LONGPRESSTIME = 2000;
@@ -126,7 +118,7 @@ function Block(protoblock, blocks, overrideName) {
                 }
             }
         }
-        this.container.updateCache();
+        // this.container.updateCache(); TODO : Check what update cache does
         this.blocks.refreshCanvas(1);
     }
 
@@ -135,67 +127,68 @@ function Block(protoblock, blocks, overrideName) {
         var thisBlock = this.blocks.blockList.indexOf(this);
 
         this.clampCount[clamp] += plusMinus;
-        this.newArtwork(plusMinus);
+        this.newArtwork(plusMinus); //
         this.regenerateArtwork(false); // , blocksToCheck);
     }
 
+    // Fix this function when the base graphics is done
     this.resize = function(scale) {
         // If the block scale changes, we need to regenerate the
         // artwork and recalculate the hitarea.
-        this.postProcess = function(myBlock) {
-            if (myBlock.imageBitmap != null) {
-                if (myBlock.imageBitmap.image.width > myBlock.imageBitmap.image.height) {
-                    myBlock.imageBitmap.scaleX = myBlock.imageBitmap.scaleY = myBlock.imageBitmap.scale = MEDIASAFEAREA[2] / myBlock.imageBitmap.image.width * scale / 2;
-                } else {
-                    myBlock.imageBitmap.scaleX = myBlock.imageBitmap.scaleY = myBlock.imageBitmap.scale = MEDIASAFEAREA[3] / myBlock.imageBitmap.image.height * scale / 2;
-                }
-                myBlock.imageBitmap.x = (MEDIASAFEAREA[0] - 10) * scale / 2;
-                myBlock.imageBitmap.y = MEDIASAFEAREA[1] * scale / 2;
-                z = myBlock.container.getNumChildren() - 1;
-                myBlock.container.setChildIndex(myBlock.imageBitmap, z);
-            }
-            if (myBlock.name == 'start') {
-                // Rescale the decoration on the start blocks.
-                for (turtle = 0; turtle < myBlock.blocks.turtles.turtleList.length; turtle++) {
-                    if (myBlock.blocks.turtles.turtleList[turtle].startBlock == myBlock) {
-                        myBlock.blocks.turtles.turtleList[turtle].resizeDecoration(scale, myBlock.bitmap.image.width);
-                        ensureDecorationOnTop(myBlock);
-                        break;
-                    }
-                }
-            }
-            myBlock.container.updateCache();
-            calculateBlockHitArea(myBlock);
-        }
-        this.protoblock.scale = scale;
-        this.newArtwork(0);
-        this.regenerateArtwork(true);
+        // this.postProcess = function(myBlock) {
+        //     if (myBlock.imageBitmap != null) {
+        //         if (myBlock.imageBitmap.image.width > myBlock.imageBitmap.image.height) {
+        //             myBlock.imageBitmap.scaleX = myBlock.imageBitmap.scaleY = myBlock.imageBitmap.scale = MEDIASAFEAREA[2] / myBlock.imageBitmap.image.width * scale / 2;
+        //         } else {
+        //             myBlock.imageBitmap.scaleX = myBlock.imageBitmap.scaleY = myBlock.imageBitmap.scale = MEDIASAFEAREA[3] / myBlock.imageBitmap.image.height * scale / 2;
+        //         }
+        //         myBlock.imageBitmap.x = (MEDIASAFEAREA[0] - 10) * scale / 2;
+        //         myBlock.imageBitmap.y = MEDIASAFEAREA[1] * scale / 2;
+        //         z = myBlock.container.getNumChildren() - 1;
+        //         myBlock.container.setChildIndex(myBlock.imageBitmap, z);
+        //     }
+        //     if (myBlock.name == 'start') {
+        //         // Rescale the decoration on the start blocks.
+        //         for (turtle = 0; turtle < myBlock.blocks.turtles.turtleList.length; turtle++) {
+        //             if (myBlock.blocks.turtles.turtleList[turtle].startBlock == myBlock) {
+        //                 myBlock.blocks.turtles.turtleList[turtle].resizeDecoration(scale, myBlock.bitmap.image.width);
+        //                 ensureDecorationOnTop(myBlock);
+        //                 break;
+        //             }
+        //         }
+        //     }
+        //     myBlock.container.updateCache();
+        //     calculateBlockHitArea(myBlock);
+        // }
+        // this.protoblock.scale = scale;
+        // this.newArtwork(0);
+        // this.regenerateArtwork(true);
 
-        if (this.text != null) {
-            var fontSize = 10 * scale;
-            this.text.font = fontSize + 'px Sans';
-            this.text.x = VALUETEXTX * scale / 2.;
-            this.text.y = VALUETEXTY * scale / 2.;
-        }
-        if (this.collapseContainer != null) {
-            this.collapseContainer.uncache();
-            var postProcess = function(myBlock) {
-                myBlock.collapseBitmap.scaleX = myBlock.collapseBitmap.scaleY = myBlock.collapseBitmap.scale = scale / 2;
-                myBlock.expandBitmap.scaleX = myBlock.expandBitmap.scaleY = myBlock.expandBitmap.scale = scale / 2;
-                var bounds = myBlock.collapseContainer.getBounds();
-                myBlock.collapseContainer.cache(bounds.x, bounds.y, bounds.width, bounds.height);
-                myBlock.collapseContainer.x = myBlock.container.x + COLLAPSEBUTTONXOFF * (myBlock.protoblock.scale / 2);
-                myBlock.collapseContainer.y = myBlock.container.y + COLLAPSEBUTTONYOFF * (myBlock.protoblock.scale / 2);
+        // if (this.text != null) {
+        //     var fontSize = 10 * scale;
+        //     this.text.font = fontSize + 'px Sans';
+        //     this.text.x = VALUETEXTX * scale / 2.;
+        //     this.text.y = VALUETEXTY * scale / 2.;
+        // }
+        // if (this.collapseContainer != null) {
+        //     this.collapseContainer.uncache();
+        //     var postProcess = function(myBlock) {
+        //         myBlock.collapseBitmap.scaleX = myBlock.collapseBitmap.scaleY = myBlock.collapseBitmap.scale = scale / 2;
+        //         myBlock.expandBitmap.scaleX = myBlock.expandBitmap.scaleY = myBlock.expandBitmap.scale = scale / 2;
+        //         var bounds = myBlock.collapseContainer.getBounds();
+        //         myBlock.collapseContainer.cache(bounds.x, bounds.y, bounds.width, bounds.height);
+        //         myBlock.collapseContainer.x = myBlock.container.x + COLLAPSEBUTTONXOFF * (myBlock.protoblock.scale / 2);
+        //         myBlock.collapseContainer.y = myBlock.container.y + COLLAPSEBUTTONYOFF * (myBlock.protoblock.scale / 2);
 
-                calculateCollapseHitArea(myBlock);
-            }
+        //         calculateCollapseHitArea(myBlock);
+        //     }
 
-            this.generateCollapseArtwork(postProcess);
-            var fontSize = 10 * scale;
-            this.collapseText.font = fontSize + 'px Sans';
-            this.collapseText.x = COLLAPSETEXTX * scale / 2;
-            this.collapseText.y = COLLAPSETEXTY * scale / 2;
-        }
+        //     this.generateCollapseArtwork(postProcess);
+        //     var fontSize = 10 * scale;
+        //     this.collapseText.font = fontSize + 'px Sans';
+        //     this.collapseText.x = COLLAPSETEXTX * scale / 2;
+        //     this.collapseText.y = COLLAPSETEXTY * scale / 2;
+        // }
     }
 
     this.newArtwork = function(plusMinus) {
@@ -256,28 +249,54 @@ function Block(protoblock, blocks, overrideName) {
         // blocks, this is the primary label; for parameter blocks,
         // this is used to display the current block value.
         var fontSize = 10 * this.protoblock.scale;
-        this.text = new createjs.Text('', fontSize + 'px Sans', '#000000');
+        var options = {'font' : 'helvetiker','weight' : 'normal', 'style' : 'normal','size' : fontSize,'curveSegments' : 20};
+        var textShapes = THREE.FontUtils.generateShapes( 'The message has changed and has been replaced', options );
+        var text = new THREE.ShapeGeometry( textShapes );
+        var textMesh = new THREE.Mesh( text, new THREE.MeshBasicMaterial( { color: 0x000000 } ) ) ;
+        this.text = textMesh;
 
         this.generateArtwork(true, []);
     }
+
 
     this.addImage = function() {
         var image = new Image();
         var myBlock = this;
 
         image.onload = function() {
-            var bitmap = new createjs.Bitmap(image);
+            var canvas = document.createElement('canvas');
+            canvas.width = image.width;
+            canvas.height = image.height;
+            var context = canvas.getContext('2d');
+            context.drawImage(image, 0, 0);
+            var texture = new THREE.Texture(canvas);
+            texture.needsUpdate = true;
+            texture.minFilter = THREE.NearestFilter; 
+            var material = new THREE.MeshBasicMaterial( {map: texture} );
+            material.transparent = true;
+            material.depthWrite = false;
+            // me.container.scaleX = size/me.iconsize; //See if the scale variable is required here
+            // me.container.scaleY = size/me.iconsize;
+            // var bitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(me.container.scaleX*image.width, me.container.scaleY*image.height),material);
+            
+            var bitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(image.width, image.height),material);
             bitmap.name = 'media';
-            if (image.width > image.height) {
-                bitmap.scaleX = bitmap.scaleY = bitmap.scale = MEDIASAFEAREA[2] / image.width * (myBlock.protoblock.scale / 2);
+            bitmap.imgWidth = image.width;
+            bitmap.imgHeight = image.height;
+
+            if (image.width > image.height){
+                bitmap.scale.setX(MEDIASAFEAREA[2] / image.width * (myBlock.protoblock.scale / 2));
+                bitmap.scale.setY(MEDIASAFEAREA[2] / image.width * (myBlock.protoblock.scale / 2));
+                bitmap.scaleStore = MEDIASAFEAREA[2] / image.width * (myBlock.protoblock.scale / 2);    
             } else {
-                bitmap.scaleX = bitmap.scaleY = bitmap.scale = MEDIASAFEAREA[3] / image.height * (myBlock.protoblock.scale / 2);
+                bitmap.scale.setX(MEDIASAFEAREA[3] / image.height * (myBlock.protoblock.scale / 2));
+                bitmap.scale.setY(MEDIASAFEAREA[3] / image.height * (myBlock.protoblock.scale / 2));
+                bitmap.scaleStore = MEDIASAFEAREA[3] / image.height * (myBlock.protoblock.scale / 2); 
             }
-            myBlock.container.addChild(bitmap);
-            myBlock.imageBitmap = bitmap;
-            bitmap.x = (MEDIASAFEAREA[0] - 10) * (myBlock.protoblock.scale / 2);
-            bitmap.y = MEDIASAFEAREA[1] * (myBlock.protoblock.scale / 2);
-            myBlock.container.updateCache();
+
+            myBlock.container.add(bitmap);
+            bitmap.position.setX(threeCoorX((MEDIASAFEAREA[0] - 10) * (myBlock.protoblock.scale / 2)));
+            bitmap.position.setY(threeCoorY(MEDIASAFEAREA[1] * (myBlock.protoblock.scale / 2)));
             myBlock.blocks.refreshCanvas(1);
         }
         image.src = this.image;
@@ -288,13 +307,13 @@ function Block(protoblock, blocks, overrideName) {
         // to regenerate the artwork associated with a block.
 
         // First we need to remove the old artwork.
-        this.container.removeChild(this.bitmap);
-        this.container.removeChild(this.highlightBitmap);
+        this.container.remove(this.bitmap);
+        this.container.remove(this.highlightBitmap);
         if (collapse && this.collapseBitmap != null) {
-            this.collapseContainer.removeChild(this.collapseBitmap);
-            this.collapseContainer.removeChild(this.expandBitmap);
-            this.container.removeChild(this.collapseBlockBitmap);
-            this.container.removeChild(this.highlightCollapseBlockBitmap);
+            this.collapseContainer.remove(this.collapseBitmap);
+            this.collapseContainer.remove(this.expandBitmap);
+            this.container.remove(this.collapseBlockBitmap);
+            this.container.remove(this.highlightCollapseBlockBitmap);
         }
         // Then we generate new artwork.
         this.generateArtwork(false, []);
@@ -338,14 +357,12 @@ function Block(protoblock, blocks, overrideName) {
                 if (myBlock.text != null) {
                     // Make sure text is on top.
                     z = myBlock.container.children.length - 1;
+                    // URGENT TODO : Make a function that brings to top
                     // myBlock.container.setChildIndex(myBlock.text, z);
                 }
 
                 // At me point, it should be safe to calculate the
                 // bounds of the container and cache its contents.
-                if (!firstTime) {
-                    myBlock.container.uncache();
-                }
 
                 myBlock.bounds = myBlock.container.get2DBounds();
                 // myBlock.container.cache(myBlock.bounds.x, myBlock.bounds.y, myBlock.bounds.width, myBlock.bounds.height);
@@ -360,7 +377,7 @@ function Block(protoblock, blocks, overrideName) {
                     myBlock.finishImageLoad(firstTime);
                 } else {
                     if (myBlock.name == 'start') {
-                        ensureDecorationOnTop(myBlock);
+                        // ensureDecorationOnTop(myBlock);
                     }
 
                     // Adjust the docks.
@@ -513,6 +530,7 @@ function Block(protoblock, blocks, overrideName) {
                     myBlock.container.add(myBlock.highlightCollapseBlockBitmap);
                     myBlock.highlightCollapseBlockBitmap.visible = false;
 
+                    // TODO : Uncomment this text adding section after fixing it
                     // var fontSize = 10 * myBlock.protoblock.scale;
                     // if (myBlock.name == 'action') {
                     //     myBlock.collapseText = new createjs.Text(_('action'), fontSize + 'px Sans', '#000000');
@@ -526,7 +544,8 @@ function Block(protoblock, blocks, overrideName) {
                     // myBlock.container.addChild(myBlock.collapseText);
                     // myBlock.collapseText.visible = myBlock.collapsed;
 
-                    ensureDecorationOnTop(myBlock);
+                    // TODO : Uncomment this function when ensureDecorationOnTop works
+                    // ensureDecorationOnTop(myBlock);
 
                     // myBlock.container.updateCache();
                     myBlock.blocks.refreshCanvas(1);
@@ -535,10 +554,38 @@ function Block(protoblock, blocks, overrideName) {
                     // myBlock.collapseContainer.snapToPixelEnabled = true;
 
                     var image = new Image();
+
+                // img.src = 'data:image/svg+xml;base64,' + window.btoa(
+                //     unescape(encodeURIComponent(data)));
+
+
                     image.onload = function() {
-                        myBlock.collapseBitmap = new createjs.Bitmap(image);
-                        myBlock.collapseBitmap.scaleX = myBlock.collapseBitmap.scaleY = myBlock.collapseBitmap.scale = myBlock.protoblock.scale / 2;
-                        myBlock.collapseContainer.addChild(myBlock.collapseBitmap);
+                        var canvas = document.createElement('canvas');
+                        canvas.width = image.width;
+                        canvas.height = image.height;
+                        var context = canvas.getContext('2d');
+                        context.drawImage(image, 0, 0);
+                        var texture = new THREE.Texture(canvas);
+                        texture.needsUpdate = true;
+                        texture.minFilter = THREE.NearestFilter; 
+                        var material = new THREE.MeshBasicMaterial( {map: texture} );
+                        material.transparent = true;
+                        material.depthWrite = false;
+                        // me.container.scaleX = size/me.iconsize; //See if the scale variable is required here
+                        // me.container.scaleY = size/me.iconsize;
+                        // var bitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(me.container.scaleX*image.width, me.container.scaleY*image.height),material);
+                        
+                        myBlock.collapseBitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(image.width, image.height),material);
+                        myBlock.collapseBitmap.name = 'collapseBitmap '
+                        myBlock.collapseBitmap.imgWidth = image.width;
+                        myBlock.collapseBitmap.imgHeight = image.height;
+
+                        bitmap.scale.setX(myBlock.protoblock.scale / 2);
+                        bitmap.scale.setY(myBlock.protoblock.scale / 2);
+                        bitmap.scaleStore = myBlock.protoblock.scale / 2;
+
+                        myBlock.collapseContainer.add(myBlock.collapseBitmap);
+
                         finishCollapseButton(myBlock);
                     }
                     image.src = 'images/collapse.svg';
@@ -546,14 +593,32 @@ function Block(protoblock, blocks, overrideName) {
                     finishCollapseButton = function(myBlock) {
                         var image = new Image();
                         image.onload = function() {
-                            myBlock.expandBitmap = new createjs.Bitmap(image);
-                            myBlock.expandBitmap.scaleX = myBlock.expandBitmap.scaleY = myBlock.expandBitmap.scale = myBlock.protoblock.scale / 2;
-                            myBlock.collapseContainer.addChild(myBlock.expandBitmap);
+                            var canvas = document.createElement('canvas');
+                            canvas.width = image.width;
+                            canvas.height = image.height;
+                            var context = canvas.getContext('2d');
+                            context.drawImage(image, 0, 0);
+                            var texture = new THREE.Texture(canvas);
+                            texture.needsUpdate = true;
+                            texture.minFilter = THREE.NearestFilter; 
+                            var material = new THREE.MeshBasicMaterial( {map: texture} );
+                            material.transparent = true;
+                            material.depthWrite = false;
+                            // me.container.scaleX = size/me.iconsize; //See if the scale variable is required here
+                            // me.container.scaleY = size/me.iconsize;
+                            // var bitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(me.container.scaleX*image.width, me.container.scaleY*image.height),material);
+                            myBlock.expandBitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(image.width, image.height),material);
+                            myBlock.expandBitmap.name = 'expandBitmap';
+                            myBlock.expandBitmap.imgWidth = image.width;
+                            myBlock.expandBitmap.imgHeight = image.height;
+
+                            myBlock.expandBitmap.scale.setX(myBlock.protoblock.scale / 2);
+                            myBlock.expandBitmap.scale.setY(myBlock.protoblock.scale / 2);
+                            myBlock.expandBitmap.scaleStore = myBlock.protoblock.scale / 2;
+                            myBlock.collapseContainer.add(myBlock.collapseBitmap);
                             myBlock.expandBitmap.visible = false;
 
-                            var bounds = myBlock.collapseContainer.getBounds();
-                            myBlock.collapseContainer.cache(bounds.x, bounds.y, bounds.width, bounds.height);
-                            myBlock.blocks.stage.addChild(myBlock.collapseContainer);
+                            myBlock.blocks.stage.add(myBlock.collapseContainer);
                             if (postProcess != null) {
                                 postProcess(myBlock);
                             }
@@ -815,14 +880,15 @@ function $() {
 
 
 function calculateCollapseHitArea(myBlock) {
-    var bounds = myBlock.collapseContainer.getBounds();
-    var hitArea = new createjs.Shape();
-    var w2 = bounds.width;
-    var h2 = bounds.height;
-    hitArea.graphics.beginFill('#FFF').drawEllipse(-w2 / 2, -h2 / 2, w2, h2);
-    hitArea.x = w2 / 2;
-    hitArea.y = h2 / 2;
-    myBlock.collapseContainer.hitArea = hitArea;
+    var bounds = myBlock.collapseContainer.get2DBounds(true);
+    // TODO : Create hitmesh once the basic is done
+    // var hitArea = new createjs.Shape();
+    // var w2 = bounds.width;
+    // var h2 = bounds.height;
+    // hitArea.graphics.beginFill('#FFF').drawEllipse(-w2 / 2, -h2 / 2, w2, h2);
+    // hitArea.x = w2 / 2;
+    // hitArea.y = h2 / 2;
+    // myBlock.collapseContainer.hitArea = hitArea;
 }
 
 
@@ -961,16 +1027,19 @@ document.addEventListener('mousemove', function (e) {
 
 
 function calculateBlockHitArea(myBlock) {
-    // var hitArea = new createjs.Shape();
-    // var bounds = myBlock.container.getBounds()
+    
+    var bounds = myBlock.container.get2DBounds();
+    var hitmesh;
 
-    // // Only detect hits on top section of block.
-    // if (myBlock.isClampBlock()) {
-    //     hitArea.graphics.beginFill('#FFF').drawRect(0, 0, bounds.width, STANDARDBLOCKHEIGHT);
-    // } else {
-    //     hitArea.graphics.beginFill('#FFF').drawRect(0, 0, bounds.width, bounds.height * 0.75); // Shrinking the height makes it easier to grab blocks below in the stack.
-    // }
-    // myBlock.container.hitArea = hitArea;
+    // Only detect hits on top section of block.
+    if (myBlock.isClampBlock()) {
+        hitmesh = createRectangle(bounds.width, bounds.height, '#000000');
+    } else {
+        hitmesh = createRectangle(bounds.width, bounds.height * 0.75, '#000000'); // Shrinking the height makes it easier to grab blocks below in the stack.
+    }
+    myBlock.container.add(hitmesh);
+    hitmesh.visible = false;
+    myBlock.container.hitmesh = hitmesh;
 }
 
 
@@ -1238,10 +1307,12 @@ function mouseoutCallback(myBlock, event, moved) {
 
 
 function ensureDecorationOnTop(myBlock) {
+    // FIXME : Write new logic for this function with z-index instead.
+
     // Find the turtle decoration and move it to the top.
-    for (var child = 0; child < myBlock.container.getNumChildren(); child++) {
+    for (var child = 0; child < myBlock.container.children.length; child++) {
         if (myBlock.container.children[child].name == 'decoration') {
-            myBlock.container.setChildIndex(myBlock.container.children[child], myBlock.container.getNumChildren() - 1);
+            myBlock.container.position.setZ(3);
             break;
         }
     }
