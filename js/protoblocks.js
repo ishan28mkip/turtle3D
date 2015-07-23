@@ -55,6 +55,7 @@ function ProtoBlock(name) {
     // Hidden: don't show on any palette
     this.hidden = false;
 
+    // DONE 
     this.adjustWidthToLabel = function() {
         if (this.staticLabels.length == 0) {
             return;

@@ -544,7 +544,7 @@ function Turtles(canvas, stage, refreshCanvas) {
 
         // Each turtle needs its own canvas.
         myTurtle.drawingCanvas = new createjs.Shape();
-        this.stage.addChild(myTurtle.drawingCanvas);
+        this.stage.add(myTurtle.drawingCanvas);
         // In theory, this prevents some unnecessary refresh of the
         // canvas.
         myTurtle.drawingCanvas.tickEnabled = false;
