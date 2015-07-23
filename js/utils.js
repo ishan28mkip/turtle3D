@@ -605,6 +605,18 @@ function createBoundingBitmap(container,scene){
     scene.add(line);
 }
 
+function createRectangle(width,height,color){
+    var rectShape = new THREE.Shape();
+    rectShape.moveTo( -width/2, height/2 );
+    rectShape.lineTo( width/2, height/2 );
+    rectShape.lineTo( width/2, -height/2 );
+    rectShape.lineTo( -width/2, -height/2 );
+    rectShape.lineTo( -width/2, height/2 );
+    var rectGeom = new THREE.ShapeGeometry( rectShape );
+    var rectMesh = new THREE.Mesh( rectGeom, new THREE.MeshBasicMaterial( { 'color': color } ) ) ;
+    return rectMesh;
+}
+
 
 
 // ------------------------------------------------------------------- //
