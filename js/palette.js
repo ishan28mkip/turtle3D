@@ -393,7 +393,7 @@ function Palette(palettes, name) {
                         palette.upButton = bitmap;
 
                         palette.upButton.on('click', function(event) {
-                            palette.scrollEvent(STANDARDBLOCKHEIGHT, 10);
+                            palette.scrollEvent(STANDARDBLOCKHEIGHT, 10); //Add next palette page handler here
                         });
 
                         function processDownIcon(palette, name, bitmap, extras) {
@@ -408,7 +408,7 @@ function Palette(palettes, name) {
                             palette.downButton = bitmap;
 
                             palette.downButton.on('click', function(event) {
-                                palette.scrollEvent(-STANDARDBLOCKHEIGHT, 10);
+                                palette.scrollEvent(-STANDARDBLOCKHEIGHT, 10); //Add next palette page handler here
                             });
                         } 
                         makePaletteBitmap(palette, DOWNICON, name, processDownIcon, null);
@@ -733,7 +733,7 @@ function Palette(palettes, name) {
 
                         bitmap.scale.setX(PROTOBLOCKSCALE);
                         bitmap.scale.setY(PROTOBLOCKSCALE);
-                        bitmap.scale = PROTOBLOCKSCALE;
+                        bitmap.scaleStore = PROTOBLOCKSCALE;
 
                         // TODO : Fix theses width and height to include scaling
                         var width =  bitmap.imgWidth - 15;
@@ -786,10 +786,10 @@ function Palette(palettes, name) {
                                     // FIXME : Fix the scaling issues together
                                     bitmap.scale.setX(MEDIASAFEAREA[2] / image.width);
                                     bitmap.scale.setY(MEDIASAFEAREA[2] / image.width );
-                                    bitmap.scale = (MEDIASAFEAREA[2] / image.width );
+                                    bitmap.scaleStore = (MEDIASAFEAREA[2] / image.width );
                                     // bitmap.scale.setX(MEDIASAFEAREA[2] / image.width * (myBlock.scale / 2));
                                     // bitmap.scale.setY(MEDIASAFEAREA[2] / image.width * (myBlock.scale / 2));
-                                    // bitmap.scale = (MEDIASAFEAREA[2] / image.width * (myBlock.scale / 2));
+                                    // bitmap.scaleStore = (MEDIASAFEAREA[2] / image.width * (myBlock.scale / 2));
                                 }
 
                                 palette.protoContainers[modname].add(bitmap);
@@ -936,6 +936,8 @@ function Palette(palettes, name) {
             this.FadedDownButton.position.setY(this.FadedDownButton.position.y + dy);
         }
     }
+
+// Fix this function
 this.scrollEvent = function(direction, scrollSpeed) {
         var diff = direction * scrollSpeed;
         var h = Math.min(maxPaletteHeight(this.palettes.cellSize, this.palettes.scale), this.y);
