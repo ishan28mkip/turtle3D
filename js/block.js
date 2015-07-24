@@ -58,14 +58,17 @@ function Block(protoblock, blocks, overrideName) {
     this.postProcess = null;
     this.postProcessArg = null;
 
+    // DONE
     this.copySize = function() {
         this.size = this.protoblock.size;
     }
 
+    // DONE
     this.getInfo = function() {
         return this.name + ' block';
     }
 
+    // DONE
     this.highlight = function() {
         if (this.collapsed && ['start', 'action'].indexOf(this.name) != -1) {
             // We may have a race condition.
@@ -98,6 +101,7 @@ function Block(protoblock, blocks, overrideName) {
         this.blocks.refreshCanvas(1);
     }
 
+    // DONE
     this.unhighlight = function() {
         if (this.collapsed && ['start', 'action'].indexOf(this.name) != -1) {
             if (this.highlightCollapseBlockBitmap) {
@@ -122,6 +126,7 @@ function Block(protoblock, blocks, overrideName) {
         this.blocks.refreshCanvas(1);
     }
 
+    // DONE
     this.updateSlots = function(clamp, plusMinus, blocksToCheck) {
         // Resize an expandable block.
         var thisBlock = this.blocks.blockList.indexOf(this);
@@ -191,6 +196,7 @@ function Block(protoblock, blocks, overrideName) {
         // }
     }
 
+    // DONE | TEST 
     this.newArtwork = function(plusMinus) {
         switch (this.name) {
             case 'start':
@@ -240,6 +246,7 @@ function Block(protoblock, blocks, overrideName) {
         }
     }
 
+    // INCOMPLETE
     this.imageLoad = function() {
         // Load any artwork associated with the block and create any
         // extra parts. Image components are loaded asynchronously so
@@ -248,9 +255,13 @@ function Block(protoblock, blocks, overrideName) {
         // We need a text label for some blocks. For number and text
         // blocks, this is the primary label; for parameter blocks,
         // this is used to display the current block value.
+
+        // See where this is used and adjust the message and color
+        // parameters accordingly. Also make a function that edits the
+        // text easily.
         var fontSize = 10 * this.protoblock.scale;
         var options = {'font' : 'helvetiker','weight' : 'normal', 'style' : 'normal','size' : fontSize,'curveSegments' : 20};
-        var textShapes = THREE.FontUtils.generateShapes( 'The message has changed and has been replaced', options );
+        var textShapes = THREE.FontUtils.generateShapes( 'Message here', options );
         var text = new THREE.ShapeGeometry( textShapes );
         var textMesh = new THREE.Mesh( text, new THREE.MeshBasicMaterial( { color: 0x000000 } ) ) ;
         this.text = textMesh;
@@ -258,7 +269,8 @@ function Block(protoblock, blocks, overrideName) {
         this.generateArtwork(true, []);
     }
 
-
+    // DONE 
+    // Adjust the positioning
     this.addImage = function() {
         var image = new Image();
         var myBlock = this;
@@ -302,6 +314,7 @@ function Block(protoblock, blocks, overrideName) {
         image.src = this.image;
     }
 
+    // DONE | TEST
     this.regenerateArtwork = function(collapse) {
         // Sometimes (in the case of namedboxes and nameddos) we need
         // to regenerate the artwork associated with a block.
@@ -319,6 +332,7 @@ function Block(protoblock, blocks, overrideName) {
         this.generateArtwork(false, []);
     }
 
+    // ALMOST : FIX ensure on top function
     this.generateArtwork = function(firstTime, blocksToCheck) {
         // Get the block labels from the protoblock
         var thisBlock = this.blocks.blockList.indexOf(this);
@@ -337,8 +351,8 @@ function Block(protoblock, blocks, overrideName) {
         function processBitmap(name, bitmap, myBlock) {
             myBlock.bitmap = bitmap;
             myBlock.container.add(myBlock.bitmap);
-            myBlock.bitmap.position.x = 0; //PE : Check if this needs to 0 or threeCoorX(0)
-            myBlock.bitmap.position.y = 0;
+            myBlock.bitmap.position.x = 0; // PE : Check if this needs to 0 or threeCoorX(0)
+            myBlock.bitmap.position.y = 0; // PE
             myBlock.bitmap.name = 'bmp_' + thisBlock;
             myBlock.bitmap.cursor = 'pointer';
             myBlock.blocks.refreshCanvas(1);
@@ -348,7 +362,7 @@ function Block(protoblock, blocks, overrideName) {
                 myBlock.highlightBitmap = bitmap;
                 myBlock.container.add(myBlock.highlightBitmap);
                 myBlock.highlightBitmap.position.x = 0; // PE : if this needs to 0 or threeCoorX(0)
-                myBlock.highlightBitmap.position.y = 0;
+                myBlock.highlightBitmap.position.y = 0; //PE
                 myBlock.highlightBitmap.name = 'bmp_highlight_' + thisBlock;
                 myBlock.highlightBitmap.cursor = 'pointer';
                 // Hide it to start
@@ -370,14 +384,14 @@ function Block(protoblock, blocks, overrideName) {
                 myBlock.blocks.refreshCanvas(1);
 
                 if (firstTime) {
-                    loadEventHandlers(myBlock);
+                    loadEventHandlers(myBlock); 
                     if (myBlock.image != null) {
                         myBlock.addImage();
                     }
                     myBlock.finishImageLoad(firstTime);
                 } else {
                     if (myBlock.name == 'start') {
-                        // ensureDecorationOnTop(myBlock);
+                        ensureDecorationOnTop(myBlock);
                     }
 
                     // Adjust the docks.
@@ -530,28 +544,25 @@ function Block(protoblock, blocks, overrideName) {
                     myBlock.container.add(myBlock.highlightCollapseBlockBitmap);
                     myBlock.highlightCollapseBlockBitmap.visible = false;
 
-                    // TODO : Uncomment this text adding section after fixing it
-                    // var fontSize = 10 * myBlock.protoblock.scale;
-                    // if (myBlock.name == 'action') {
-                    //     myBlock.collapseText = new createjs.Text(_('action'), fontSize + 'px Sans', '#000000');
-                    // } else {
-                    //     myBlock.collapseText = new createjs.Text(_('start'), fontSize + 'px Sans', '#000000');
-                    // }
-                    // myBlock.collapseText.x = COLLAPSETEXTX * (myBlock.protoblock.scale / 2);
-                    // myBlock.collapseText.y = COLLAPSETEXTY * (myBlock.protoblock.scale / 2);
-                    // myBlock.collapseText.textAlign = 'left';
-                    // myBlock.collapseText.textBaseline = 'alphabetic';
-                    // myBlock.container.addChild(myBlock.collapseText);
-                    // myBlock.collapseText.visible = myBlock.collapsed;
+                    var fontSize = 10 * myBlock.protoblock.scale;
+                    if (myBlock.name == 'action') {
+                        myBlock.collapseText = createText(_('action'), '#000000',fontSize);
+                    } else {
+                        myBlock.collapseText = createText(_('start'), '#000000',fontSize);
+                    }
+                    myBlock.collapseText.x = COLLAPSETEXTX * (myBlock.protoblock.scale / 2);
+                    myBlock.collapseText.y = COLLAPSETEXTY * (myBlock.protoblock.scale / 2);
+                    // myBlock.collapseText.textAlign = 'left'; // FIXME : Implement a proper text plugin with all easel options 
+                    // myBlock.collapseText.textBaseline = 'alphabetic'; // TODO : Implement a baseline
+                    myBlock.container.add(myBlock.collapseText);
+                    myBlock.collapseText.visible = myBlock.collapsed;
 
-                    // TODO : Uncomment this function when ensureDecorationOnTop works
-                    // ensureDecorationOnTop(myBlock);
+                    ensureDecorationOnTop(myBlock);
 
-                    // myBlock.container.updateCache();
                     myBlock.blocks.refreshCanvas(1);
 
                     myBlock.collapseContainer = new THREE.Group();
-                    // myBlock.collapseContainer.snapToPixelEnabled = true;
+                    // myBlock.collapseContainer.snapToPixelEnabled = true; //TODO : Implement a snap feature
 
                     var image = new Image();
 
@@ -1025,7 +1036,7 @@ document.addEventListener('mousemove', function (e) {
     window.hasMouse = true;
 });
 
-
+// DONE
 function calculateBlockHitArea(myBlock) {
     
     var bounds = myBlock.container.get2DBounds();
@@ -1059,6 +1070,7 @@ function loadEventHandlers(myBlock) {
     var moved = false;
     var locked = false;
     var getInput = window.hasMouse;
+
     myBlock.container.on('click', function(event) {
         if (locked) {
             return;
@@ -1067,7 +1079,7 @@ function loadEventHandlers(myBlock) {
         setTimeout(function() {
             locked = false;
         }, 500);
-        hideDOMLabel();
+        // hideDOMLabel(); //FIXME : fix the dom labels
         if ((!window.hasMouse && getInput) || (window.hasMouse && !moved)) {
             if (blocks.selectingStack) {
                 var topBlock = blocks.findTopBlock(thisBlock);
@@ -1305,21 +1317,34 @@ function mouseoutCallback(myBlock, event, moved) {
     }
 }
 
-
+// DONE
 function ensureDecorationOnTop(myBlock) {
-    // FIXME : Write new logic for this function with z-index instead.
-
     // Find the turtle decoration and move it to the top.
-    for (var child = 0; child < myBlock.container.children.length; child++) {
+    var decorationIndex;
+    var currZindex = myBlock.container.children[0].position.z;
+    var maxZindex = currZindex;
+    var flag = false;
+
+    for (var child = 1; child < myBlock.container.children.length; child++) {
         if (myBlock.container.children[child].name == 'decoration') {
-            myBlock.container.position.setZ(3);
-            break;
+            decorationIndex = child;        
         }
+        else{
+            currZindex = myBlock.container.children[child].position.z;
+            if(currZindex > maxZindex){
+                maxZindex = currZindex;
+                flag = true;
+            }
+        }
+    }
+
+    if(decorationChild !== undefined && flag){
+        myBlock.container.children[decorationIndex].position.setZ(maxZindex+1);
     }
 }
 
 
-
+// DONE
 function makeBitmap(data, name, callback, args) {
     // Async creation of bitmap from SVG data
     // Works with Chrome, Safari, Firefox (untested on IE)
