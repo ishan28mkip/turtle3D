@@ -617,6 +617,34 @@ function createRectangle(width,height,color){
     return rectMesh;
 }
 
+function createText(text,color,size,font,weight,style,curveSegments){
+    // Setting the defaul values
+    text = (text === undefined) ? 'Default Text' : text;
+    color = (color === undefined) ? 0x000000 : color;
+    size = (size === undefined) ? 15 : size;
+    font = (font === undefined) ? 'helvetiker' : font;
+    weight = (weight === undefined) ? 'normal' : weight;
+    style = (style === undefined) ? 'normal' : style;
+    curveSegments = (curveSegments === undefined) ? 20 : curveSegments;
+
+    var options = {'font' : font,'weight' : weight, 'style' : style,'size' : size,'curveSegments' : curveSegments};
+    var textShapes = THREE.FontUtils.generateShapes( text, options );
+    var text = new THREE.ShapeGeometry( textShapes );
+    var textMesh = new THREE.Mesh( text, new THREE.MeshBasicMaterial( { color: color } ) ) ;
+    textMesh.options = options;
+    return textMesh;
+}
+
+// TODO : Make and test these functions when required  
+function editText(mesh,text){
+
+}
+
+// TODO : Make and test these functions when required 
+function editTextStyle(){
+
+}
+
 
 
 // ------------------------------------------------------------------- //
