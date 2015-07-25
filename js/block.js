@@ -1210,6 +1210,8 @@ function loadEventHandlers(myBlock) {
 
 
     myBlock.container.on('pressup', function(event) {
+        px = false;
+        py = false;
         if (!blocks.inLongPress) {
             mouseoutCallback(myBlock, event, moved);
         }
