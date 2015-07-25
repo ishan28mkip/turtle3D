@@ -87,6 +87,7 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
     this.inLongPress = false;
 
     // Change the scale of the blocks (and the protoblocks on the palette).
+    // DONE
     this.setBlockScale = function(scale) {
         console.log('new block scale is ' + scale);
         this.blockScale = scale;
@@ -916,7 +917,7 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
         // }
     }
 
-    // understand this later when the variables are clear
+    // DONE
     this.findTopBlock = function(blk) {
         // Find the top block in a stack.
         if (blk == null) {
@@ -2301,18 +2302,19 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
         this.refreshCanvas(1);
     }
 
+    // FIXME : Fix this function when fixing blocks.js
     this.raiseStackToTop = function (blk) {
         // Move the stack associated with blk to the top.
-        var topBlk = this.findTopBlock(blk);
-        this.findDragGroup(topBlk);
+    //     var topBlk = this.findTopBlock(blk);
+    //     this.findDragGroup(topBlk);
 
-        var n = this.stage.getNumChildren() - 1;
-        for (var b = 0; b < this.dragGroup.length; b++) {
-            this.stage.setChildIndex(this.blockList[this.dragGroup[b]].container, n);
-            n -= 1;
-        }
+    //     var n = this.stage.children.length - 1;
+    //     for (var b = 0; b < this.dragGroup.length; b++) {
+    //         this.stage.setChildIndex(this.blockList[this.dragGroup[b]].container, n);
+    //         n -= 1;
+    //     }
 
-        this.refreshCanvas;
+    //     this.refreshCanvas(1);
     }
 
     blockBlocks = this;
