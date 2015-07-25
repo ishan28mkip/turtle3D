@@ -1,4 +1,4 @@
-// Fix scaling along with coding in blocks so only palette and main screen scaling is required to be fixed later on.
+// Fix scaling along with code in block so only palette and main screen scaling is required to be fixed later on.
 
 
 // Length of a long touch
@@ -246,7 +246,7 @@ function Block(protoblock, blocks, overrideName) {
         }
     }
 
-    // INCOMPLETE
+    // DONE
     this.imageLoad = function() {
         // Load any artwork associated with the block and create any
         // extra parts. Image components are loaded asynchronously so
@@ -329,13 +329,12 @@ function Block(protoblock, blocks, overrideName) {
 
     this.generateArtwork = function(firstTime, blocksToCheck) {
         // Get the block labels from the protoblock
-        console.log(_('start'));
         var thisBlock = this.blocks.blockList.indexOf(this);
         var block_label = '';
         if (this.overrideName) {
             block_label = this.overrideName;
         } else if (this.protoblock.staticLabels.length > 0 && !this.protoblock.image) {
-            // Label should be defined inside _(). WHY?
+            // Label should be defined inside _(). 
             block_label = this.protoblock.staticLabels[0];
         }
         while (this.protoblock.staticLabels.length < this.protoblock.args + 1) {
@@ -372,7 +371,6 @@ function Block(protoblock, blocks, overrideName) {
                 // bounds of the container and cache its contents.
 
                 myBlock.bounds = myBlock.container.get2DBounds();
-                // myBlock.container.cache(myBlock.bounds.x, myBlock.bounds.y, myBlock.bounds.width, myBlock.bounds.height);
                 myBlock.container.bounds = myBlock.bounds;
                 myBlock.blocks.refreshCanvas(1);
 
@@ -997,13 +995,14 @@ function loadCollapsibleEventHandlers(myBlock) {
 }
 
 
+// DONE
 function collapseOut(blocks, myBlock, thisBlock, moved, event) {
     // Always hide the trash when there is no block selected.
     trashcan.hide();
     blocks.unhighlight(thisBlock);
     if (moved) {
         // Check if block is in the trash.
-        if (trashcan.overTrashcan(event.stageX / blocks.scale, event.stageY / blocks.scale)) {
+        if (trashcan.overTrashcan(event.clientX / blocks.scale, event.clientY / blocks.scale)) {
             sendStackToTrash(blocks, myBlock);
         } else {
             // Otherwise, process move.
@@ -1052,15 +1051,17 @@ function loadEventHandlers(myBlock) {
 
     calculateBlockHitArea(myBlock);
 
+    var moved = false;
+    var locked = false;
+    var getInput = window.hasMouse;
+    var px,py,dx,dy;
+
+    // DONE
     myBlock.container.on('mouseover', function(event) {
         blocks.highlight(thisBlock, true);
         blocks.activeBlock = thisBlock;
         blocks.refreshCanvas(1);
     });
-
-    var moved = false;
-    var locked = false;
-    var getInput = window.hasMouse;
 
     myBlock.container.on('click', function(event) {
         if (locked) {
@@ -1081,8 +1082,8 @@ function loadEventHandlers(myBlock) {
             } else if (myBlock.name == 'loadFile') {
                 myBlock.doOpenMedia(myBlock);
             } else if (myBlock.name == 'text' || myBlock.name == 'number') {
-                var x = myBlock.container.x
-                var y = myBlock.container.y
+                var x = myBlock.container.position.x
+                var y = myBlock.container.position.y
                 var canvasLeft = blocks.canvas.offsetLeft + 28;
                 var canvasTop = blocks.canvas.offsetTop + 6;
 
@@ -1186,90 +1187,119 @@ function loadEventHandlers(myBlock) {
 
         // And possibly the collapse button.
         if (myBlock.collapseContainer != null) {
-            blocks.stage.setChildIndex(myBlock.collapseContainer, blocks.stage.getNumChildren() - 1);
+            // FIXME : set the collapseContainer z-index same as other
+            // blocks.stage.setChildIndex(myBlock.collapseContainer, blocks.stage.getNumChildren() - 1);
         }
 
         moved = false;
-        var offset = {
-            x: myBlock.container.x - Math.round(event.stageX / blocks.scale),
-            y: myBlock.container.y - Math.round(event.stageY / blocks.scale)
-        };
+        // var offset = {
+        //     x: myBlock.container.x - Math.round(event.stageX / blocks.scale),
+        //     y: myBlock.container.y - Math.round(event.stageY / blocks.scale)
+        // };
 
-        myBlock.container.on('mouseout', function(event) {
-            if (!blocks.inLongPress) {
-                mouseoutCallback(myBlock, event, moved);
-            }
-            moved = false;
-        });
+        var original = {x: event.clientX, y: event.clientY};
+    });
 
-        myBlock.container.on('pressup', function(event) {
-            if (!blocks.inLongPress) {
-                mouseoutCallback(myBlock, event, moved);
-            }
-            moved = false;
-        });
 
-        var original = {x: event.stageX, y: event.stageY};
-        myBlock.container.on('pressmove', function(event) {
-            // FIXME: More voodoo
-            event.nativeEvent.preventDefault();
+    myBlock.container.on('mouseout', function(event) {
+        if (!blocks.inLongPress) {
+            mouseoutCallback(myBlock, event, moved);
+        }
+        moved = false;
+    });
 
-            // FIXME: need to remove timer
-            if (blocks.timeOut != null) {
-                clearTimeout(blocks.timeOut);
-                blocks.timeOut = null;
-            }
-            if (!moved && myBlock.label != null) {
-                myBlock.label.style.display = 'none';
-            }
 
-            if (window.hasMouse) {
-                moved = true;
-            } else {
-                // Make it eaiser to select text on mobile
-                setTimeout(function () {
-                    moved = Math.abs(event.stageX - original.x) + Math.abs(event.stageY - original.y) > 20 && !window.hasMouse;
-                    getInput = !moved;
-                }, 200);
-            }
+    myBlock.container.on('pressup', function(event) {
+        if (!blocks.inLongPress) {
+            mouseoutCallback(myBlock, event, moved);
+        }
+        moved = false;
+    });
 
-            var oldX = myBlock.container.x;
-            var oldY = myBlock.container.y;
-            myBlock.container.x = Math.round(event.stageX / blocks.scale) + offset.x;
-            myBlock.container.y = Math.round(event.stageY / blocks.scale) + offset.y;
-            myBlock.x = myBlock.container.x;
-            myBlock.y = myBlock.container.y;
-            var dx = Math.round(myBlock.container.x - oldX);
-            var dy = Math.round(myBlock.container.y - oldY);
+    myBlock.container.on('pressmove', function(event) {
+        // FIXME: More voodoo, fix this function, causing errors
+        // event.nativeEvent.preventDefault();
 
-            // If we are over the trash, warn the user.
-            if (trashcan.overTrashcan(event.stageX / blocks.scale, event.stageY / blocks.scale)) {
-                trashcan.highlight();
-            } else {
-                trashcan.unhighlight();
-            }
+        // FIXME: need to remove timer
+        if (blocks.timeOut != null) {
+            clearTimeout(blocks.timeOut);
+            blocks.timeOut = null;
+        }
+        if (!moved && myBlock.label != null) {
+            myBlock.label.style.display = 'none';
+        }
 
-            if (myBlock.isValueBlock() && myBlock.name != 'media') {
-                // Ensure text is on top
-                var z = myBlock.container.getNumChildren() - 1;
-                myBlock.container.setChildIndex(myBlock.text, z);
-            } else if (myBlock.collapseContainer != null) {
-                myBlock.collapseContainer.x = myBlock.container.x + COLLAPSEBUTTONXOFF * (myBlock.protoblock.scale / 2);
-                myBlock.collapseContainer.y = myBlock.container.y + COLLAPSEBUTTONYOFF * (myBlock.protoblock.scale / 2);
-            }
+        if (window.hasMouse) {
+            moved = true;
+        } else {
+            // Make it eaiser to select text on mobile
+            setTimeout(function () {
+                moved = Math.abs(event.stageX - original.x) + Math.abs(event.stageY - original.y) > 20 && !window.hasMouse;
+                getInput = !moved;
+            }, 200);
+        }
 
-            // Move any connected blocks.
-            blocks.findDragGroup(thisBlock)
-            if (blocks.dragGroup.length > 0) {
-                for (var b = 0; b < blocks.dragGroup.length; b++) {
-                    var blk = blocks.dragGroup[b];
-                    if (b != 0) {
-                        blocks.moveBlockRelative(blk, dx, dy);
-                    }
+        // var oldX = myBlock.container.x;
+        // var oldY = myBlock.container.y;
+        // myBlock.container.x = Math.round(event.stageX / blocks.scale) + offset.x;
+        // myBlock.container.y = Math.round(event.stageY / blocks.scale) + offset.y;
+        // myBlock.x = myBlock.container.x;
+        // myBlock.y = myBlock.container.y;
+        // var dx = Math.round(myBlock.container.x - oldX);
+        // var dy = Math.round(myBlock.container.y - oldY);
+
+        // TODO : When scaling is active throughout then put it here as well
+        // just divide event.clientX and event.clientY with blocks.scale
+
+        if(!px || !py){
+            px = event.clientX;
+            py = event.clientY;
+            dx = 0;
+            dy = 0;
+        }
+        else{
+            dx = event.clientX - px;
+            dy = py - event.clientY;
+        }
+
+        myBlock.container.position.setX(myBlock.container.position.x + dx);
+        myBlock.container.position.setY(myBlock.container.position.y + dy);
+
+
+        // If we are over the trash, warn the user.
+        // Add scaling here
+        // if (trashcan.overTrashcan(event.stageX / blocks.scale, event.stageY / blocks.scale)) {
+        if(trashcan.overTrashcan(event.clientX, event.clientY)){
+            trashcan.highlight();
+        } else {
+            trashcan.unhighlight();
+        }
+
+        if (myBlock.isValueBlock() && myBlock.name != 'media') {
+            // Ensure text is on top
+            bringTextToTop(myBlock);
+        } else if (myBlock.collapseContainer != null) {
+            // PE : Check whether the positioning is working fine
+            myBlock.collapseContainer.position.setX(myBlock.container.position.x + COLLAPSEBUTTONXOFF * (myBlock.protoblock.scale / 2));
+            myBlock.collapseContainer.position.setY(myBlock.container.position.y + COLLAPSEBUTTONYOFF * (myBlock.protoblock.scale / 2));
+        }
+
+        // Move any connected blocks.
+        // PE : Check whether this is working
+        blocks.findDragGroup(thisBlock)
+        if (blocks.dragGroup.length > 0) {
+            for (var b = 0; b < blocks.dragGroup.length; b++) {
+                var blk = blocks.dragGroup[b];
+                if (b != 0) {
+                    blocks.moveBlockRelative(blk, dx, dy);
                 }
             }
-            blocks.refreshCanvas(1);
-        });
+        }
+
+        px = event.clientX;
+        py = event.clientY;
+
+        blocks.refreshCanvas(1);
     });
 
     myBlock.container.on('mouseout', function(event) {
@@ -1292,7 +1322,8 @@ function mouseoutCallback(myBlock, event, moved) {
 
     if (moved) {
         // Check if block is in the trash.
-        if (trashcan.overTrashcan(event.stageX / myBlock.blocks.scale, event.stageY / myBlock.blocks.scale)) {
+        // if (trashcan.overTrashcan(event.clientX / myBlock.blocks.scale, event.clientY / myBlock.blocks.scale)) {
+        if (trashcan.overTrashcan(event.clientX, event.clientY)) {
             sendStackToTrash(blocks, myBlock);
         } else {
             // Otherwise, process move.
