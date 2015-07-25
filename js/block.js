@@ -260,17 +260,12 @@ function Block(protoblock, blocks, overrideName) {
         // parameters accordingly. Also make a function that edits the
         // text easily.
         var fontSize = 10 * this.protoblock.scale;
-        var options = {'font' : 'helvetiker','weight' : 'normal', 'style' : 'normal','size' : fontSize,'curveSegments' : 20};
-        var textShapes = THREE.FontUtils.generateShapes( 'Message here', options );
-        var text = new THREE.ShapeGeometry( textShapes );
-        var textMesh = new THREE.Mesh( text, new THREE.MeshBasicMaterial( { color: 0x000000 } ) ) ;
-        this.text = textMesh;
-
+        this.text = createText('Default','#000000',fontSize);
         this.generateArtwork(true, []);
     }
 
     // DONE 
-    // Adjust the positioning
+    // FIXME : Adjust the positioning
     this.addImage = function() {
         var image = new Image();
         var myBlock = this;
@@ -332,15 +327,15 @@ function Block(protoblock, blocks, overrideName) {
         this.generateArtwork(false, []);
     }
 
-    // ALMOST : FIX ensure on top function
     this.generateArtwork = function(firstTime, blocksToCheck) {
         // Get the block labels from the protoblock
+        console.log(_('start'));
         var thisBlock = this.blocks.blockList.indexOf(this);
         var block_label = '';
         if (this.overrideName) {
             block_label = this.overrideName;
         } else if (this.protoblock.staticLabels.length > 0 && !this.protoblock.image) {
-            // Label should be defined inside _().
+            // Label should be defined inside _(). WHY?
             block_label = this.protoblock.staticLabels[0];
         }
         while (this.protoblock.staticLabels.length < this.protoblock.args + 1) {
@@ -370,9 +365,7 @@ function Block(protoblock, blocks, overrideName) {
 
                 if (myBlock.text != null) {
                     // Make sure text is on top.
-                    z = myBlock.container.children.length - 1;
-                    // URGENT TODO : Make a function that brings to top
-                    // myBlock.container.setChildIndex(myBlock.text, z);
+                    bringTextToTop(myBlock);
                 }
 
                 // At me point, it should be safe to calculate the
@@ -566,10 +559,6 @@ function Block(protoblock, blocks, overrideName) {
 
                     var image = new Image();
 
-                // img.src = 'data:image/svg+xml;base64,' + window.btoa(
-                //     unescape(encodeURIComponent(data)));
-
-
                     image.onload = function() {
                         var canvas = document.createElement('canvas');
                         canvas.width = image.width;
@@ -709,14 +698,15 @@ function Block(protoblock, blocks, overrideName) {
     }
 
     this.removeChildBitmap = function(name) {
-        for (var child = 0; child < this.container.getNumChildren(); child++) {
+        for (var child = 0; child < this.container.children.length; child++) {
             if (this.container.children[child].name == name) {
-                this.container.removeChild(this.container.children[child]);
+                this.container.remove(this.container.children[child]);
                 break;
             }
         }
     }
 
+    // FIXME : Fix this function
     this.loadThumbnail = function (imagePath) {
         // Load an image thumbnail onto block.
         var thisBlock = this.blocks.blockList.indexOf(this);
@@ -729,6 +719,7 @@ function Block(protoblock, blocks, overrideName) {
 
         image.onload = function() {
             // Before adding new artwork, remove any old artwork.
+
             myBlock.removeChildBitmap('media');
 
             var bitmap = new createjs.Bitmap(image);
@@ -1338,8 +1329,31 @@ function ensureDecorationOnTop(myBlock) {
         }
     }
 
-    if(decorationChild !== undefined && flag){
+    if(decorationIndex !== undefined && flag){
         myBlock.container.children[decorationIndex].position.setZ(maxZindex+1);
+    }
+}
+
+function bringTextToTop(myBlock){
+    var index;
+    var currZindex = myBlock.container.children[0].position.z;
+    var maxZindex = currZindex;
+    var flag = false;
+
+    for (var child = 1; child < myBlock.container.children.length; child++) {
+        if (myBlock.container.children[child] === myBlock.text) {
+            index = child;        
+        }
+        else{
+            currZindex = myBlock.container.children[child].position.z;
+            if(currZindex > maxZindex){
+                maxZindex = currZindex;
+                flag = true;
+            }
+        }
+    }
+    if(index !== undefined && flag){
+        myBlock.text.setZ(maxZindex+1);
     }
 }
 
