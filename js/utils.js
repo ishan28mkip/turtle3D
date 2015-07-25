@@ -184,6 +184,15 @@ function globalY(container){
     }
 }
 
+function globalZ(container){
+    if(container.parent === undefined){
+        return 0; 
+    }
+    else{
+        return container.position.z + globalZ(container.parent);
+    }
+}
+
 
 // Gets the 3D bound of any object
 function get3DBounds(container,recursively){
@@ -196,7 +205,6 @@ function get3DBounds(container,recursively){
 // FIXME mouseup bug : If mousedown is on element1 and element2 also has mousedown and mouseup events attached then mouseup event will fire even if mouse is on element2. Event should only fire if mouse is on element1. 
 // FIXME mouseout can only be used with mouseover & pressmove can only be used along with pressup
 // TODO : Add many to one and one to many binding on hitmesh
-// TODO : Option to generate event even when hidden
 
 // Event handler arrays
 var clickArray = [];
@@ -1036,7 +1044,7 @@ function processMacroData(macroData, palettes, blocks, macroDict) {
     }
 }
 
-
+// DONE
 function prepareMacroExports(name, stack, macroDict) {
     if (name != null) {
         macroDict[name] = stack;
@@ -1044,12 +1052,13 @@ function prepareMacroExports(name, stack, macroDict) {
     return JSON.stringify(macroDict);
 }
 
-
+// TEST
 function doSaveSVG(logo, desc) {
     var svg = doSVG(logo.canvas, logo, logo.turtles, logo.canvas.width, logo.canvas.height, 1.0);
     download(desc, 'data:image/svg+xml;utf8,' + svg, desc, '"width=' + logo.canvas.width + ', height=' + logo.canvas.height + '"');
 }
 
+// TEST
 function download(filename, data) {
     var a = document.createElement('a');
     a.setAttribute('href', data);
@@ -1062,6 +1071,7 @@ function download(filename, data) {
 // Some block-specific code
 
 // Publish to FB
+// DONE
 function doPublish(desc) {
     var url = doSave();
     console.log('push ' + url + ' to FB');
@@ -1081,6 +1091,7 @@ function doPublish(desc) {
 
 
 // TODO: Move to camera plugin
+// TEST
 var hasSetupCamera = false;
 function doUseCamera(args, turtles, turtle, isVideo, cameraID, setCameraID, errorMsg) {
     var w = 320;
@@ -1151,7 +1162,7 @@ function doUseCamera(args, turtles, turtle, isVideo, cameraID, setCameraID, erro
     }
 }
 
-
+// DONE
 function doStopVideoCam(cameraID, setCameraID) {
     if (cameraID != null) {
         window.clearInterval(cameraID);
@@ -1160,7 +1171,7 @@ function doStopVideoCam(cameraID, setCameraID) {
     document.querySelector('#camVideo').pause();
 }
 
-
+// DONE
 function hideDOMLabel() {
     var textLabel = docById('textLabel');
     if (textLabel != null) {
@@ -1172,12 +1183,13 @@ function hideDOMLabel() {
     }
 }
 
-
+// FIXME : Make the edit text command and adding text method in activity
 function displayMsg(blocks, text) {
     return;
     var msgContainer = blocks.msgText.parent;
     msgContainer.visible = true;
-    blocks.msgText.text = text;
-    msgContainer.updateCache();
-    blocks.stage.setChildIndex(msgContainer, blocks.stage.getNumChildren() - 1);
+    // blocks.msgText.text = text;
+
+    // FIXME : Add a bring to top code here
+    // blocks.stage.setChildIndex(msgContainer, blocks.stage.getNumChildren() - 1);
 }
