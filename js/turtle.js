@@ -552,7 +552,7 @@ function Turtles(canvas, stage, refreshCanvas) {
         var turtleImage = new Image();
         i %= 10;
         myTurtle.container = new createjs.Container();
-        this.stage.addChild(myTurtle.container);
+        this.stage.add(myTurtle.container);
         myTurtle.container.x = this.turtleX2screenX(myTurtle.x);
         myTurtle.container.y = this.turtleY2screenY(myTurtle.y);
 
