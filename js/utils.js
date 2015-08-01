@@ -644,33 +644,13 @@ function createText(text,color,size,font,weight,style,curveSegments){
 }
 
 // TODO : Make and test these functions when required  
-function editText(mesh,text,options){
-    if(options === undefined){
-        options = mesh.options;
-    }
-    else{
-        options.text = (options.text === undefined) ? mesh.options.text : options.text;
-        options.color = (options.color === undefined) ? mesh.options.color  : options.color;
-        options.size = (options.size === undefined) ? mesh.options.size : options.size;
-        options.font = (options.font === undefined) ? mesh.options.font : options.font;
-        options.weight = (options.weight === undefined) ? mesh.options.weight : options.weight;
-        options.style = (options.style === undefined) ? mesh.options.style : options.style;
-        options.curveSegments = (options.curveSegments === undefined) ? mesh.options.curveSegments : options.curveSegments;
-    }
-    var currScale = new THREE.Vector3();
-    var currPosition = new THREE.Vector3();
-    currScale.copy(mesh.scale);
-    currPosition.copy(mesh.position);
-    containerCache = mesh.parent;
-    containerCache.remove(mesh);
-    var textShapes = THREE.FontUtils.generateShapes( text, options );
-    var text = new THREE.ShapeGeometry( textShapes );
-    var textMesh = new THREE.Mesh( text, new THREE.MeshBasicMaterial( { color: color } ) ) ;
-    textMesh.options = options;
-    textMesh.position.copy(currPosition);
-    textMesh.scale.copy(currScale);
-    containerCache.add(textMesh);
-    // Call refreshCanvas after call to this function
+function editText(mesh,text){
+
+}
+
+// TODO : Make and test these functions when required 
+function editTextStyle(){
+
 }
 
 
