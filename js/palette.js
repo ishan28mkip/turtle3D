@@ -16,6 +16,7 @@ function maxPaletteHeight(menuSize, scale) {
     return h - (h % STANDARDBLOCKHEIGHT) + (STANDARDBLOCKHEIGHT / 2);
 }
 
+// TODO : Later when required
 function paletteBlockButtonPush(name, arg) {
     console.log('paletteBlockButtonPush: ' + name + ' ' + arg);
     blk = paletteBlocks.makeBlock(name, arg);
@@ -795,9 +796,8 @@ function Palette(palettes, name) {
                                 // FIXME : fix the image positions or just add these in the mesh
                                 // bitmap.position.setX(MEDIASAFEAREA[0] * (myBlock.scale / 2));
                                 // bitmap.position.setY(MEDIASAFEAREA[1] * (myBlock.scale / 2));
-
-                                // bitmap.position.setX(MEDIASAFEAREA[0]);
-                                // bitmap.position.setY(MEDIASAFEAREA[1]);
+                                bitmap.position.setX(MEDIASAFEAREA[0]);
+                                bitmap.position.setY(MEDIASAFEAREA[1]);
                                 loadPaletteMenuItemHandler(palette, blk, modname); //Here the calculate bounds function call was there
                             }
                             image.src = myBlock.image;
@@ -937,8 +937,8 @@ function Palette(palettes, name) {
         }
     }
 
- // FIXME : Instead of normal scroll add scroll pages instead
- this.scrollEvent = function(direction, scrollSpeed) {
+// Fix this function
+this.scrollEvent = function(direction, scrollSpeed) {
         var diff = direction * scrollSpeed;
         var h = Math.min(maxPaletteHeight(this.palettes.cellSize, this.palettes.scale), this.y);
 
@@ -1238,7 +1238,6 @@ function loadPaletteMenuItemHandler(palette, blk, blkname) {
         if (moved) {
             moved = false;
             palette.draggingProtoBlock = false;
-            // TODO : Understand how this macro is working and fix this
             if (palette.name == 'myblocks') {
                 // If we are on the myblocks palette, it is a macro.
                 var macroName = blkname.replace('macro_', '');
@@ -1297,9 +1296,7 @@ function loadPaletteMenuItemHandler(palette, blk, blkname) {
                     // Move the drag group under the cursor.
                     paletteBlocks.findDragGroup(newBlock);
                     for (var i in paletteBlocks.dragGroup) {
-                        // paletteBlocks.moveBlockRelative(paletteBlocks.dragGroup[i], Math.round(event.clientX / palette.palettes.scale) - paletteBlocks.stage.x, Math.round(event.stageY / palette.palettes.scale) - paletteBlocks.stage.y);
-                        // PE : Why is it divided by scale here?
-                        paletteBlocks.moveBlockRelative(paletteBlocks.dragGroup[i], threeCoorX(event.clientX) - paletteBlocks.stage.position.x, threeCoorY(event.clientY) - paletteBlocks.stage.position.y);
+                        paletteBlocks.moveBlockRelative(paletteBlocks.dragGroup[i], Math.round(event.stageX / palette.palettes.scale) - paletteBlocks.stage.x, Math.round(event.stageY / palette.palettes.scale) - paletteBlocks.stage.y);
                     }
                     // Dock with other blocks if needed
                     console.log('new block moved ' + newBlock);
