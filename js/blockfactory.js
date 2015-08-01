@@ -702,7 +702,7 @@ function SVG() {
         svg += this._doBoolean();
         svg += this._rLineTo(0, this._radius * 1.5 + this._innieY2 + this._inniesSpacer);
 
-        svg += this._rLineTo(0, this._expandY);
+	svg += this._rLineTo(0, this._expandY);
 
         svg += this._doBoolean();
         svg += this._rLineTo(0, this._radius / 2.0);
