@@ -141,8 +141,8 @@ function Block(protoblock, blocks, overrideName) {
         // If the block scale changes, we need to regenerate the
         // artwork and recalculate the hitarea.
         // this.postProcess = function(myBlock) {
-        //     if (myBlock.imageBitmap != null) {
-        //         if (myBlock.imageBitmap.image.width > myBlock.imageBitmap.image.height) {
+            // if (myBlock.imageBitmap != null) {
+                // if (myBlock.imageBitmap.image.width > myBlock.imageBitmap.image.height) {
         //             myBlock.imageBitmap.scaleX = myBlock.imageBitmap.scaleY = myBlock.imageBitmap.scale = MEDIASAFEAREA[2] / myBlock.imageBitmap.image.width * scale / 2;
         //         } else {
         //             myBlock.imageBitmap.scaleX = myBlock.imageBitmap.scaleY = myBlock.imageBitmap.scale = MEDIASAFEAREA[3] / myBlock.imageBitmap.image.height * scale / 2;
@@ -265,7 +265,7 @@ function Block(protoblock, blocks, overrideName) {
     }
 
     // DONE 
-    // FIXME : Adjust the positioning
+    // FIXME : Adjust the positioning and TEST
     this.addImage = function() {
         var image = new Image();
         var myBlock = this;
@@ -282,8 +282,7 @@ function Block(protoblock, blocks, overrideName) {
             var material = new THREE.MeshBasicMaterial( {map: texture} );
             material.transparent = true;
             material.depthWrite = false;
-            // me.container.scaleX = size/me.iconsize; //See if the scale variable is required here
-            // me.container.scaleY = size/me.iconsize;
+            // FIXME : Set image height and width using scaling
             // var bitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(me.container.scaleX*image.width, me.container.scaleY*image.height),material);
             
             var bitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(image.width, image.height),material);
@@ -291,6 +290,8 @@ function Block(protoblock, blocks, overrideName) {
             bitmap.imgWidth = image.width;
             bitmap.imgHeight = image.height;
 
+            // Check this media safe area
+            // FIXME : Fix this image scaling
             if (image.width > image.height){
                 bitmap.scale.setX(MEDIASAFEAREA[2] / image.width * (myBlock.protoblock.scale / 2));
                 bitmap.scale.setY(MEDIASAFEAREA[2] / image.width * (myBlock.protoblock.scale / 2));
@@ -302,8 +303,12 @@ function Block(protoblock, blocks, overrideName) {
             }
 
             myBlock.container.add(bitmap);
-            bitmap.position.setX(threeCoorX((MEDIASAFEAREA[0] - 10) * (myBlock.protoblock.scale / 2)));
-            bitmap.position.setY(threeCoorY(MEDIASAFEAREA[1] * (myBlock.protoblock.scale / 2)));
+            // FIXME : Fix the image positioning
+            // bitmap.position.setX(threeCoorX((MEDIASAFEAREA[0] - 10) * (myBlock.protoblock.scale / 2)));
+            // bitmap.position.setY(threeCoorY(MEDIASAFEAREA[1] * (myBlock.protoblock.scale / 2)));
+            bitmap.position.setX(0);
+            bitmap.position.setY(0);
+
             myBlock.blocks.refreshCanvas(1);
         }
         image.src = this.image;
@@ -343,20 +348,22 @@ function Block(protoblock, blocks, overrideName) {
 
         // Create the bitmap for the block.
         function processBitmap(name, bitmap, myBlock) {
+            // No need to set the position as by default is center of the container
             myBlock.bitmap = bitmap;
             myBlock.container.add(myBlock.bitmap);
-            myBlock.bitmap.position.x = 0; // PE : Check if this needs to 0 or threeCoorX(0)
-            myBlock.bitmap.position.y = 0; // PE
             myBlock.bitmap.name = 'bmp_' + thisBlock;
             myBlock.bitmap.cursor = 'pointer';
+
+            var boundingBox = new THREE.BoxHelper( myBlock.bitmap );
+            myBlock.blocks.stage.add( boundingBox );
+
+
             myBlock.blocks.refreshCanvas(1);
 
             // Create the highlight bitmap for the block.
             function processHighlightBitmap(name, bitmap, myBlock) {
                 myBlock.highlightBitmap = bitmap;
                 myBlock.container.add(myBlock.highlightBitmap);
-                myBlock.highlightBitmap.position.x = 0; // PE : if this needs to 0 or threeCoorX(0)
-                myBlock.highlightBitmap.position.y = 0; //PE
                 myBlock.highlightBitmap.name = 'bmp_highlight_' + thisBlock;
                 myBlock.highlightBitmap.cursor = 'pointer';
                 // Hide it to start
@@ -372,6 +379,7 @@ function Block(protoblock, blocks, overrideName) {
 
                 myBlock.bounds = myBlock.container.get2DBounds();
                 myBlock.container.bounds = myBlock.bounds;
+                
                 myBlock.blocks.refreshCanvas(1);
 
                 if (firstTime) {
@@ -436,7 +444,7 @@ function Block(protoblock, blocks, overrideName) {
     this.finishImageLoad = function(firstTime) {
         var thisBlock = this.blocks.blockList.indexOf(this);
         // TODO : Add text here once the graphic is done
-        // // Value blocks get a modifiable text label
+        // Value blocks ge t a modifiable text label
         // if (this.name == 'text' || this.name == 'number') {
         //     if (this.value == null) {
         //         if (this.name == 'text') {
@@ -704,7 +712,7 @@ function Block(protoblock, blocks, overrideName) {
         }
     }
 
-    // FIXME : Fix this function
+    // DONE | TEST
     this.loadThumbnail = function (imagePath) {
         // Load an image thumbnail onto block.
         var thisBlock = this.blocks.blockList.indexOf(this);
@@ -717,43 +725,65 @@ function Block(protoblock, blocks, overrideName) {
 
         image.onload = function() {
             // Before adding new artwork, remove any old artwork.
+            console.log('Hello: ' + myBlock.children);
 
-            myBlock.removeChildBitmap('media');
+            // myBlock.removeChildBitmap('media');
+            for(var i = 0; i < myBlock.container.children.length; i++){
+                if(myBlock.container.children[i].name === 'media'){
+                    myBlock.container.remove(myBlock.container.children[i]);
+                    break;
+                }
+            }
 
-            var bitmap = new createjs.Bitmap(image);
+            var canvas = document.createElement('canvas');
+            canvas.width = image.width;
+            canvas.height = image.height;
+            var context = canvas.getContext('2d');
+            context.drawImage(image, 0, 0);
+            var texture = new THREE.Texture(canvas);
+            texture.needsUpdate = true;
+            texture.minFilter = THREE.NearestFilter; 
+            var material = new THREE.MeshBasicMaterial( {map: texture} );
+            material.transparent = true;
+            material.depthWrite = false;
+
+            var bitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(image.width, image.height),material);
             bitmap.name = 'media';
-
-
-            var myContainer = new createjs.Container();
-            myContainer.addChild(bitmap);
+            bitmap.imgWidth = image.width;
+            bitmap.imgHeight = image.height;
 
             // Resize the image to a reasonable maximum.
             if (image.width > image.height) {
                 if (image.width > 1200) {
-                    bitmap.scaleX = bitmap.scaleY = bitmap.scale = 1200 / image.width;
+                    bitmap.scale.setX(1200 / image.width);
+                    bitmap.scale.setY(1200 / image.width);
+                    bitmap.scaleStore = 1200 / image.width;
                 }
             } else {
                 if (image.height > 900) {
-                    bitmap.scaleX = bitmap.scaleY = bitmap.scale = 900 / image.height;
+                    bitmap.scale.setX(900 / image.height);
+                    bitmap.scale.setY(900 / image.height);
+                    bitmap.scaleStore = 900 / image.height;
                 }
             }
-            var bounds = myContainer.getBounds();
-            myContainer.cache(bounds.x, bounds.y, bounds.width, bounds.height);
-            myBlock.value = myContainer.getCacheDataURL();
+
             myBlock.imageBitmap = bitmap;
 
             // Next, scale the bitmap for the thumbnail.
             if (image.width > image.height) {
-                bitmap.scaleX = bitmap.scaleY = bitmap.scale = MEDIASAFEAREA[2] / image.width * (myBlock.protoblock.scale / 2);
+                bitmap.scale.setX(MEDIASAFEAREA[2] / image.width * (myBlock.protoblock.scale / 2));
+                bitmap.scale.setY(MEDIASAFEAREA[2] / image.width * (myBlock.protoblock.scale / 2));
+                bitmap.scaleScore = MEDIASAFEAREA[2] / image.width * (myBlock.protoblock.scale / 2);
             } else {
-                bitmap.scaleX = bitmap.scaleY = bitmap.scale = MEDIASAFEAREA[3] / image.height * (myBlock.protoblock.scale / 2);
+                bitmap.scale.setX(MEDIASAFEAREA[3] / image.height * (myBlock.protoblock.scale / 2));
+                bitmap.scale.setY(MEDIASAFEAREA[3] / image.height * (myBlock.protoblock.scale / 2));
+                bitmap.scaleScore = MEDIASAFEAREA[3] / image.height * (myBlock.protoblock.scale / 2);
             }
 
-            myBlock.container.addChild(bitmap);
-            bitmap.x = (MEDIASAFEAREA[0] - 10) * (myBlock.protoblock.scale / 2);
-            bitmap.y = MEDIASAFEAREA[1] * (myBlock.protoblock.scale / 2);
+            myBlock.container.add(bitmap);
+            bitmap.position.setX = (MEDIASAFEAREA[0] - 10) * (myBlock.protoblock.scale / 2);
+            bitmap.position.setY = MEDIASAFEAREA[1] * (myBlock.protoblock.scale / 2);
 
-            myBlock.container.updateCache();
             myBlock.blocks.refreshCanvas(1);
         }
 
@@ -764,6 +794,7 @@ function Block(protoblock, blocks, overrideName) {
         }
     }
 
+    // DONE
     this.doOpenMedia = function (myBlock) {
         var fileChooser = docById('myOpenAll');
         var thisBlock = myBlock.blocks.blockList.indexOf(myBlock);
@@ -795,7 +826,7 @@ function Block(protoblock, blocks, overrideName) {
         fileChooser.addEventListener('change', readerAction, false);
         fileChooser.focus();
         fileChooser.click();
-        window.scroll(0, 0)
+        window.scroll(0, 0);
     }
 
     this.collapseToggle = function () {
@@ -953,8 +984,8 @@ function loadCollapsibleEventHandlers(myBlock) {
             moved = true;
             var oldX = myBlock.collapseContainer.x;
             var oldY = myBlock.collapseContainer.y;
-            myBlock.collapseContainer.x = Math.round(event.stageX / myBlock.blocks.scale + offset.x);
-            myBlock.collapseContainer.y = Math.round(event.stageY / myBlock.blocks.scale + offset.y);
+            myBlock.collapseContainer.x = Math.round(event.clientX / myBlock.blocks.scale + offset.x);
+            myBlock.collapseContainer.y = Math.round(event.clientY / myBlock.blocks.scale + offset.y);
             var dx = myBlock.collapseContainer.x - oldX;
             var dy = myBlock.collapseContainer.y - oldY;
             myBlock.container.x += dx;
@@ -1039,6 +1070,7 @@ function calculateBlockHitArea(myBlock) {
         hitmesh = createRectangle(bounds.width, bounds.height * 0.75, '#000000'); // Shrinking the height makes it easier to grab blocks below in the stack.
     }
     myBlock.container.add(hitmesh);
+    hitmesh.position.setY(bounds.height * 0.25 / 2); //Placing the hitmesh in the top right corner
     hitmesh.visible = false;
     myBlock.container.hitmesh = hitmesh;
 }
@@ -1084,10 +1116,12 @@ function loadEventHandlers(myBlock) {
             } else if (myBlock.name == 'text' || myBlock.name == 'number') {
                 var x = myBlock.container.position.x
                 var y = myBlock.container.position.y
+                // FIXME : Fix these values
                 var canvasLeft = blocks.canvas.offsetLeft + 28;
                 var canvasTop = blocks.canvas.offsetTop + 6;
 
                 var movedStage = false;
+                // FIXME : Fix this value of 75 in accordance with the new values
                 if (!window.hasMouse && blocks.stage.y + y > 75) {
                     movedStage = true;
                     var fromY = blocks.stage.y;
@@ -1142,9 +1176,9 @@ function loadEventHandlers(myBlock) {
                 myBlock.label.addEventListener('change', function() {
                     labelChanged(myBlock);
                 });
-
-                myBlock.label.style.left = Math.round((x + blocks.stage.x) * blocks.scale + canvasLeft) + 'px';
-                myBlock.label.style.top = Math.round((y + blocks.stage.y) * blocks.scale + canvasTop) + 'px';
+                // FIXME : Fix the positioning of the label
+                myBlock.label.style.left = Math.round((x + blocks.stage.position.x) * blocks.scale + canvasLeft) + 'px';
+                myBlock.label.style.top = Math.round((y + blocks.stage.position.y) * blocks.scale + canvasTop) + 'px';
                 myBlock.label.style.width = Math.round(100 * blocks.scale) * myBlock.protoblock.scale / 2 + 'px';
                 myBlock.label.style.fontSize = Math.round(20 * blocks.scale * myBlock.protoblock.scale / 2) + 'px';
                 myBlock.label.style.display = '';
@@ -1168,7 +1202,6 @@ function loadEventHandlers(myBlock) {
 
     myBlock.container.on('mousedown', function(event) {
         hideDOMLabel();
-
         // Track time for detecting long pause...
         // but only for top block in stack
         if (myBlock.connections[0] == null) {
@@ -1192,14 +1225,7 @@ function loadEventHandlers(myBlock) {
         }
 
         moved = false;
-        // var offset = {
-        //     x: myBlock.container.x - Math.round(event.stageX / blocks.scale),
-        //     y: myBlock.container.y - Math.round(event.stageY / blocks.scale)
-        // };
-
-        var original = {x: event.clientX, y: event.clientY};
     });
-
 
     myBlock.container.on('mouseout', function(event) {
         if (!blocks.inLongPress) {
@@ -1207,7 +1233,6 @@ function loadEventHandlers(myBlock) {
         }
         moved = false;
     });
-
 
     myBlock.container.on('pressup', function(event) {
         px = false;
@@ -1236,7 +1261,8 @@ function loadEventHandlers(myBlock) {
         } else {
             // Make it eaiser to select text on mobile
             setTimeout(function () {
-                moved = Math.abs(event.stageX - original.x) + Math.abs(event.stageY - original.y) > 20 && !window.hasMouse;
+                // FIXME : THIS Mobile version
+                // moved = Math.abs(event.clientX - original.x) + Math.abs(event.stageY - original.y) > 20 && !window.hasMouse;
                 getInput = !moved;
             }, 200);
         }
@@ -1288,7 +1314,7 @@ function loadEventHandlers(myBlock) {
 
         // Move any connected blocks.
         // PE : Check whether this is working
-        blocks.findDragGroup(thisBlock)
+        blocks.findDragGroup(thisBlock);
         if (blocks.dragGroup.length > 0) {
             for (var b = 0; b < blocks.dragGroup.length; b++) {
                 var blk = blocks.dragGroup[b];
@@ -1311,7 +1337,7 @@ function loadEventHandlers(myBlock) {
     });
 }
 
-
+// DONE | TEST
 function mouseoutCallback(myBlock, event, moved) {
     var thisBlock = myBlock.blocks.blockList.indexOf(myBlock);
     // Always hide the trash when there is no block selected.
@@ -1342,6 +1368,10 @@ function mouseoutCallback(myBlock, event, moved) {
 }
 
 // DONE
+// FIXME :
+// Currently whenever this function runs, the objects z-index becomes highest + 1,
+// this makes the z-index to grow to large numbers if check is not placed
+// either fix the algo or reset all the z-indexes after a value is reached.
 function ensureDecorationOnTop(myBlock) {
     // Find the turtle decoration and move it to the top.
     var decorationIndex;
@@ -1367,6 +1397,7 @@ function ensureDecorationOnTop(myBlock) {
     }
 }
 
+// DONE
 function bringTextToTop(myBlock){
     var index;
     var currZindex = myBlock.container.children[0].position.z;
