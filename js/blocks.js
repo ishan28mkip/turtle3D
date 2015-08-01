@@ -154,6 +154,8 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
     }
 
     // set up copy/paste, dismiss, and copy-stack buttons
+    // TODO : Check if the buttons are positioned properly
+    // FIXME : When the basic designs work;
     this.makeCopyPasteButtons = function(makeButton, updatePasteButton) {
         var blocks = this;
         this.updatePasteButton = updatePasteButton;
@@ -201,6 +203,7 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
 
     // Walk through all of the proto blocks in order to make lists of
     // any blocks that need special treatment.
+    // DONE
     this.findBlockTypes = function() {
         for (var proto in this.protoBlockDict) {
             if (this.protoBlockDict[proto].expandable) {
@@ -247,6 +250,7 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
             // Should not happen
             return;
         }
+
         var obj = blocksToCheck.pop();
         var blk = obj[0];
         var clamp = obj[1];
@@ -254,6 +258,7 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
         var myBlock = this.blockList[blk];
 
         // Make sure it is the proper type of expandable block.
+        // TODO : Add the exection of the ThreeArgBlock here
         if (myBlock.isArgBlock() || myBlock.isTwoArgBlock()) {
             return;
         }
@@ -511,6 +516,7 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
                 continue;
             }
 
+
             // Another database integrety check.
             if (this.blockList[cblk] == null) {
                 console.log('This is not good: we encountered a null block: ' + cblk);
@@ -543,8 +549,8 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
                     var nx = myBlock.x + dx;
                     var ny = myBlock.y + dy;
                 } else {
-                    var nx = myBlock.container.x + dx;
-                    var ny = myBlock.container.y + dy;
+                    var nx = myBlock.container.position.x + dx;
+                    var ny = myBlock.container.position.y + dy;
                 }
                 this.moveBlock(cblk, nx, ny);
             } else {
@@ -830,55 +836,59 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
         }
     }
 
+    // FIXME : Fix this function
     this.bringToTop = function() {
         // Move all the blocks to the top layer of the stage
         for (var blk in this.blockList) {
             var myBlock = this.blockList[blk];
-            this.stage.removeChild(myBlock.container);
-            this.stage.addChild(myBlock.container);
+            this.stage.remove(myBlock.container);
+            this.stage.add(myBlock.container);
             if (myBlock.collapseContainer != null) {
-                this.stage.removeChild(myBlock.collapseContainer);
-                this.stage.addChild(myBlock.collapseContainer);
+                this.stage.remove(myBlock.collapseContainer);
+                this.stage.add(myBlock.collapseContainer);
             }
         }
         this.refreshCanvas(1);
     }
 
+    // DONE : Tested
     this.moveBlock = function(blk, x, y) {
         // Move a block (and its label) to x, y.
         var myBlock = this.blockList[blk];
         if (myBlock.container != null) {
-            myBlock.container.x = x;
-            myBlock.container.y = y;
-            myBlock.x = x
-            myBlock.y = y
+            myBlock.container.position.setX(x);
+            myBlock.container.position.setY(y);
+            myBlock.x = x;
+            myBlock.y = y;
             if (myBlock.collapseContainer != null) {
-                myBlock.collapseContainer.x = x + COLLAPSEBUTTONXOFF * (this.blockList[blk].protoblock.scale / 2);
-                myBlock.collapseContainer.y = y + COLLAPSEBUTTONYOFF * (this.blockList[blk].protoblock.scale / 2);
+                // FIXME : Fix this positioning
+                myBlock.collapseContainer.position.setX(x + COLLAPSEBUTTONXOFF * (this.blockList[blk].protoblock.scale / 2));
+                myBlock.collapseContainer.position.setY(y + COLLAPSEBUTTONYOFF * (this.blockList[blk].protoblock.scale / 2));
             }
         } else {
             console.log('no container yet');
-            myBlock.x = x
-            myBlock.y = y
+            myBlock.x = x;
+            myBlock.y = y;
         }
     }
 
+    // DONE : Tested
     this.moveBlockRelative = function(blk, dx, dy) {
         // Move a block (and its label) by dx, dy.
         var myBlock = this.blockList[blk];
         if (myBlock.container != null) {
-            myBlock.container.x += dx;
-            myBlock.container.y += dy;
-            myBlock.x = myBlock.container.x;
-            myBlock.y = myBlock.container.y;
+            myBlock.container.position.setX(myBlock.container.position.x + dx);
+            myBlock.container.position.setY(myBlock.container.position.y + dy);
+            myBlock.x = myBlock.container.position.x;
+            myBlock.y = myBlock.container.position.y;
             if (myBlock.collapseContainer != null) {
-                myBlock.collapseContainer.x += dx;
-                myBlock.collapseContainer.y += dy;
+                myBlock.collapseContainer.position.setX(myBlock.collapseContainer.position.x + dx);
+                myBlock.collapseContainer.position.setY(myBlock.collapseContainer.position.y + dy);
             }
         } else {
             console.log('no container yet');
-            myBlock.x += dx
-            myBlock.y += dy
+            myBlock.x = myBlock.x + dx;
+            myBlock.y = myBlock.y + dy;
         }
     }
 
@@ -886,24 +896,24 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
         // // When we create new blocks, we may not have assigned the
         // // value yet.
         // TODO : Fix this function and add the text utils
-        // var myBlock = this.blockList[blk];
-        // var maxLength = 8;
-        // if (myBlock.text == null) {
-        //     return;
-        // }
-        // if (myBlock.name == 'loadFile') {
-        //     try {
-        //         var label = myBlock.value[0].toString();
-        //     } catch (e) {
-        //         var label = _('open file');
-        //     }
-        //     maxLength = 10;
-        // } else {
-        //     var label = myBlock.value.toString();
-        // }
-        // if (label.length > maxLength) {
-        //     label = label.substr(0, maxLength - 1) + '...';
-        // }
+        var myBlock = this.blockList[blk];
+        var maxLength = 8;
+        if (myBlock.text == null) {
+            return;
+        }
+        if (myBlock.name == 'loadFile') {
+            try {
+                var label = myBlock.value[0].toString();
+            } catch (e) {
+                var label = _('open file');
+            }
+            maxLength = 10;
+        } else {
+            var label = myBlock.value.toString();
+        }
+        if (label.length > maxLength) {
+            label = label.substr(0, maxLength - 1) + '...';
+        }
         // myBlock.text.text = label;
 
         // // Make sure text is on top.
@@ -976,6 +986,8 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
         return blk;
     }
 
+    // DONE
+    // Finds all blocks that don't have any first connection.
     this.findStacks = function() {
         // Find any blocks with null in the first connection.
         this.stackList = [];
@@ -986,6 +998,7 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
         }
     }
 
+    // DONE
     this.findClamps = function() {
         // Find any clamp blocks.
         this.expandablesList = [];
@@ -1008,11 +1021,13 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
         }
     }
 
+    // DONE
     this.searchForExpandables = function(blk) {
         // Find the expandable blocks below blk in a stack.
         while (blk != null && this.blockList[blk] != null && !this.blockList[blk].isValueBlock()) {
             // More checks for malformed or corrupted block data.
             this.searchCounter += 1;
+            // PE : Didn't understand this check
             if (this.searchCounter > 2 * this.blockList.length) {
                 console.log('infinite loop searching for Expandables? ' + this.searchCounter);
                 console.log(blk + ' ' + this.blockList[blk].name);
@@ -1166,10 +1181,16 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
 
         // We need a container for the block graphics.
         myBlock.container = new THREE.Group();
+
+        axes = buildAxes( 1000 );
+        myBlock.container.add( axes );
+        
         this.stage.add(myBlock.container);
         // myBlock.container.snapToPixelEnabled = true;
+        // TODO : Enable snap to pixel feature.
         myBlock.container.position.setX(myBlock.x);
         myBlock.container.position.setY(myBlock.y);
+
 
         // and we need to load the images into the container.
         myBlock.imageLoad();
@@ -1197,7 +1218,7 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
                 var value = args[1];
                 me.blockList[thisBlock].value = value;
                 me.blockList[thisBlock].text.text = value;
-                // me.blockList[thisBlock].container.updateCache(); //REMOVE
+                // me.blockList[thisBlock].container.updateCache(); //TODO REMOVE
             }
             postProcessArg = [thisBlock, _('text')];
         } else if (name == 'number') {
@@ -1206,7 +1227,7 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
                 var value = Number(args[1]);
                 me.blockList[thisBlock].value = value;
                 me.blockList[thisBlock].text.text = value.toString();
-                // me.blockList[thisBlock].container.updateCache(); //REMOVE
+                // me.blockList[thisBlock].container.updateCache(); //TODO REMOVE
             }
             postProcessArg = [thisBlock, 100];
         } else if (name == 'media') {
@@ -1287,6 +1308,7 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
 
         var blk = this.blockList.length - 1;
         var myBlock = this.blockList[blk];
+
         for (var i = 0; i < myBlock.docks.length; i++) {
             myBlock.connections.push(null);
         }
@@ -1323,6 +1345,7 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
                         if (label.length > 8) {
                             label = label.substr(0, 7) + '...';
                         }
+                        // TODO : Edit the text here 
                         me.blockList[thisBlock].text.text = label;
                         // me.blockList[thisBlock].container.updateCache();//REMOVE
                     }
@@ -1332,6 +1355,7 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
                         var thisBlock = args[0];
                         var value = Number(args[1]);
                         me.blockList[thisBlock].value = value;
+                        // TODO : Edit the text here
                         me.blockList[thisBlock].text.text = value.toString();
                     }
                     this.makeNewBlock('number', postProcess, [thisBlock, value]);
@@ -1345,6 +1369,7 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
                     if (label.length > 8) {
                         label = label.substr(0, 7) + '...';
                     }
+                    // TODO : Edit the text here
                     me.blockList[thisBlock].text.text = label;
                 }
                 this.makeNewBlock('text', postProcess, [thisBlock, value]);
@@ -1368,6 +1393,7 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
                     var thisBlock = args[0];
                     var value = args[1];
                     me.blockList[thisBlock].value = value;
+                    // TODO : Edit the text here
                     me.blockList[thisBlock].text.text = value.toString();
                 }
                 this.makeNewBlock('number', postProcess, [thisBlock, value]);
@@ -1382,17 +1408,20 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
         // Generate and position the block bitmaps and labels
         this.updateBlockPositions();
         this.adjustDocks(blk, true);
+        
         this.refreshCanvas(1);
 
         return blk;
     }
 
+    // DONE
     this.findDragGroup = function(blk) {
         // Generate a drag group from blocks connected to blk
         this.dragGroup = [];
         this.calculateDragGroup(blk);
     }
 
+    // DONE
     this.calculateDragGroup = function(blk) {
         // Give a block, find all the blocks connected to it
         if (blk == null) {
@@ -1664,6 +1693,7 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
         myActionBlock.palette.add(myActionBlock);
     }
 
+    // DONE | TODO : Understand this
     this.insideExpandableBlock = function(blk) {
         // Returns a containing expandable block or null
         if (this.blockList[blk] == null) {
@@ -1687,6 +1717,7 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
         }
     }
 
+    // FIXME : Fix this function
     this.triggerLongPress = function(myBlock) {
         this.timeOut == null;
         this.inLongPress = true;

@@ -1308,8 +1308,7 @@ define(function(require) {
             var msgContainer = msgText.parent;
             msgContainer.visible = true;
             msgText.text = msg;
-            msgContainer.updateCache();
-            stage.setChildIndex(msgContainer, stage.getNumChildren() - 1);
+            // stage.setChildIndex(msgContainer, stage.getNumChildren() - 1);
         }
 
         function errorMsg(msg, blk, text) {
