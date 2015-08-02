@@ -516,7 +516,9 @@ function SVG() {
     this.header = function (center) {
 	// FIXME: Why are our calculations off by 2 x strokeWidth?
 	var width = this._width + 2 * this._strokeWidth;
-        return '<svg xmlns="http://www.w3.org/2000/svg" width="' + width * 1.1 + '" height="' + this._height * 1.3 + '">' + this._transform(center) + '<filter id="dropshadow" height="130%"> \
+    // FIXME : Bounding box seems fine with the this._width;
+    // FIXME : Why was width multiplied by 1.1 and height by 1.3?
+        return '<svg xmlns="http://www.w3.org/2000/svg" width="' +  this._width  + '" height="' + this._height + '">' + this._transform(center) + '<filter id="dropshadow" height="130%"> \
   <feGaussianBlur in="SourceAlpha" stdDeviation="3"/> \
   <feOffset dx="2" dy="2" result="offsetblur"/> \
   <feComponentTransfer xmlns="http://www.w3.org/2000/svg"> \
