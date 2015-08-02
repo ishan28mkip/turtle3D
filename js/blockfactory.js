@@ -1048,6 +1048,13 @@ function SVG() {
         return this.header(false) + svg;
     }
 
+    this.adjustDocksCenter = function(){
+        for(var i = 0 ; i < this.docks.length; i++){
+            this.docks[i][0] = this.docks[i][0] - this._width/2;
+            this.docks[i][1] = this.docks[i][1] - this._height/2;
+        }
+    }
+
     /*
     // SVG helper methods
 
