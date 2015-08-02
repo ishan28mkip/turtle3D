@@ -493,7 +493,7 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
 
         this.loopCounter += 1;
         if (this.loopCounter > this.blockList.length * 2) {
-            console.log('Infinite loop encountered while adjusting docks: ' + blk + ' ' + this.blockList);
+            console.log('Infinite loop encountered while adjusting : ' + blk + ' ' + this.blockList);
             return;
         }
 
@@ -540,6 +540,8 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
 
             var cdock = this.blockList[cblk].docks[b];
 
+            console.log(bdock,cdock);
+
             if (c > 0) {
                 // Move the connected block...
                 var dx = bdock[0] - cdock[0];
@@ -550,7 +552,8 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
                     var ny = myBlock.y + dy;
                 } else {
                     var nx = myBlock.container.position.x + dx;
-                    var ny = myBlock.container.position.y + dy;
+                    var ny = myBlock.container.position.y - dy;
+                    console.log(nx,ny);
                 }
                 this.moveBlock(cblk, nx, ny);
             } else {
@@ -1182,12 +1185,14 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
         // We need a container for the block graphics.
         myBlock.container = new THREE.Group();
 
-        axes = buildAxes( 1000 );
-        myBlock.container.add( axes );
+        // axes = buildAxes( 1000 );
+        // myBlock.container.add( axes );
         
         this.stage.add(myBlock.container);
         // myBlock.container.snapToPixelEnabled = true;
         // TODO : Enable snap to pixel feature.
+
+        // TODO : Check this positioning, this positioning everything at the center on a reload
         myBlock.container.position.setX(myBlock.x);
         myBlock.container.position.setY(myBlock.y);
 
@@ -1218,7 +1223,6 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
                 var value = args[1];
                 me.blockList[thisBlock].value = value;
                 me.blockList[thisBlock].text.text = value;
-                // me.blockList[thisBlock].container.updateCache(); //TODO REMOVE
             }
             postProcessArg = [thisBlock, _('text')];
         } else if (name == 'number') {
@@ -1227,7 +1231,6 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
                 var value = Number(args[1]);
                 me.blockList[thisBlock].value = value;
                 me.blockList[thisBlock].text.text = value.toString();
-                // me.blockList[thisBlock].container.updateCache(); //TODO REMOVE
             }
             postProcessArg = [thisBlock, 100];
         } else if (name == 'media') {
@@ -1404,7 +1407,6 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
             myConnectionBlock.value = value;
             myBlock.connections[i + 1] = cblk + i;
         }
-
         // Generate and position the block bitmaps and labels
         this.updateBlockPositions();
         this.adjustDocks(blk, true);

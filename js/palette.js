@@ -798,6 +798,8 @@ function Palette(palettes, name) {
 
                                 // bitmap.position.setX(MEDIASAFEAREA[0]);
                                 // bitmap.position.setY(MEDIASAFEAREA[1]);
+                                bitmap.position.setX(0);
+                                bitmap.position.setY(0);
                                 loadPaletteMenuItemHandler(palette, blk, modname); //Here the calculate bounds function call was there
                             }
                             image.src = myBlock.image;
