@@ -1,6 +1,5 @@
 // Fix scaling along with code in block so only palette and main screen scaling is required to be fixed later on.
 
-
 // Length of a long touch
 var LONGPRESSTIME = 2000;
 
@@ -353,9 +352,10 @@ function Block(protoblock, blocks, overrideName) {
             myBlock.container.add(myBlock.bitmap);
             myBlock.bitmap.name = 'bmp_' + thisBlock;
             myBlock.bitmap.cursor = 'pointer';
-
-            var boundingBox = new THREE.BoxHelper( myBlock.bitmap );
-            myBlock.blocks.stage.add( boundingBox );
+ 
+            // REMOVE : After graphics work perfect
+            // var boundingBox = new THREE.BoxHelper( myBlock.bitmap );
+            // myBlock.blocks.stage.add( boundingBox );
 
 
             myBlock.blocks.refreshCanvas(1);
@@ -1064,13 +1064,15 @@ function calculateBlockHitArea(myBlock) {
     var hitmesh;
 
     // Only detect hits on top section of block.
-    if (myBlock.isClampBlock()) {
+    // FIXME : Why is hitmesh height reduced?
+    // if (myBlock.isClampBlock()) {
         hitmesh = createRectangle(bounds.width, bounds.height, '#000000');
-    } else {
-        hitmesh = createRectangle(bounds.width, bounds.height * 0.75, '#000000'); // Shrinking the height makes it easier to grab blocks below in the stack.
-    }
+    // } else {
+    //     hitmesh = createRectangle(bounds.width, bounds.height * 0.75, '#000000'); // Shrinking the height makes it easier to grab blocks below in the stack.
+    //     hitmesh.position.setY(bounds.height * 0.25 / 2);
+    // }
     myBlock.container.add(hitmesh);
-    hitmesh.position.setY(bounds.height * 0.25 / 2); //Placing the hitmesh in the top right corner
+     //Placing the hitmesh in the top right corner
     hitmesh.visible = false;
     myBlock.container.hitmesh = hitmesh;
 }
