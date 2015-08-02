@@ -657,6 +657,7 @@ function SVG() {
         }
 
         svg += this.footer();
+        this.adjustDocksCenter();
         return this.header(false) + svg;
     }
 
@@ -686,6 +687,7 @@ function SVG() {
         svg += this.text(tx / this._scale, ty / this._scale, this._fontSize, this._width, 'left', 'block_label');
 
         svg += this.footer();
+        this.adjustDocksCenter();
         return this.header(false) + svg;
     }
 
@@ -721,6 +723,7 @@ function SVG() {
         svg += this.text(tx / this._scale, ty / this._scale, this._fontSize, this._width, 'right', 'block_label');
 
         svg += this.footer();
+        this.adjustDocksCenter();
         return this.header(false) + svg;
     }
 
@@ -793,6 +796,7 @@ function SVG() {
         svg += this.text(tx / this._scale, ty / this._scale, this._fontSize, this._width, 'right', 'block_label');
 
         svg += this.footer();
+        this.adjustDocksCenter();
         return this.header(false) + svg;
     }
 
@@ -833,6 +837,7 @@ function SVG() {
         svg += this.text(tx / this._scale, ty / this._scale, this._fontSize, this._width, 'right', 'block_label');
 
         svg += this.footer();
+        this.adjustDocksCenter();
         return this.header(false) + svg;
     }
 
@@ -947,6 +952,7 @@ function SVG() {
         }
 
         svg += this.footer();
+        this.adjustDocksCenter();
         return this.header(false) + svg;
     }
 
@@ -1019,6 +1025,7 @@ function SVG() {
         }
 
         svg += this.footer();
+        this.adjustDocksCenter();
         return this.header(false) + svg;
     }
 
@@ -1045,6 +1052,7 @@ function SVG() {
         svg += this._closePath();
         svg += this.style();
         svg += this.footer();
+        this.adjustDocksCenter();
         return this.header(false) + svg;
     }
 
