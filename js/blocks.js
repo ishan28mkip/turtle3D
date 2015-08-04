@@ -540,8 +540,6 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
 
             var cdock = this.blockList[cblk].docks[b];
 
-            console.log(bdock,cdock);
-
             if (c > 0) {
                 // Move the connected block...
                 var dx = bdock[0] - cdock[0];
@@ -549,11 +547,10 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
                 if (myBlock.container == null) {
                     console.log('Does this ever happen any more?')
                     var nx = myBlock.x + dx;
-                    var ny = myBlock.y + dy;
+                    var ny = myBlock.y - dy;
                 } else {
                     var nx = myBlock.container.position.x + dx;
                     var ny = myBlock.container.position.y - dy;
-                    console.log(nx,ny);
                 }
                 this.moveBlock(cblk, nx, ny);
             } else {
@@ -561,6 +558,7 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
                 var dx = cdock[0] - bdock[0];
                 var dy = cdock[1] - bdock[1];
                 var nx = this.blockList[cblk].container.x + dx;
+                // PE : Check this for error when the docking happens with parent
                 var ny = this.blockList[cblk].container.y + dy;
                 this.moveBlock(blk, nx, ny);
             }
@@ -580,6 +578,8 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
         // (3) Look for a new connection;
         // (4) Is it an arg block connected to a 2-arg block?
         // (5) Recheck if it inside of a expandable block.
+        // TODO :  
+        // (6) Handle 3-arg Blocks.
 
         // Find any containing expandable blocks.
         var checkExpandableBlocks = [];
@@ -607,9 +607,11 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
             return;
         }
         var c = myBlock.connections[0];
+
         if (c != null) {
             var cBlock = this.blockList[c];
         }
+
         // If it is an arg block, where is it coming from?
         if (myBlock.isArgBlock() && c != null) {
             // We care about twoarg (2arg) blocks with
@@ -637,9 +639,10 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
             myBlock.connections[0] = null;
         }
 
+
         // Look for a new connection.
-        var x1 = myBlock.container.x + myBlock.docks[0][0];
-        var y1 = myBlock.container.y + myBlock.docks[0][1];
+        var x1 = myBlock.container.position.x + myBlock.docks[0][0];
+        var y1 = myBlock.container.position.y - myBlock.docks[0][1];
         // Find the nearest dock; if it is close
         // enough, connect;
         var newBlock = null;
@@ -647,12 +650,16 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
         // TODO: Make minimum distance relative to scale.
         var min = MINIMUMDOCKDISTANCE;
         var blkType = myBlock.docks[0][2]
+
+        console.log(min, "minimum docking distance");  
+
+        // TODO : Optimize this code by reducing the number of iterations by imposing conditions
         for (var b = 0; b < this.blockList.length; b++) {
             // Don't connect to yourself.
             if (b == thisBlock) {
                 continue;
             }
-            for (var i = 1; i < this.blockList[b].connections.length; i++) {
+            for (var i = 0; i < this.blockList[b].connections.length; i++) {
                 // When converting from Python projects to JS format,
                 // sometimes extra null connections are added. We need
                 // to ignore them.
@@ -660,12 +667,14 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
                     break;
                 }
 
+                // console.log(b , this.blockList[b].docks[i][0], this.blockList[b].docks[i][1], this.blockList[b].docks[i][2]);
+
                 // Look for available connections.
                 if (this.testConnectionType(
                     blkType,
                     this.blockList[b].docks[i][2])) {
-                    x2 = this.blockList[b].container.x + this.blockList[b].docks[i][0];
-                    y2 = this.blockList[b].container.y + this.blockList[b].docks[i][1];
+                    x2 = this.blockList[b].container.position.x + this.blockList[b].docks[i][0];
+                    y2 = this.blockList[b].container.position.y - this.blockList[b].docks[i][1];
                     dist = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
                     if (dist < min) {
                         newBlock = b;
