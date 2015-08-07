@@ -684,11 +684,8 @@ define(function(require) {
         function createGrid(imagePath,name) {
             var container = new THREE.Group();
             scriptingScene.add(container);
-            container.position.setX(0);
-            container.position.setY(0);
 
             var img = new Image();
-
             img.onload = function() {
 
                 var canvas = document.createElement('canvas');
@@ -712,11 +709,7 @@ define(function(require) {
                 // }
 
                 container.add(bitmap);
-                bitmap.position.setX(0);
-                bitmap.position.setY(0);
-                bitmap.scale.setX(1);
-                bitmap.scale.setY(1);
-                bitmap.visible = true;
+                bitmap.visible = false;
                 refreshCanvas(1);
             }
             img.src = imagePath;
