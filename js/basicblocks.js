@@ -55,29 +55,6 @@ var NAMEDICT = {
 function initBasicProtoBlocks(palettes, blocks) {
     blocks.palettes = palettes;
         //3D blocks
-    var setCursorPositionX = new ProtoBlock('setCursorPositionX');
-    setCursorPositionX.palette = palettes.dict['turtle'];
-    blocks.protoBlockDict['setCursorPositionX'] = setCursorPositionX;
-    setCursorPositionX.staticLabels.push(_('setPositionX'));
-    setCursorPositionX.adjustWidthToLabel();
-    setCursorPositionX.oneArgBlock();
-    setCursorPositionX.defaults.push(10);
-
-    var setCursorPositionY = new ProtoBlock('setCursorPositionY');
-    setCursorPositionY.palette = palettes.dict['turtle'];
-    blocks.protoBlockDict['setCursorPositionY'] = setCursorPositionY;
-    setCursorPositionY.staticLabels.push(_('setPositionY'));
-    setCursorPositionY.adjustWidthToLabel();
-    setCursorPositionY.oneArgBlock();
-    setCursorPositionY.defaults.push(10);
-
-    var setCursorPositionZ = new ProtoBlock('setCursorPositionZ');
-    setCursorPositionZ.palette = palettes.dict['turtle'];
-    blocks.protoBlockDict['setCursorPositionZ'] = setCursorPositionZ;
-    setCursorPositionZ.staticLabels.push(_('setPositionZ'));
-    setCursorPositionZ.adjustWidthToLabel();
-    setCursorPositionZ.oneArgBlock();
-    setCursorPositionZ.defaults.push(10);
 
     var setCursorPosition = new ProtoBlock('setCursorPosition');
     setCursorPosition.palette = palettes.dict['turtle'];
