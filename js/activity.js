@@ -759,6 +759,8 @@ define(function(require) {
                 //     refreshCanvas(1);
                 // });
 
+                // FIXME : Implement the new drag and drop functionality
+
                 var px,py;
                 var coor = new THREE.Vector3();
                 coor.z = 0;
@@ -799,6 +801,7 @@ define(function(require) {
             }
         }
 
+        // TODO : Replace the manual text creation with function
         function makeErrorArtwork(name) {
             var container = new THREE.Group();
             scriptingScene.add(container);
@@ -904,6 +907,7 @@ define(function(require) {
             currentKeyCode = 0;
         }
 
+        // FIXME : Important funciton to fix when fixing the scaling
         function onResize() {
             if (docById('labelDiv').classList.contains('hasKeyboard')) {
                 return;
@@ -982,7 +986,7 @@ define(function(require) {
             onResize();
         }
 
-        // TODO : Fix this function when done with blocks.js
+        // FIXME
         function restoreTrash() {
             var dx = 0;
             var dy = -cellSize * 3; // Reposition blocks about trash area.
@@ -998,7 +1002,7 @@ define(function(require) {
                     }
                 }
             }
-            update = true;
+            refreshCanvas(1);
         }
 
         function deleteBlocksBox() {
@@ -1006,6 +1010,7 @@ define(function(require) {
         }
 
         // FIXME: confirm???
+        // FIXME : fix this function
         function sendAllToTrash(addStartBlock, doNotSave) {
             var dx = 2000;
             var dy = cellSize;
@@ -1054,7 +1059,7 @@ define(function(require) {
                 palettes.hide();
             } else {
                 palettes.show();
-                palettes.bringToTop();
+                // palettes.bringToTop();
             }
         }
 
@@ -1122,6 +1127,7 @@ define(function(require) {
             thumbnails.show()
         }
 
+        // FIXME 
         function saveLocally() {
             console.log('overwriting session data');
 
@@ -1140,9 +1146,10 @@ define(function(require) {
                 localStorage['SESSION' + p] = prepareExport();
             } catch (e) { console.log(e); }
 
-            if (isSVGEmpty(turtles)) {
-                return;
-            }
+            // TODO : Add a flag in turtles to check if nothing has been drawn as of yet instead of this function 
+            // if (isSVGEmpty(turtles)) {
+            //     return;
+            // }
 
             var img = new Image();
             var svgData = doSVG(canvas, logo, turtles, 320, 240, 320 / canvas.width);
