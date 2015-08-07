@@ -728,14 +728,32 @@ function Queue (blk, count, parentBlk) {
 
 
 function makeTurtleBitmap(me, data, name, callback, extras) {
+    // TODO : Creating normal turtle also works but we need a 3D turtle
+
     // Async creation of bitmap from SVG data
     // Works with Chrome, Safari, Firefox (untested on IE)
     var img = new Image();
-    img.onload = function () {
-        complete = true;
-        bitmap = new createjs.Bitmap(img);
-        callback(me, name, bitmap, extras);
-    };
+        img.onload = function () {
+            var canvas = document.createElement('canvas');
+            complete = true;
+            canvas.width = img.width;
+            canvas.height = img.height;
+            var context = canvas.getContext('2d');
+            context.drawImage(img, 0, 0);
+            var texture = new THREE.Texture(canvas);
+            texture.needsUpdate = true;
+            texture.minFilter = THREE.NearestFilter; 
+            var material = new THREE.MeshBasicMaterial( {map: texture} );
+            material.transparent = true;
+            material.depthWrite = false;
+            var bitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(img.width, img.height),material);
+            bitmap.name = name;
+            bitmap.imgWidth = img.width;
+            bitmap.imgHeight = img.height;
+            callback(me, name, bitmap, extras);
+    }
     img.src = 'data:image/svg+xml;base64,' + window.btoa(
         unescape(encodeURIComponent(data)));
+
+
 };

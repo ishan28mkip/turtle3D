@@ -791,32 +791,6 @@ function first(myList){
     }
 }
 
-
-// This function is no longer used
-function doSVG(canvas, logo, turtles, width, height, scale) {
-    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + width + '" height="' + height + '">\n';
-    svg += '<g transform="scale(' + scale + ',' + scale + ')">\n';
-    svg += logo.svgOutput;
-    for (var turtle in turtles.turtleList) {
-        turtles.turtleList[turtle].closeSVG();
-        svg += turtles.turtleList[turtle].svgOutput;
-    }
-    svg += '</g>';
-    svg += '</svg>';
-    return svg;
-}
-
-function isSVGEmpty(turtles) {
-    for (var turtle in turtles.turtleList) {
-        turtles.turtleList[turtle].closeSVG();
-        if (turtles.turtleList[turtle].svgOutput !== '') {
-            return false;
-        }
-    }
-    return true;
-}
-
-
 function fileExt(file) {
     var parts = file.split('.');
     if (parts.length == 1 || (parts[0] == '' && parts.length == 2)) {
