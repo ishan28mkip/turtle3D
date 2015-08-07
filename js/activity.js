@@ -1151,20 +1151,21 @@ define(function(require) {
             //     return;
             // }
 
-            var img = new Image();
-            var svgData = doSVG(canvas, logo, turtles, 320, 240, 320 / canvas.width);
-            img.onload = function() {
-                var bitmap = new createjs.Bitmap(img);
-                var bounds = bitmap.getBounds();
-                bitmap.cache(bounds.x, bounds.y, bounds.width, bounds.height);
-                try {
-                    localStorage['SESSIONIMAGE' + p] = bitmap.getCacheDataURL();
-                } catch (e) { console.log(e); }
-            }
-            img.src = 'data:image/svg+xml;base64,' +
-                      window.btoa(unescape(encodeURIComponent(svgData)));
+            // var img = new Image();
+            // var svgData = doSVG(canvas, logo, turtles, 320, 240, 320 / canvas.width);
+            // img.onload = function() {
+            //     var bitmap = new createjs.Bitmap(img);
+            //     var bounds = bitmap.getBounds();
+            //     bitmap.cache(bounds.x, bounds.y, bounds.width, bounds.height);
+            //     try {
+            //         localStorage['SESSIONIMAGE' + p] = bitmap.getCacheDataURL();
+            //     } catch (e) { console.log(e); }
+            // }
+            // img.src = 'data:image/svg+xml;base64,' +
+            //           window.btoa(unescape(encodeURIComponent(svgData)));
         }
 
+        // FIXME
         function loadProject(projectName) {
             // Show busy cursor.
             document.body.style.cursor = 'wait';
@@ -1206,6 +1207,7 @@ define(function(require) {
             document.body.style.cursor = 'default';
         }
 
+        // FIXME : All the blocks are centered on screen when loaded, fix that 
         function saveProject(projectName) {
             // palettes.updatePalettes();
             // Show busy cursor.
@@ -1243,6 +1245,7 @@ define(function(require) {
                 }
             }, 200);
         }
+
 
         function loadStart() {
             // where to put this?
@@ -1292,14 +1295,19 @@ define(function(require) {
         function hideMsgs() {
             errorMsgText.parent.visible = false;
             if (errorMsgArrow !== null) {
-                errorMsgArrow.removeAllChildren();
-                refreshCanvas();
+                for(var i = 0; i < errorMsgArrow.children.length; i++){
+                    errorMsgArrow.remove(errorMsgArrow.children[i]);
+                }
+                refreshCanvas(1);
             }
-            msgText.parent.visible = false;
+            if(msgText.parent !== undefined){
+                msgText.parent.visible = false;
+            }
+
             for(var i in errorArtwork) {
                 errorArtwork[i].visible = false;
             }
-        }
+        }   
 
         function textMsg(msg) {
             if (msgText == null) {
