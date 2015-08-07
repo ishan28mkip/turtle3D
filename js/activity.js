@@ -1584,11 +1584,11 @@ define(function(require) {
             var dy = 0;
 
             for (var name in buttonNames) {
-                var container = makeButton(buttonNames[name][0] + '-button',
-                    x, y, btnSize);
-                loadButtonDragHandler(container, x, y, buttonNames[name][1]);
+                var container = makeButton(buttonNames[name][0],
+                    x, y, btnSize, 0 , buttonNames[name][1]);
+                
                 onscreenButtons.push(container);
-
+                
                 if (buttonNames[name][0] == 'stop-turtle') {
                     stopTurtleContainer = container;
                     stopTurtleContainerX = x;
@@ -1630,16 +1630,14 @@ define(function(require) {
             var dx = 0;
             var dy = btnSize;
 
-            menuContainer = makeButton('menu-button', x, y, btnSize,
-                                       menuButtonsVisible? 90 : undefined);
-            loadButtonDragHandler(menuContainer, x, y, doMenuButton);
+            menuContainer = makeButton('menu', x, y, btnSize,
+                                       menuButtonsVisible? 90 : undefined, doMenuButton);
 
             for (var name in menuNames) {
                 x += dx;
                 y -= dy;
-                var container = makeButton(menuNames[name][0] + '-button',
-                    x, y, btnSize);
-                loadButtonDragHandler(container, x, y, menuNames[name][1]);
+                var container = makeButton(menuNames[name][0],
+                    x, y, btnSize, 0, menuNames[name][1]);
                 onscreenMenu.push(container);
                 container.visible = false;
             }
@@ -1781,6 +1779,7 @@ define(function(require) {
 
         function doMenuAnimation() {
             var bitmap = first(menuContainer.children);
+
             // FIXME : Make the rotation a animation instead of direct change
 
             if (bitmap !== null) {
