@@ -253,57 +253,39 @@ function Turtle (name, turtles) {
         else
             this.pitch += tempRot;
         this.turtles.refreshCanvas(2);
+    };
 
-        this.move(ox, oy, nx, ny, true);
-        this.turtles.refreshCanvas();
-    }
+    this.setYaw = function(degrees){
+        var tempRot = degrees - this.yaw;
+        rotateAroundObjectAxis(this.axis,this.axisZ,tempRot*Math.PI/180);
+        this.axisX.applyAxisAngle(this.axisZ.normalize(),tempRot*Math.PI/180);
+        this.axisY.applyAxisAngle(this.axisZ.normalize(),tempRot*Math.PI/180);
+        if(this.yaw + tempRot >= 360)
+            this.yaw = this.yaw + tempRot - 360;
+        else if(this.yaw + tempRot < 0 )
+            this.yaw = this.yaw + tempRot + 360;
+        else
+            this.yaw += tempRot;
+        this.turtles.refreshCanvas(2);
+    };
 
-    this.doArc = function(angle, radius) {
-        if (!this.fillState) {
-            this.drawingCanvas.graphics.beginStroke(this.canvasColor);
-            this.drawingCanvas.graphics.setStrokeStyle(this.stroke, 'round', 'round');
-            this.drawingCanvas.graphics.moveTo(this.container.x, this.container.y);
-        }
-        var adeg = Number(angle);
-        var arad = (adeg / 180) * Math.PI;
-        var orad = (this.orientation / 180) * Math.PI;
-        var r = Number(radius);
+    this.doRoll = function(degrees){
+        this.setRoll(this.roll+degrees);
+    };
 
-        // old turtle point
-        ox = this.turtles.screenX2turtleX(this.container.x);
-        oy = this.turtles.screenY2turtleY(this.container.y);
+    this.doPitch = function(degrees){
+        this.setPitch(this.pitch+degrees);
+    };
 
-        if( adeg < 0 ) {
-            var anticlockwise = true;
-            adeg = -adeg;
-            // center point for arc
-            var cx = ox - Math.cos(orad) * r;
-            var cy = oy + Math.sin(orad) * r;
-            // new position of turtle
-            var nx = cx + Math.cos(orad + arad) * r;
-            var ny = cy - Math.sin(orad + arad) * r;
-        } else {
-            var anticlockwise = false;
-            // center point for arc
-            var cx = ox + Math.cos(orad) * r;
-            var cy = oy - Math.sin(orad) * r;
-            // new position of turtle
-            var nx = cx - Math.cos(orad + arad) * r;
-            var ny = cy + Math.sin(orad + arad) * r;
-        }
-        this.arc(cx, cy, ox, oy, nx, ny, r, orad, orad + arad, anticlockwise, true);
+    this.doYaw = function(degrees){
+        this.setYaw(this.yaw+degrees);
+    };
 
-        if (anticlockwise) {
-            this.doRight(-adeg);
-        } else {
-            this.doRight(adeg);
-        }
-        this.turtles.refreshCanvas();
-    }
 
+    
+    // FIXME
     this.doShowImage = function(size, myImage) {
         // Add an image object to the canvas
-        // Is there a JS test for a valid image path?
         if (myImage == null) {
             return;
         }
@@ -321,11 +303,16 @@ function Turtle (name, turtles) {
             bitmap.regX = image.width / 2;
             bitmap.regY = image.height / 2;
             bitmap.rotation = me.orientation;
-            me.turtles.refreshCanvas();
+            me.turtles.refreshCanvas(1);
         }
         image.src = myImage;
     }
 
+    this.doShow3DModel = function(){
+        // TODO : Create this function
+    }
+
+    // FIXME
     this.doShowURL = function(size, myURL) {
         // Add an image object from a URL to the canvas
         if (myURL == null) {
