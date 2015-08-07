@@ -668,6 +668,31 @@ function editText(mesh,text,options){
     // Call refreshCanvas after call to this function
 }
 
+    else if(object.visible == true)
+        return visibilityCheck(object.parent);
+    else if(object.visible === false)
+        return false;
+}
+
+//Rotation about the arbitary axis
+var rotObjectMatrix;
+function rotateAroundObjectAxis(object, axis, radians) {
+    rotObjectMatrix = new THREE.Matrix4();
+    rotObjectMatrix.makeRotationAxis(axis.normalize(), radians);
+    object.matrix.multiply(rotObjectMatrix);
+    object.rotation.setFromRotationMatrix(object.matrix);
+}
+
+//rotation about world axis
+var rotWorldMatrix;
+function rotateAroundWorldAxis(object, axis, radians) {
+    rotWorldMatrix = new THREE.Matrix4();
+    rotWorldMatrix.makeRotationAxis(axis.normalize(), radians);
+    rotWorldMatrix.multiply(object.matrix); 
+    object.matrix = rotWorldMatrix;
+    object.rotation.setFromRotationMatrix(object.matrix);
+}
+
 
 
 // ------------------------------------------------------------------- //
