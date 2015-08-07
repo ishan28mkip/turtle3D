@@ -461,20 +461,6 @@ function Turtle (name, turtles) {
         this.fillState = false;
     }
 
-    this.closeSVG = function() {
-        if (this.svgPath) {
-            this.svgOutput += '" style="stroke-linecap:round;fill:';
-            if (this.fillState) {
-                this.svgOutput += this.canvasColor + ';';
-            } else {
-                this.svgOutput += 'none;';
-            }
-            this.svgOutput += 'stroke:' + this.canvasColor + ';';
-            var strokeScaled = this.stroke * this.turtles.scale;
-            this.svgOutput += 'stroke-width:' + strokeScaled + 'pt;" />';
-            this.svgPath = false;
-        }
-    }
 };
 
 
