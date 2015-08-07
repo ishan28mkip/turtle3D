@@ -464,9 +464,13 @@ function Turtle (name, turtles) {
 };
 
 
-function Turtles(canvas, stage, refreshCanvas) {
+function Turtles(canvas, stage2D, stage3D, refreshCanvas) {
     this.canvas = canvas;
-    this.stage = stage;
+    
+    // TODO : Remove the concept of two stages when the turtle becomes a 3D model instead.
+    this.stage2D = stage2D;
+    this.stage3D = stage3D;
+
     this.refreshCanvas = refreshCanvas;
     this.scale = 1.0;
     this.rotating = false;
@@ -510,24 +514,14 @@ function Turtles(canvas, stage, refreshCanvas) {
         this.turtleList.push(myTurtle);
 
         // Each turtle needs its own canvas.
-        myTurtle.drawingCanvas = new createjs.Shape();
-        this.stage.add(myTurtle.drawingCanvas);
+        // myTurtle.drawingCanvas = new createjs.Shape();
+        // this.stage3D.add(myTurtle.drawingCanvas);
         // In theory, this prevents some unnecessary refresh of the
         // canvas.
-        myTurtle.drawingCanvas.tickEnabled = false;
+        // myTurtle.drawingCanvas.tickEnabled = false;
 
         var turtleImage = new Image();
         i %= 10;
-        myTurtle.container = new createjs.Container();
-        this.stage.add(myTurtle.container);
-        myTurtle.container.x = this.turtleX2screenX(myTurtle.x);
-        myTurtle.container.y = this.turtleY2screenY(myTurtle.y);
-
-        var hitArea = new createjs.Shape();
-        hitArea.graphics.beginFill('#FFF').drawEllipse(-27, -27, 55, 55);
-        hitArea.x = 0;
-        hitArea.y = 0;
-        myTurtle.container.hitArea = hitArea;
 
         function processTurtleBitmap(me, name, bitmap, startBlock) {
             myTurtle.bitmap = bitmap;
