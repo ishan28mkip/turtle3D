@@ -421,6 +421,7 @@ function initMouseEvents(events, renderer, camera){
             }, false ); 
             break;
             case 'mousemove' : renderer.domElement.addEventListener( 'mousemove',  function(event){
+                // TODO : Comment this out when no longer needed
                 // Adding code to update the mouse coordinate helper window
                 document.getElementById('mouseCoorX').innerHTML = event.clientX;
                 document.getElementById('mouseCoorY').innerHTML = event.clientY;
@@ -498,9 +499,11 @@ function onSceneEvent(event,eventName){
                             intersects[i].object.parentMesh.dispatchEvent(setEventTypeMesh(event,'mouseup', intersects[i].object.parentMesh));
                         }
                         if(intersects[i].object.parentMesh._listeners.hasOwnProperty('pressup')){
-                            if(intersects[i].object.parentMesh._listeners.pressmove.active){
-                                intersects[i].object.parentMesh.dispatchEvent(setEventTypeMesh(event,'pressup', intersects[i].object.parentMesh));
-                                intersects[i].object.parentMesh._listeners.pressmove.active = false;
+                            if(intersects[i].object.parentMesh._listeners.pressmove !== undefined){
+                                if(intersects[i].object.parentMesh._listeners.pressmove.active){
+                                   intersects[i].object.parentMesh.dispatchEvent(setEventTypeMesh(event,'pressup', intersects[i].object.parentMesh));
+                                   intersects[i].object.parentMesh._listeners.pressmove.active = false;
+                                }
                             }
                         }
                         break;                       
