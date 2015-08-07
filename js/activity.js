@@ -1321,6 +1321,7 @@ define(function(require) {
         }
 
 
+        // FIXME :
         // (1) Need to create a arrow graphic
         // (2) Need to create a function to bring the function to the top
         function errorMsg(msg, blk, text) {
@@ -1403,27 +1404,23 @@ define(function(require) {
         }
 
         function hideCartesian() {
-            cartesianBitmap.visible = false;
-            cartesianBitmap.updateCache();
-            update = true;
+            cartesianBitmap.children[0].visible = false;
+            refreshCanvas(1);
         }
 
         function showCartesian() {
-            cartesianBitmap.visible = true;
-            cartesianBitmap.updateCache();
-            update = true;
+            cartesianBitmap.children[0].visible = true;
+            refreshCanvas(1);
         }
 
         function hidePolar() {
-            polarBitmap.visible = false;
-            polarBitmap.updateCache();
-            update = true;
+            polarBitmap.children[0].visible = false;
+            refreshCanvas(1);
         }
 
         function showPolar() {
-            polarBitmap.visible = true;
-            polarBitmap.updateCache();
-            update = true;
+            polarBitmap.children[0].visible = true;
+            refreshCanvas(1);
         }
 
         function pasteStack() {
