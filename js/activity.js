@@ -11,8 +11,6 @@
 // TODO
     // Add touch support by using on cordova
 
-
-
 // NEWS
 
 
@@ -55,11 +53,11 @@
 
 
 
-var lang = document.webL10n.getLanguage();
-if (lang.indexOf("-") != -1) {
-    lang = lang.slice(0, lang.indexOf("-"));
-    document.webL10n.setLanguage(lang);
-}
+// var lang = document.webL10n.getLanguage();
+// if (lang.indexOf("-") != -1) {
+//     lang = lang.slice(0, lang.indexOf("-"));
+//     document.webL10n.setLanguage(lang);
+// }
 
 define(function(require) {
     require('easeljs');
@@ -253,9 +251,8 @@ define(function(require) {
             for (var turtle = 0; turtle < turtles.turtleList.length; turtle++) {
                 turtles.turtleList[turtle].doClear();
             }
-
-            blocksContainer.x = 0;
-            blocksContainer.y = 0;
+            blocksContainer.position.setX(0);
+            blocksContainer.position.setY(0);
         }
 
         function doFastButton() {
@@ -401,7 +398,7 @@ define(function(require) {
             // Position and point the scripting camera to the center of the scene
             scriptingCamera.position.x = 0;
             scriptingCamera.position.y = 0;
-            scriptingCamera.position.z = 1000;
+            scriptingCamera.position.z = 10000;
             scriptingCamera.lookAt(new THREE.Vector3(0, 0, 0));
 
             // Position and point the turtle camera to the center of the screen
