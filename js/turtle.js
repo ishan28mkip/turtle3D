@@ -121,22 +121,36 @@ function Turtle (name, turtles) {
         this.fillState = false;
 
         this.canvasColor = getMunsellColor(this.color, this.value, this.chroma);
-        this.drawingCanvas.graphics.clear();
-        this.drawingCanvas.graphics.beginStroke(this.canvasColor);
-        this.drawingCanvas.graphics.setStrokeStyle(this.stroke, 'round', 'round');
 
-        this.svgOutput = '';
-        this.svgPath = false;
+        // TODO : Implement a stroke style
+        // this.drawingCanvas.graphics.setStrokeStyle(this.stroke, 'round', 'round');
 
-        this.turtles.refreshCanvas();
+        this.turtles.refreshCanvas(1);
+        this.turtles.refreshCanvas(2);
     }
 
-    this.doForward = function(steps) {
-        if (!this.fillState) {
-            this.drawingCanvas.graphics.beginStroke(this.canvasColor);
-            this.drawingCanvas.graphics.setStrokeStyle(this.stroke, 'round', 'round');
-            this.drawingCanvas.graphics.moveTo(this.container.x, this.container.y);
+
+    this.setCursorPosition = function(x,y,z){
+
+        var geometry = new THREE.Geometry();
+        var lineBegin = new THREE.Vector3();
+        var lineClose = new THREE.Vector3();
+        lineBegin.copy(this.position);
+        geometry.vertices.push(lineBegin);
+        if(this.penState){
+            this.position.set(x,y,z);
+            lineClose.copy(this.position);
+            geometry.vertices.push(lineClose);
+            this.drawingCanvas.add(new THREE.Line(geometry, this.material));
+            this.axis.position.set(x,y,z);
+            this.turtles.refreshCanvas(2);
         }
+        else{
+            this.position.set(x,y,z);
+            this.axis.position.set(x,y,z);
+            this.turtles.refreshCanvas(2);
+        }  
+    };
 
         // old turtle point
         var ox = this.turtles.screenX2turtleX(this.container.x);
