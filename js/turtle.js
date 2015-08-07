@@ -72,96 +72,19 @@ function Turtle (name, turtles) {
 
 
     this.move = function(ox, oy, x, y, invert) {
-        if (invert) {
-            ox = this.turtles.turtleX2screenX(ox);
-            oy = this.turtles.turtleY2screenY(oy);
-            nx = this.turtles.turtleX2screenX(x);
-            ny = this.turtles.turtleY2screenY(y);
-        } else {
-            nx = x;
-            ny = y;
-        }
 
-        // Draw a line if the pen is down.
-        if (this.penState) {
-            this.drawingCanvas.graphics.lineTo(nx, ny);
-            if (!this.svgPath) {
-                this.svgPath = true;
-                var oxScaled = ox * this.turtles.scale;
-                var oyScaled = oy * this.turtles.scale;
-                this.svgOutput += '<path d="M ' + oxScaled + ',' + oyScaled + ' ';
-            }
-            var nxScaled = nx * this.turtles.scale;
-            var nyScaled = ny * this.turtles.scale;
-            this.svgOutput += nxScaled + ',' + nyScaled + ' ';
-        } else {
-            this.drawingCanvas.graphics.moveTo(nx, ny);
-        }
-        // Update turtle position on screen.
-        this.container.x = nx;
-        this.container.y = ny;
-        if (invert) {
-            this.x = x;
-            this.y = y;
-        } else {
-            this.x = this.turtles.screenX2turtleX(x);
-            this.y = this.turtles.screenY2turtleY(y);
-        }
-    }
+    };
 
     this.arc = function(cx, cy, ox, oy, x, y, radius, start, end, anticlockwise, invert) {
-        if (invert) {
-            cx = this.turtles.turtleX2screenX(cx);
-            cy = this.turtles.turtleY2screenY(cy);
-            ox = this.turtles.turtleX2screenX(ox);
-            oy = this.turtles.turtleY2screenY(oy);
-            nx = this.turtles.turtleX2screenX(x);
-            ny = this.turtles.turtleY2screenY(y);
-        } else {
-            nx = x;
-            ny = y;
-        }
+        // TODO : Add option to draw arc later on when the implementation pattern is clear
+        // Problem is where the arc should be drawn, 
+        // (1) Should it be drawn in a plane, then which plane would this be.
+        // (2) Or somehow give option to draw a parametric 3D curve
+    };
 
-        if (!anticlockwise) {
-            sa = start - Math.PI;
-            ea = end - Math.PI;
-        } else {
-            sa = start;
-            ea = end;
-        }
+    this.doArc = function(angle, radius) {
 
-        // Draw an arc if the pen is down.
-        if (this.penState) {
-            this.drawingCanvas.graphics.arc(cx, cy, radius, sa, ea, anticlockwise);
-            if (!this.svgPath) {
-                this.svgPath = true;
-                var oxScaled = ox * this.turtles.scale;
-                var oyScaled = oy * this.turtles.scale;
-                this.svgOutput += '<path d="M ' + oxScaled + ',' + oyScaled + ' ';
-            }
-            if (anticlockwise) {
-                var sweep = 0;
-            } else {
-                var sweep = 1;
-            }
-            var nxScaled = nx * this.turtles.scale;
-            var nyScaled = ny * this.turtles.scale;
-            var radiusScaled = radius * this.turtles.scale;
-            this.svgOutput += 'A ' + radiusScaled + ',' + radiusScaled + ' 0 0 ' + sweep + ' ' + nxScaled + ',' + nyScaled + ' ';
-        } else {
-            this.drawingCanvas.graphics.moveTo(nx, ny);
-        }
-        // Update turtle position on screen.
-        this.container.x = nx;
-        this.container.y = ny;
-        if (invert) {
-            this.x = x;
-            this.y = y;
-        } else {
-            this.x = this.screenX2turtles.turtleX(x);
-            this.y = this.screenY2turtles.turtleY(y);
-        }
-    }
+    };
 
     // Turtle functions
     this.doClear = function() {
