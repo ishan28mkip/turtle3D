@@ -1320,6 +1320,9 @@ define(function(require) {
             // stage.setChildIndex(msgContainer, stage.getNumChildren() - 1);
         }
 
+
+        // (1) Need to create a arrow graphic
+        // (2) Need to create a function to bring the function to the top
         function errorMsg(msg, blk, text) {
             if (errorMsgText == null) {
                 // The container may not be ready yet... so do nothing
@@ -1330,73 +1333,69 @@ define(function(require) {
                 && !blocks.blockList[blk].collapsed) {
                 var fromX = (canvas.width - 1000) / 2;
                 var fromY = 128;
-                var toX = blocks.blockList[blk].x + blocksContainer.x;
-                var toY = blocks.blockList[blk].y + blocksContainer.y;
+                var toX = blocks.blockList[blk].x + blocksContainer.position.x;
+                var toY = blocks.blockList[blk].y + blocksContainer.position.y;
 
                 if (errorMsgArrow == null) {
-                    errorMsgArrow = new createjs.Container();
-                    stage.addChild(errorMsgArrow);
+                    errorMsgArrow = new THREE.Group();
+                    scriptingScene.add(errorMsgArrow);
                 }
 
-                var line = new createjs.Shape();
-                errorMsgArrow.addChild(line);
-                line.graphics.setStrokeStyle(4).beginStroke('#ff0031').moveTo(fromX, fromY).lineTo(toX, toY);
-                stage.setChildIndex(errorMsgArrow, stage.getNumChildren() - 1);
+                // TODO : Create a arrow here
 
-                var angle = Math.atan2(toX - fromX, fromY - toY) / Math.PI * 180;
-                var head = new createjs.Shape();
-                errorMsgArrow.addChild(head);
-                head.graphics.setStrokeStyle(4).beginStroke('#ff0031').moveTo(-10, 18).lineTo(0, 0).lineTo(10, 18);
-                head.x = toX;
-                head.y = toY;
-                head.rotation = angle;
+                // var line = new createjs.Shape();
+                // errorMsgArrow.addChild(line);
+                // line.graphics.setStrokeStyle(4).beginStroke('#ff0031').moveTo(fromX, fromY).lineTo(toX, toY);
+                // stage.setChildIndex(errorMsgArrow, stage.getNumChildren() - 1);
+
+                // var angle = Math.atan2(toX - fromX, fromY - toY) / Math.PI * 180;
+                // var head = new createjs.Shape();
+                // errorMsgArrow.addChild(head);
+                // head.graphics.setStrokeStyle(4).beginStroke('#ff0031').moveTo(-10, 18).lineTo(0, 0).lineTo(10, 18);
+                // head.x = toX;
+                // head.y = toY;
+                // head.rotation = angle;
             }
 
+            // TODO : Bring to top all the error artwork when setting visibility as true
+            console.log(msg);
             switch (msg) {
                 case 'empty heap.':
-                    errorArtwork['emptyheap'].visible = true;
-                    stage.setChildIndex(errorArtwork['emptyheap'], stage.getNumChildren() - 1);
+                    // errorArtwork['emptyheap'].visible = true;
                     break;
                 case 'Cannot take square root of negative number.':
-                    errorArtwork['negroot'].visible = true;
-                    stage.setChildIndex(errorArtwork['negroot'], stage.getNumChildren() - 1);
+                    // errorArtwork['negroot'].visible = true;
                     break;
 		        case 'Cannot find action.':
                     if (text == null) {
                         text = 'foo';
                     }
-                    errorArtwork['nostack'].children[1].text = text;
-                    errorArtwork['nostack'].visible = true;
-                    errorArtwork['nostack'].updateCache();
-                    stage.setChildIndex(errorArtwork['nostack'], stage.getNumChildren() - 1);
+                    // TODO : Edit the text here
+                    // errorArtwork['nostack'].children[1].text = text;
+                    // errorArtwork['nostack'].visible = true;
                     break;
 		        case 'Cannot find box.':
                     if (text == null) {
                         text = 'foo';
                     }
-                    errorArtwork['emptybox'].children[1].text = text;
-                    errorArtwork['emptybox'].visible = true;
-                    errorArtwork['emptybox'].updateCache();
-                    stage.setChildIndex(errorArtwork['emptybox'], stage.getNumChildren() - 1);
+                    // errorArtwork['emptybox'].children[1].text = text;
+                    // errorArtwork['emptybox'].visible = true;
                     break;
                 case 'Cannot divide by zero.':
-                    errorArtwork['zerodivide'].visible = true;
-                    stage.setChildIndex(errorArtwork['zerodivide'], stage.getNumChildren() - 1);
+                    // errorArtwork['zerodivide'].visible = true;
                     break;
                 case 'Not a number.':
-                    errorArtwork['notanumber'].visible = true;
-                    stage.setChildIndex(errorArtwork['notanumber'], stage.getNumChildren() - 1);
+                    // errorArtwork['notanumber'].visible = true;
                     break;
                 case 'Missing argument.':
-                    errorArtwork['noinput'].visible = true;
-                    stage.setChildIndex(errorArtwork['noinput'], stage.getNumChildren() - 1);
+                    // errorArtwork['noinput'].visible = true;
                     break;
                 default:
-                    var errorMsgContainer = errorMsgText.parent;
-                    errorMsgContainer.visible = true;
-                    errorMsgText.text = msg;
-                    stage.setChildIndex(errorMsgContainer, stage.getNumChildren() - 1);
-                    errorMsgContainer.updateCache();
+                    // TODO : Uncomment this when the container is ready
+                    // var errorMsgContainer = errorMsgText.parent;
+                    // errorMsgContainer.visible = true;
+                    // TODO : Set default error message text
+                    // errorMsgText.text = msg;
                     break;
             }
 
