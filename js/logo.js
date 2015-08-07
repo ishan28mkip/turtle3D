@@ -4,7 +4,7 @@ var DEFAULTDELAY = 500; // milleseconds
 var TURTLESTEP = -1;  // Run in step-by-step mode
 
 
-function Logo(canvas, blocks, turtles, stage, refreshCanvas, textMsg, errorMsg,
+function Logo(canvas, blocks, turtles, stage2D, stage3D, refreshCanvas, textMsg, errorMsg,
               hideMsgs, onStopTurtle, onRunTurtle, prepareExport, getStageX,
               getStageY, getStageMouseDown, getCurrentKeyCode,
               clearCurrentKeyCode, meSpeak, saveLocally) {
@@ -12,7 +12,8 @@ function Logo(canvas, blocks, turtles, stage, refreshCanvas, textMsg, errorMsg,
     this.canvas = canvas;
     this.blocks = blocks;
     this.turtles = turtles;
-    this.stage = stage;
+    this.stage2D = stage2D;
+    this.stage3D = stage3D;
     this.refreshCanvas = refreshCanvas;
     this.textMsg = textMsg;
     this.errorMsg = errorMsg;
