@@ -1,4 +1,6 @@
-// Fix scaling along with code in block so only palette and main screen scaling is required to be fixed later on.
+// TODO :
+    // (1) : Apply transform on hitmesh also when the block expands
+    // (2) : Fix scaling along with code in block so only palette and main screen scaling is required to be fixed later on.
 
 // Length of a long touch
 var LONGPRESSTIME = 2000;
@@ -121,7 +123,6 @@ function Block(protoblock, blocks, overrideName) {
                 }
             }
         }
-        // this.container.updateCache(); TODO : Check what update cache does
         this.blocks.refreshCanvas(1);
     }
 
@@ -396,7 +397,7 @@ function Block(protoblock, blocks, overrideName) {
                     // Adjust the docks.
                     myBlock.blocks.loopCounter = 0;
                     myBlock.blocks.adjustDocks(thisBlock);
-                    
+
                     if (blocksToCheck.length > 0) {
                         if (myBlock.isArgBlock() || myBlock.isTwoArgBlock()) {
                             myBlock.blocks.adjustExpandableTwoArgBlock(blocksToCheck);
@@ -855,7 +856,6 @@ function Block(protoblock, blocks, overrideName) {
                 myBlock.bitmap.visible = true;
             } else {
                 myBlock.bitmap.visible = false;
-                myBlock.container.updateCache();
             }
             myBlock.highlightBitmap.visible = false;
 
@@ -885,8 +885,6 @@ function Block(protoblock, blocks, overrideName) {
                 }
             }
 
-            myBlock.collapseContainer.updateCache();
-            myBlock.container.updateCache();
             myBlock.blocks.refreshCanvas(1);
         }
 
@@ -1193,10 +1191,11 @@ function loadEventHandlers(myBlock) {
                     focused = true;
                 }, 100);
             } else {
+                // TODO : Fix inLongPress to properly support click and run
                 if (!blocks.inLongPress) {
-                    var topBlock = blocks.findTopBlock(thisBlock);
-                    console.log('running from ' + blocks.blockList[topBlock].name);
-                    blocks.logo.runLogoCommands(topBlock);
+                    // var topBlock = blocks.findTopBlock(thisBlock);
+                    // console.log('running from ' + blocks.blockList[topBlock].name);
+                    // blocks.logo.runLogoCommands(topBlock);
                 }
             }
         }
@@ -1206,6 +1205,7 @@ function loadEventHandlers(myBlock) {
         hideDOMLabel();
         // Track time for detecting long pause...
         // but only for top block in stack
+        // TODO : Add support to trigger long press
         if (myBlock.connections[0] == null) {
             var d = new Date();
             blocks.time = d.getTime();
@@ -1486,14 +1486,8 @@ function labelChanged(myBlock) {
     // and hide the DOM textview...
     myBlock.label.style.display = 'none';
 
-    // Make sure text is on top.
-    var z = myBlock.container.getNumChildren() - 1;
-    myBlock.container.setChildIndex(myBlock.text, z);
-    try {
-        myBlock.container.updateCache();
-    } catch (e) {
-        console.log(e);
-    }
+    // TODO : Make sure text is on top.
+
     myBlock.blocks.refreshCanvas(1);
 
     // TODO: Don't allow duplicate action names
