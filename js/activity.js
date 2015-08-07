@@ -1814,19 +1814,21 @@ define(function(require) {
             for (button in onscreenMenu) {
                 onscreenMenu[button].visible = buttonsVisible;
             }
-            update = true;
+            refreshCanvas(1);
         }
 
         // creates a button
-        function makeButton(name, x, y, size, rotation) {
+        function makeButton(name, x, y, size, rotation, action) {
             var container = new THREE.Group();
-            if (name == 'paste-disabled-button') {
+            var buttonName = name + '-button';
+            if (buttonName == 'paste-disabled-button') {
                 pasteContainer = container;
             }
 
             scriptingScene.add(container);
             container.position.setX(x);
             container.position.setY(y);
+            
 
             var img = new Image();
 
@@ -1844,7 +1846,7 @@ define(function(require) {
                 texture.minFilter = THREE.NearestFilter; 
                 var material = new THREE.MeshBasicMaterial( {map: texture, transparent : true, depthWrite : false} );
                 var bitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(img.width, img.height),material);
-                bitmap.name = name;
+                bitmap.name = buttonName;
                 bitmap.imgWidth = img.width;
                 bitmap.imgHeight = img.height;
                 if(size != originalSize){
@@ -1868,7 +1870,9 @@ define(function(require) {
 
                 container.hitmesh = circleMesh;
 
-                if(rotation !== undefined){
+                loadButtonDragHandler(container, x, y, action);
+
+                if(rotation !== undefined || rotation !== 0){
                     bitmap.rotation.z = rotation;
                 }
 
@@ -1880,33 +1884,35 @@ define(function(require) {
                 // bitmap.cache(0, 0, size, size);
                 // bitmap.updateCache();
             }
-            img.src = 'icons/' + name + '.svg';
+            img.src = 'icons/' + buttonName + '.svg';
             return container;
         }
 
-        // TODO : fix this event handler later
         function loadButtonDragHandler(container, ox, oy, action) {
             // Prevent multiple button presses (i.e., debounce).
             var locked = false;
+            var moved;
 
             container.on('mousedown', function(event) {
-                var moved = true;
-                var offset = {
-                    x: container.x - Math.round(event.clientX / blocks.scale),
-                    y: container.y - Math.round(event.clientY / blocks.scale)
-                };
-                container.traverse(function(node){
-                    console.log(node);
-                });
+                moved = true;
+                // TODO : Use when you have fixed the scale 
+                // var offset = {
+                //     x: container.x - Math.round(event.clientX / blocks.scale),
+                //     y: container.y - Math.round(event.clientY / blocks.scale)
+                // };
+                
+                // container.traverse(function(node){
+                //     console.log(node);
+                // });
 
-                var circles = showMaterialHighlight(ox, oy, cellSize / 2, //Add circle hover on this
-                                                    event, scale, stage);
+                // TODO : Enable when the circle hover has been fixed
+                // var circles = showMaterialHighlight(ox, oy, cellSize / 2, //Add circle hover on this
+                //                                     event, scale, stage);
             });
-            container.on('pressup', function(event) {
-                    hideMaterialHighlight(circles, stage);
-
-                    container.x = ox;
-                    container.y = oy;
+            container.on('mouseup', function(event) {
+                    // hideMaterialHighlight(circles, stage);
+                    container.position.setX(ox);
+                    container.position.setY(oy);
                     if (action != null && moved && !locked) {
                         locked = true;
                         setTimeout(function() {
@@ -1917,5 +1923,6 @@ define(function(require) {
                     moved = false;
             });
         }
+        
     });
 });
