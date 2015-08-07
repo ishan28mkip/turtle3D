@@ -108,11 +108,11 @@ function Logo(canvas, blocks, turtles, stage2D, stage3D, refreshCanvas, textMsg,
     this.clearParameterBlocks = function() {
         for (var blk in this.blocks.blockList) {
             if (this.blocks.blockList[blk].parameter) {
-                this.blocks.blockList[blk].text.text = '';
-                this.blocks.blockList[blk].container.updateCache();
+                // TODO : Put the text mesh here
+                // this.blocks.blockList[blk].text.text = '';
             }
         }
-        this.refreshCanvas();
+        this.refreshCanvas(1);
     }
 
     this.updateParameterBlock = function(logo, turtle, blk) {
@@ -220,7 +220,7 @@ function Logo(canvas, blocks, turtles, stage2D, stage3D, refreshCanvas, textMsg,
                 this.blocks.blockList[blk].text.text = Math.round(value).toString();
             }
             this.blocks.blockList[blk].container.updateCache();
-            this.refreshCanvas();
+            this.refreshCanvas(1);
         }
     }
 
@@ -247,7 +247,7 @@ function Logo(canvas, blocks, turtles, stage2D, stage3D, refreshCanvas, textMsg,
         for (var turtle = 0; turtle < this.turtles.turtleList.length; turtle++) {
             for (var listener in this.turtles.turtleList[turtle].listeners) {
                 console.log('removing listener ' + listener);
-                this.stage.removeEventListener(listener, this.turtles.turtleList[turtle].listeners[listener], false);
+                this.stage3D.removeEventListener(listener, this.turtles.turtleList[turtle].listeners[listener], false);
             }
             this.turtles.turtleList[turtle].listeners = {};
         }
@@ -262,8 +262,7 @@ function Logo(canvas, blocks, turtles, stage2D, stage3D, refreshCanvas, textMsg,
 
         // Init the graphic state.
         for (var turtle = 0; turtle < this.turtles.turtleList.length; turtle++) {
-            this.turtles.turtleList[turtle].container.x = this.turtles.turtleX2screenX(this.turtles.turtleList[turtle].x);
-            this.turtles.turtleList[turtle].container.y = this.turtles.turtleY2screenY(this.turtles.turtleList[turtle].y);
+            this.turtles.turtleList[turtle].axis.position.copy(this.turtles.turtleList[turtle].position);
         }
 
         // Execute turtle code here...  Find the start block (or the
@@ -391,7 +390,7 @@ function Logo(canvas, blocks, turtles, stage2D, stage3D, refreshCanvas, textMsg,
                 }
             }
         }
-        this.refreshCanvas();
+        this.refreshCanvas(1);
     }
 
     this.runFromBlock = function(logo, turtle, blk) {
@@ -508,7 +507,7 @@ function Logo(canvas, blocks, turtles, stage2D, stage3D, refreshCanvas, textMsg,
                         var event = new Event(args[0]);
                         logo.eventList[args[0]] = event;
                     }
-                    logo.stage.dispatchEvent(args[0]);
+                    logo.stage3D.dispatchEvent(args[0]);
                 }
                 break;
             case 'listen':
@@ -532,10 +531,10 @@ function Logo(canvas, blocks, turtles, stage2D, stage3D, refreshCanvas, textMsg,
                         // If there is already a listener, remove it
                         // before adding the new one.
                         if (args[0] in logo.turtles.turtleList[turtle].listeners) {
-                            logo.stage.removeEventListener(args[0], logo.turtles.turtleList[turtle].listeners[args[0]], false);
+                            logo.stage3D.removeEventListener(args[0], logo.turtles.turtleList[turtle].listeners[args[0]], false);
                         }
                         logo.turtles.turtleList[turtle].listeners[args[0]] = listener;
-                        logo.stage.addEventListener(args[0], listener, false);
+                        logo.stage3D.addEventListener(args[0], listener, false);
                     }
                 }
                 break;
@@ -1096,8 +1095,6 @@ function Logo(canvas, blocks, turtles, stage2D, stage3D, refreshCanvas, textMsg,
             }
             logo.runFromBlock(logo, turtle, nextBlock);
         } else {
-            // Make sure SVG path is closed.
-            logo.turtles.turtleList[turtle].closeSVG();
             // Mark the turtle as not running.
             logo.turtles.turtleList[turtle].running = false;
             if (!logo.turtles.running()) {
@@ -1116,10 +1113,9 @@ function Logo(canvas, blocks, turtles, stage2D, stage3D, refreshCanvas, textMsg,
                 logo.blocks.unhighlight(logo.parentFlowQueue[turtle][b]);
             }
 
-            // Make sure the turtles are on top.
-            var i = logo.stage.getNumChildren() - 1;
-            logo.stage.setChildIndex(logo.turtles.turtleList[turtle].container, i);
-            logo.refreshCanvas();
+            // TODO : Make sure the turtles are on top.
+            // logo.stage3D.setChildIndex(logo.turtles.turtleList[turtle].container, i);
+            logo.refreshCanvas(1);
         }
 
         clearTimeout(this.saveTimeout);
@@ -1148,7 +1144,6 @@ function Logo(canvas, blocks, turtles, stage2D, stage3D, refreshCanvas, textMsg,
                 break;
             }
         }
-
         return startHere;
     }
 
@@ -1395,7 +1390,7 @@ function Logo(canvas, blocks, turtles, stage2D, stage3D, refreshCanvas, textMsg,
                     logo.turtles.turtleList[turtle].container.visible = false;
                     var x = logo.turtles.turtleList[turtle].container.x;
                     var y = logo.turtles.turtleList[turtle].container.y;
-                    logo.refreshCanvas();
+                    logo.refreshCanvas(1);
                     var ctx = this.canvas.getContext("2d");
                     var imgData = ctx.getImageData(x, y, 1, 1).data;
                     var color = searchColors(imgData[0], imgData[1], imgData[2]);
@@ -1557,7 +1552,7 @@ function Logo(canvas, blocks, turtles, stage2D, stage3D, refreshCanvas, textMsg,
             // }
             //trashcan.hide();
             //palettes.hide();
-            this.refreshCanvas();
+            this.refreshCanvas(1);
         }
 
     this.showBlocks = function() {
@@ -1569,6 +1564,6 @@ function Logo(canvas, blocks, turtles, stage2D, stage3D, refreshCanvas, textMsg,
                 // this.turtles.turtleList[turtle].container.visible = true;
             // }
             // trashcan.show();
-            this.refreshCanvas();
+            this.refreshCanvas(1);
         }
 }
