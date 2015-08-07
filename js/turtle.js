@@ -30,10 +30,23 @@ function Turtle (name, turtles) {
     
     // Things used for drawing the turtle.
     this.container = null;
-    this.x = 0;
-    this.y = 0;
+    this.axis = null;
+    this.drawingCanvas = new THREE.Group();
+    
+
+    // Holds the current position of the location of the turtle
+    this.position = new THREE.Vector3(0,0,0);
     this.bitmap = null;
     this.skinChanged = false;  // Should we reskin the turtle on clear?
+    // 3D
+    // Holds the vectors of the current axis directions
+    this.axisX = new THREE.Vector3(1,0,0);
+    this.axisY = new THREE.Vector3(0,1,0);
+    this.axisZ = new THREE.Vector3(0,0,1);
+    // Holds the current rotation in degrees
+    this.roll = 0;
+    this.pitch = 0;
+    this.yaw  = 0;
 
     // Which start block is assocated with this turtle?
     this.startBlock = null;
@@ -46,20 +59,17 @@ function Turtle (name, turtles) {
     this.listeners = {};
 
     // Things used for what the turtle draws.
-    this.drawingCanvas = null;
-    this.svgOutput = '';
-    // Are we currently drawing a path?
-    this.svgPath = false;
     this.color = DEFAULTCOLOR;
     this.value = DEFAULTVALUE;
     this.chroma = DEFAULTCHROMA;
     this.stroke = DEFAULTSTROKE;
     this.canvasColor = '#ff0031';
-    this.orientation = 0;
     this.fillState = false;
     this.penState = true;
     this.font = DEFAULTFONT;
+    this.material = new THREE.LineBasicMaterial({color: this.canvasColor,linewidth : this.stroke});
     this.media = [];  // Media (text, images) we need to remove on clear.
+
 
     this.move = function(ox, oy, x, y, invert) {
         if (invert) {
