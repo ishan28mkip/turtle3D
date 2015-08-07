@@ -9,6 +9,10 @@ var DEFAULTVALUE = 50;
 var DEFAULTCHROMA = 100;
 var DEFAULTSTROKE = 5;
 var DEFAULTFONT = 'sans-serif';
+var XAXIS = new THREE.Vector3(1,0,0);
+var YAXIS = new THREE.Vector3(0,1,0);
+var ZAXIS = new THREE.Vector3(0,0,1);
+var ORIGIN = new THREE.Vector3(0,0,0);
 
 // Turtle sprite
 var turtlePath = 'images/turtle.svg';
