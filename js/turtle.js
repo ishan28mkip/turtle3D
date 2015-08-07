@@ -225,13 +225,34 @@ function Turtle (name, turtles) {
         }
     };
 
-        // old turtle point
-        var ox = this.turtles.screenX2turtleX(this.container.x);
-        var oy = this.turtles.screenY2turtleY(this.container.y);
+    /*Rotation Fuctions*/
 
-        // new turtle point
-        var nx = Number(x)
-        var ny = Number(y);
+    this.setRoll = function(degrees){
+        var tempRot = degrees - this.roll;
+        rotateAroundObjectAxis(this.axis,this.axisX,tempRot*Math.PI/180);
+        this.axisY.applyAxisAngle(this.axisX.normalize(),tempRot*Math.PI/180);
+        this.axisZ.applyAxisAngle(this.axisX.normalize(),tempRot*Math.PI/180);
+        if(this.roll + tempRot >= 360)
+            this.roll = this.roll + tempRot - 360;
+        else if(this.roll + tempRot < 0 )
+            this.roll = this.roll + tempRot + 360;
+        else
+            this.roll += tempRot;
+        this.turtles.refreshCanvas(2);
+    };
+
+    this.setPitch = function(degrees){
+        var tempRot = degrees - this.pitch;
+        rotateAroundObjectAxis(this.axis,this.axisY,tempRot*Math.PI/180);
+        this.axisX.applyAxisAngle(this.axisY.normalize(),tempRot*Math.PI/180);
+        this.axisZ.applyAxisAngle(this.axisY.normalize(),tempRot*Math.PI/180);
+        if(this.pitch + tempRot >= 360)
+            this.pitch = this.pitch + tempRot - 360;
+        else if(this.pitch + tempRot < 0 )
+            this.pitch = this.pitch + tempRot + 360;
+        else
+            this.pitch += tempRot;
+        this.turtles.refreshCanvas(2);
 
         this.move(ox, oy, nx, ny, true);
         this.turtles.refreshCanvas();
