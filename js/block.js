@@ -396,6 +396,7 @@ function Block(protoblock, blocks, overrideName) {
                     // Adjust the docks.
                     myBlock.blocks.loopCounter = 0;
                     myBlock.blocks.adjustDocks(thisBlock);
+                    
                     if (blocksToCheck.length > 0) {
                         if (myBlock.isArgBlock() || myBlock.isTwoArgBlock()) {
                             myBlock.blocks.adjustExpandableTwoArgBlock(blocksToCheck);
@@ -406,7 +407,6 @@ function Block(protoblock, blocks, overrideName) {
                     if (['start', 'action'].indexOf(myBlock.name) != -1) {
                         myBlock.bitmap.visible = !myBlock.collapsed;
                         myBlock.highlightBitmap.visible = false;
-                        myBlock.container.updateCache();
                         myBlock.blocks.refreshCanvas(1);
                     }
                     if (myBlock.postProcess != null) {
