@@ -89,29 +89,29 @@ function Turtle (name, turtles) {
     // Turtle functions
     this.doClear = function() {
         // Reset turtle.
-        this.x = 0;
-        this.y = 0;
-        this.orientation = 0.0;
+
         var i = this.turtles.turtleList.indexOf(this) % 10;
         this.color = i * 10;
         this.value = DEFAULTVALUE;
         this.chroma = DEFAULTCHROMA;
         this.stroke = DEFAULTSTROKE;
         this.font = DEFAULTFONT;
-        this.container.x = this.turtles.turtleX2screenX(this.x);
-        this.container.y = this.turtles.turtleY2screenY(this.y);
 
-        if (this.skinChanged) {
-            this.doTurtleShell(55, turtleBasePath + 'turtle-' + i.toString() + '.svg');
-            this.skinChanged = false;
+        if(this.axis !== null){ // Can occur if the turtle is still not initialized
+            this.axis.position.copy(this.position);
         }
 
-        this.bitmap.rotation = this.orientation;
-        this.container.updateCache();
+        // TODO : Port the do turtle shell function
+        // if (this.skinChanged) {
+        //     this.doTurtleShell(55, turtleBasePath + 'turtle-' + i.toString() + '.svg');
+        //     this.skinChanged = false;
+        // }
+
+        // TODO : Add calls to make all types of rotation to 0
 
         // Clear all media.
         for (i = 0; i < this.media.length; i++) {
-            this.turtles.stage.removeChild(this.media[i]);
+            this.turtles.stage2D.remove(this.media[i]);
         }
         // FIX ME: potential memory leak
         this.media = [];
