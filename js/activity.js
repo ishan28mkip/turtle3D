@@ -1500,14 +1500,14 @@ define(function(require) {
         };
 
         function hideStopButton() {
-            stopTurtleContainer.x = stopTurtleContainerX;
-            stopTurtleContainer.y = stopTurtleContainerY;
+            stopTurtleContainer.position.setX(stopTurtleContainerX);
+            stopTurtleContainer.position.setY(stopTurtleContainerY);
             stopTurtleContainer.visible = false;
         }
 
         function showStopButton() {
-            stopTurtleContainer.x = onscreenButtons[0].x;
-            stopTurtleContainer.y = onscreenButtons[0].y;
+            stopTurtleContainer.position.setX(onscreenButtons[0].x);
+            stopTurtleContainer.position.setY(onscreenButtons[0].y);
             stopTurtleContainer.visible = true;
         }
 
@@ -1565,7 +1565,6 @@ define(function(require) {
             // headerContainer.shadow = new createjs.Shadow('#777', 0, 2, 2);
             // stage.addChild(headerContainer);
 
-            // Buttons used when running turtle programs
             var buttonNames = [
                 ['fast', doFastButton],
                 ['slow', doSlowButton],
