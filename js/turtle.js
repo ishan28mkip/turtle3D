@@ -401,51 +401,47 @@ function Turtle (name, turtles) {
 
     this.doSetFont = function(font) {
         this.font = font;
-        this.turtles.refreshCanvas();
-        this.container.updateCache();
+        this.turtles.refreshCanvas(1);  
+        this.turtles.refreshCanvas(2);
     }
 
 
     this.doSetColor = function(color) {
         // Color sets hue but also selects maximum chroma.
-        this.closeSVG();
         this.color = Number(color);
         var results = getcolor(this.color);
         this.canvasValue = results[0];
         this.canvasChroma = results[1];
         this.canvasColor = results[2];
-        this.drawingCanvas.graphics.beginStroke(this.canvasColor);
+        // TODO : Set color to this.canvasColor
     }
 
     this.doSetHue = function(hue) {
-        this.closeSVG();
         this.color = Number(hue);
         this.canvasColor = getMunsellColor(this.color, this.value, this.chroma);
-        this.drawingCanvas.graphics.beginStroke(this.canvasColor);
+        // TODO : Set color to this.canvasColor
     }
 
     this.doSetValue = function(shade) {
         this.closeSVG();
         this.value = Number(shade);
         this.canvasColor = getMunsellColor(this.color, this.value, this.chroma);
-        this.drawingCanvas.graphics.beginStroke(this.canvasColor);
+        // TODO : Set color to this.canvasColor
     }
 
     this.doSetChroma = function(chroma) {
-        this.closeSVG();
         this.chroma = Number(chroma);
         this.canvasColor = getMunsellColor(this.color, this.value, this.chroma);
-        this.drawingCanvas.graphics.beginStroke(this.canvasColor);
+        // TODO : Set color to this.canvasColor
     }
 
     this.doSetPensize = function(size) {
-        this.closeSVG();
         this.stroke = size;
-        this.drawingCanvas.graphics.setStrokeStyle(this.stroke, 'round', 'round');
+        // TODO : Add option to set pen styles
+        // this.drawingCanvas.graphics.setStrokeStyle(this.stroke, 'round', 'round');
     }
 
     this.doPenUp = function() {
-        this.closeSVG();
         this.penState = false;
     }
 
@@ -454,15 +450,14 @@ function Turtle (name, turtles) {
     }
 
     this.doStartFill = function() {
-        /// start tracking points here
-        this.drawingCanvas.graphics.beginFill(this.canvasColor);
+        // start tracking points here
+        // TODO : Add a function to check and do fill operations
         this.fillState = true;
     }
 
     this.doEndFill = function() {
         /// redraw the points with fill enabled
-        this.drawingCanvas.graphics.endFill();
-        this.closeSVG();
+        // TODO : Add a function to check and do fill operations
         this.fillState = false;
     }
 
