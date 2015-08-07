@@ -522,6 +522,23 @@ function Turtles(canvas, stage2D, stage3D, refreshCanvas) {
 
         var turtleImage = new Image();
         i %= 10;
+        myTurtle.container = new THREE.Group();
+        this.stage2D.add(myTurtle.container);
+
+        // Add's a 3D Axis to the turtle
+        var axislength = 8;
+        turtleAxis = new THREE.Object3D();
+        turtleAxis.add(new THREE.ArrowHelper(XAXIS, ORIGIN, axislength, 0xff0000, 1, 1), new THREE.ArrowHelper(YAXIS, ORIGIN, axislength, 0x00ff00, 1, 1),new THREE.ArrowHelper(ZAXIS, ORIGIN, axislength, 0x0000ff, 1, 1));
+        myTurtle.axis = turtleAxis;
+        stage3D.add(turtleAxis);
+        // Adds the drawing canvas of a block
+        stage3D.add(myTurtle.drawingCanvas);
+        this.refreshCanvas(2);
+
+        // myTurtle.container.position.x = this.turtleX2screenX(myTurtle.x);
+        // myTurtle.container.position.y = this.turtleY2screenY(myTurtle.y);
+        // myTurtle.container.position.setX(myTurtle.x);
+        // myTurtle.container.position.setY(myTurtle.y);
 
         function processTurtleBitmap(me, name, bitmap, startBlock) {
             myTurtle.bitmap = bitmap;
