@@ -668,6 +668,9 @@ function editText(mesh,text,options){
     // Call refreshCanvas after call to this function
 }
 
+function visibilityCheck(object){
+    if(object.parent === undefined && object.visible === true)
+        return true;
     else if(object.visible == true)
         return visibilityCheck(object.parent);
     else if(object.visible === false)
@@ -789,7 +792,7 @@ function first(myList){
 }
 
 
-
+// This function is no longer used
 function doSVG(canvas, logo, turtles, width, height, scale) {
     var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + width + '" height="' + height + '">\n';
     svg += '<g transform="scale(' + scale + ',' + scale + ')">\n';
