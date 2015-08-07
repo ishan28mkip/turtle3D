@@ -160,13 +160,13 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
         var blocks = this;
         this.updatePasteButton = updatePasteButton;
 
-        this.copyButton = makeButton('copy-button', 0, 0, 55);
+        this.copyButton = makeButton('copy', 0, 0, 55);
         this.copyButton.visible = false;
 
-        this.dismissButton = makeButton('cancel-button', 0, 0, 55);
+        this.dismissButton = makeButton('cancel', 0, 0, 55);
         this.dismissButton.visible = false;
 
-        this.saveStackButton = makeButton('save-blocks-button', 0, 0, 55);
+        this.saveStackButton = makeButton('save-blocks', 0, 0, 55);
         this.saveStackButton.visible = false;
 
         this.copyButton.on('click', function(event) {
@@ -231,6 +231,7 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
 
     // Adjust the docking postions of all blocks in the current drag
     // group.
+    // DONE
     this.adjustBlockPositions = function() {
         if (this.dragGroup.length < 2) {
             return;
@@ -258,7 +259,7 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
         var myBlock = this.blockList[blk];
 
         // Make sure it is the proper type of expandable block.
-        // TODO : Add the exection of the ThreeArgBlock here
+        // TODO : Add the ThreeArgBlock here
         if (myBlock.isArgBlock() || myBlock.isTwoArgBlock()) {
             return;
         }
@@ -650,8 +651,6 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
         // TODO: Make minimum distance relative to scale.
         var min = MINIMUMDOCKDISTANCE;
         var blkType = myBlock.docks[0][2]
-
-        console.log(min, "minimum docking distance");  
 
         // TODO : Optimize this code by reducing the number of iterations by imposing conditions
         for (var b = 0; b < this.blockList.length; b++) {
