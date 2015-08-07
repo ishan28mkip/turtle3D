@@ -668,28 +668,9 @@ function Turtles(canvas, stage2D, stage3D, refreshCanvas) {
                 myTurtle.doSetColor(infoDict['color']);
             }
         }, 1000);
-        this.refreshCanvas();
+        turtles.refreshCanvas(1);
     }
 
-    this.screenX2turtleX = function(x) {
-        return x - (this.canvas.width / (2.0 * this.scale));
-    }
-
-    this.screenY2turtleY = function(y) {
-        return this.invertY(y);
-    }
-
-    this.turtleX2screenX = function(x) {
-        return (this.canvas.width / (2.0 * this.scale)) + x;
-    }
-
-    this.turtleY2screenY = function(y) {
-        return this.invertY(y);
-    }
-
-    this.invertY = function(y) {
-        return this.canvas.height / (2.0 * this.scale) - y;
-    }
 
     this.markAsStopped = function() {
         for (turtle in this.turtleList) {
