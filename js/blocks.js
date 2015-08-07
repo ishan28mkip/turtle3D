@@ -1200,7 +1200,7 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
         // myBlock.container.snapToPixelEnabled = true;
         // TODO : Enable snap to pixel feature.
 
-        // TODO : Check this positioning, this positioning everything at the center on a reload
+        // TODO : Check this positioning, this is positioning everything at the center on a reload
         myBlock.container.position.setX(myBlock.x);
         myBlock.container.position.setY(myBlock.y);
 
@@ -1838,6 +1838,7 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
         this.protoBlockDict[blkName].palette.add(this.protoBlockDict[blkName]);
     }
 
+    // FIXME : Check this function to ensure that blocks are positioned properly after reload 
     this.loadNewBlocks = function(blockObjs) {
         // Check for blocks connected to themselves,
         // and for action blocks not connected to text blocks.
@@ -2383,6 +2384,7 @@ function sendStackToTrash(blocks, myBlock) {
             console.log('putting turtle ' + turtle + ' in the trash');
             blocks.turtles.turtleList[turtle].trash = true;
             blocks.turtles.turtleList[turtle].container.visible = false;
+            blocks.turtles.turtleList[turtle].axis.visible = false;
         } else {
             console.log('null turtle');
         }
@@ -2440,5 +2442,6 @@ function sendStackToTrash(blocks, myBlock) {
         blocks.blockList[blk].trash = true;
         blocks.blockList[blk].hide();
         blocks.refreshCanvas(1);
+        blocks.refreshCanvas(2);
     }
 }
