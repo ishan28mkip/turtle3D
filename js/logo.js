@@ -727,73 +727,105 @@ function Logo(canvas, blocks, turtles, stage2D, stage3D, refreshCanvas, textMsg,
             case 'clear':
                 logo.turtles.turtleList[turtle].doClear();
                 break;
-            case 'setxy':
-                if (args.length == 2) {
-                    if (typeof(args[0]) == 'string' || typeof(args[1]) == 'sting') {
+
+            case 'setCursorPosition':
+                if (args.length == 3) {
+                    if (typeof(args[0]) == 'string' || typeof(args[1]) == 'string' || typeof(args[2]) == 'string') {
                         logo.errorMsg('Not a number.', blk);
                         logo.stopTurtle = true;
                     } else {
-                        logo.turtles.turtleList[turtle].doSetXY(args[0], args[1]);
+                        logo.turtles.turtleList[turtle].setCursorPosition(args[0], args[1],args[2]);
                     }
                 }
                 break;
-            case 'arc':
-                if (args.length == 2) {
-                    if (typeof(args[0]) == 'string' || typeof(args[1]) == 'sting') {
-                        logo.errorMsg('Not a number.', blk);
-                        logo.stopTurtle = true;
-                    } else {
-                        logo.turtles.turtleList[turtle].doArc(args[0], args[1]);
-                    }
-                }
-                break;
-            case 'forward':
+            case 'doForwardX':
                 if (args.length == 1) {
                     if (typeof(args[0]) == 'string') {
                         logo.errorMsg('Not a number.', blk);
                         logo.stopTurtle = true;
                     } else {
-                        logo.turtles.turtleList[turtle].doForward(args[0]);
+                        logo.turtles.turtleList[turtle].doForwardX(args[0]);
                     }
                 }
                 break;
-            case 'back':
+            case 'doForwardY':
                 if (args.length == 1) {
                     if (typeof(args[0]) == 'string') {
                         logo.errorMsg('Not a number.', blk);
                         logo.stopTurtle = true;
                     } else {
-                        logo.turtles.turtleList[turtle].doForward(-args[0]);
+                        logo.turtles.turtleList[turtle].doForwardY(args[0]);
                     }
                 }
                 break;
-            case 'right':
+            case 'doForwardZ':
                 if (args.length == 1) {
                     if (typeof(args[0]) == 'string') {
                         logo.errorMsg('Not a number.', blk);
                         logo.stopTurtle = true;
                     } else {
-                        logo.turtles.turtleList[turtle].doRight(args[0]);
+                        logo.turtles.turtleList[turtle].doForwardZ(args[0]);
                     }
                 }
                 break;
-            case 'left':
+            case 'setRoll':
                 if (args.length == 1) {
                     if (typeof(args[0]) == 'string') {
                         logo.errorMsg('Not a number.', blk);
                         logo.stopTurtle = true;
                     } else {
-                        logo.turtles.turtleList[turtle].doRight(-args[0]);
+                        logo.turtles.turtleList[turtle].setRoll(args[0]);
                     }
                 }
                 break;
-            case 'setheading':
+            case 'setPitch':
                 if (args.length == 1) {
                     if (typeof(args[0]) == 'string') {
                         logo.errorMsg('Not a number.', blk);
                         logo.stopTurtle = true;
                     } else {
-                        logo.turtles.turtleList[turtle].doSetHeading(args[0]);
+                        logo.turtles.turtleList[turtle].setPitch(args[0]);
+                    }
+                }
+                break;
+            case 'setYaw':
+                if (args.length == 1) {
+                    if (typeof(args[0]) == 'string') {
+                        logo.errorMsg('Not a number.', blk);
+                        logo.stopTurtle = true;
+                    } else {
+                        logo.turtles.turtleList[turtle].setYaw(args[0]);
+                    }
+                }
+                break;
+            case 'doRoll':
+                if (args.length == 1) {
+                    if (typeof(args[0]) == 'string') {
+                        logo.errorMsg('Not a number.', blk);
+                        logo.stopTurtle = true;
+                    } else {
+                        logo.turtles.turtleList[turtle].doRoll(args[0]);
+                    }
+                }
+                break;
+                              
+            case 'doPitch':
+                if (args.length == 1) {
+                    if (typeof(args[0]) == 'string') {
+                        logo.errorMsg('Not a number.', blk);
+                        logo.stopTurtle = true;
+                    } else {
+                        logo.turtles.turtleList[turtle].doPitch(args[0]);
+                    }
+                }
+                break;
+            case 'doYaw':
+                if (args.length == 1) {
+                    if (typeof(args[0]) == 'string') {
+                        logo.errorMsg('Not a number.', blk);
+                        logo.stopTurtle = true;
+                    } else {
+                        logo.turtles.turtleList[turtle].doYaw(args[0]);
                     }
                 }
                 break;
