@@ -601,21 +601,14 @@ define(function(require) {
             this.document.onkeydown = keyPressed;
         }
 
+        // FIXME : Works well before clicking any block and then stops working
+        // FIXME : Is not detecting clicks well
         function setupBlocksContainerEvents() {
             var moving = false;
+            var lastCords;
+
             scriptingRenderer.domElement.addEventListener( 'mousedown',  function(event){
                 stagemousedown = true;
-            }, false);
-            scriptingRenderer.domElement.addEventListener( 'mouseup',  function(event){
-                stagemousedown = false;
-            }, false);
-            scriptingRenderer.domElement.addEventListener('mousemove',function(event){
-                stageX = event.clientX; //PE : original code has event.stageX
-                stageY = event.clientY;
-            },false); 
-
-            scriptingRenderer.domElement.addEventListener( 'mousedown',  function(event){
-
                 var mouseTHREECoordinates = {};
                 var intersects;
                 mouseTHREECoordinates.x = ( event.clientX / scriptingRenderer.domElement.width ) * 2 - 1;
@@ -623,26 +616,38 @@ define(function(require) {
                 raycaster.setFromCamera( mouseTHREECoordinates, scriptingCamera ); 
                 intersects = raycaster.intersectObjects(scriptingScene.children,true);
 
+                // Only checks till immidiate parent for visibility
+                for(var i = intersects.length - 1; i>=0; i--){
+                    if(intersects[i].object.visible === false || intersects[i].object.parent.visible === false){
+                        intersects.splice(i,1);
+                    }
+                }
+
                 if (intersects.length > 0 || turtles.running()) {
                     return;
                 }
+
                 moving = true;
                 lastCords = {x: event.clientX, y: event.clientY};
+            }, false);
+
+            scriptingRenderer.domElement.addEventListener( 'mouseup',  function(event){
+                moving = false;
+                stagemousedown = false;
             }, false);
 
             scriptingRenderer.domElement.addEventListener('mousemove',function(event){
                 if (!moving) {
                     return;
                 }
-                blocksContainer.x += event.clientX - lastCords.x;
-                blocksContainer.y += event.clientY - lastCords.y;
+                stageX = event.clientX;
+                stageY = event.clientY;
+
+                // blocksContainer.position.setX(blocksContainer.position.x + event.clientX - lastCords.x);
+                // blocksContainer.position.setY(blocksContainer.position.y - event.clientY + lastCords.y);
                 lastCords = {x: event.clientX, y: event.clientY};
                 refreshCanvas(1);
-            },false);
-
-            scriptingRenderer.domElement.addEventListener( 'mouseup',  function(event){
-                moving = false;
-            }, false);
+            },false);    
         }
 
         function scrollEvent(event) {
