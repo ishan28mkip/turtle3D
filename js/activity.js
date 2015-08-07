@@ -565,13 +565,10 @@ define(function(require) {
             }, false);
 
             cartesianBitmap = createGrid('images/Cartesian.svg','cartesian');
-            cartesianBitmap.visible = false;
-
             polarBitmap = createGrid('images/polar.svg','polar');
-            polarBitmap.visible = false;
 
             var URL = window.location.href;
-            var projectName = null;
+            var projectName = null; 
             try {
                 httpGet(null);
                 console.log('running from server or the user can access to examples.');
