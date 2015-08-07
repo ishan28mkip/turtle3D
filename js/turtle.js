@@ -152,25 +152,78 @@ function Turtle (name, turtles) {
         }  
     };
 
-        // old turtle point
-        var ox = this.turtles.screenX2turtleX(this.container.x);
-        var oy = this.turtles.screenY2turtleY(this.container.y);
 
-        // new turtle point
-        var rad = this.orientation * Math.PI / 180.0;
-        var nx = ox + Number(steps) * Math.sin(rad);
-        var ny = oy + Number(steps) * Math.cos(rad);
-
-        this.move(ox, oy, nx, ny, true);
-        this.turtles.refreshCanvas();
-    }
-
-    this.doSetXY = function(x, y) {
-        if (!this.fillState) {
-            this.drawingCanvas.graphics.beginStroke(this.canvasColor);
-            this.drawingCanvas.graphics.setStrokeStyle(this.stroke, 'round', 'round');
-            this.drawingCanvas.graphics.moveTo(this.container.x, this.container.y);
+    this.doForwardX = function(x){
+        var geometry = new THREE.Geometry();
+        var lineBegin = new THREE.Vector3();
+        var lineClose = new THREE.Vector3();
+        var alongX = new THREE.Vector3();
+        alongX.copy(XAXIS);
+        alongX.multiplyScalar(x);
+        lineBegin.copy(this.position);
+        geometry.vertices.push(lineBegin);
+        if(this.penState){
+            this.position.addVectors(this.position,alongX);
+            lineClose.copy(this.position);
+            geometry.vertices.push(lineClose);
+            this.drawingCanvas.add(new THREE.Line(geometry, this.material));
+            this.axis.position.copy(this.position);
+            this.turtles.refreshCanvas(2);
         }
+        else{
+            this.position.addVectors(this.position,alongX);
+            this.axis.position.copy(this.position);
+            this.turtles.refreshCanvas(2);
+        } 
+    };
+
+    this.doForwardY = function(y){
+        var geometry = new THREE.Geometry();
+        var lineBegin = new THREE.Vector3();
+        var lineClose = new THREE.Vector3();
+        var alongY = new THREE.Vector3();
+        alongY.copy(this.axisY);
+        alongY.multiplyScalar(y);
+        lineBegin.copy(this.position);
+        geometry.vertices.push(lineBegin);
+        if(this.penState){
+            this.position.addVectors(this.position,alongY);
+            lineClose.copy(this.position);
+            geometry.vertices.push(lineClose);
+            this.drawingCanvas.add(new THREE.Line(geometry, this.material));
+            this.axis.position.copy(this.position);
+            this.turtles.refreshCanvas(2);
+        }
+        else{
+            this.position.addVectors(this.position,alongY);
+            this.axis.position.copy(this.position);
+            this.turtles.refreshCanvas(2);
+        }  
+    };
+
+    this.doForwardZ = function(z){
+        var geometry = new THREE.Geometry();
+        var lineBegin = new THREE.Vector3();
+        var lineClose = new THREE.Vector3();
+        var alongZ = new THREE.Vector3();
+        alongZ.copy(this.axisZ);
+        alongZ.multiplyScalar(z);
+        lineBegin.copy(this.position);
+        geometry.vertices.push(lineBegin);
+        if(this.penState){
+            this.position.addVectors(this.position,alongZ);
+            lineClose.copy(this.position);
+            geometry.vertices.push(lineClose);
+            this.drawingCanvas.add(new THREE.Line(geometry, this.material));
+            this.axis.position.copy(this.position);
+            this.turtles.refreshCanvas(2);
+        }
+        else{
+            this.position.addVectors(this.position,alongZ);
+            this.axis.position.copy(this.position);
+            this.turtles.refreshCanvas(2);
+        }
+    };
 
         // old turtle point
         var ox = this.turtles.screenX2turtleX(this.container.x);
