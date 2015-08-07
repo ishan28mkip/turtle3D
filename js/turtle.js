@@ -544,25 +544,35 @@ function Turtles(canvas, stage2D, stage3D, refreshCanvas) {
             myTurtle.bitmap = bitmap;
             myTurtle.bitmap.regX = 27 | 0;
             myTurtle.bitmap.regY = 27 | 0;
-            myTurtle.bitmap.cursor = 'pointer';
-            myTurtle.container.addChild(myTurtle.bitmap);
+            // myTurtle.bitmap.cursor = 'pointer';
 
-            var bounds = myTurtle.container.getBounds();
-            myTurtle.container.cache(bounds.x, bounds.y, bounds.width, bounds.height);
+            myTurtle.container.add(myTurtle.bitmap);
+            myTurtle.container.visible = false;
+
+            // TODO : Add a sphere hitmesh for the axes
+            myTurtle.container.hitmesh = myTurtle.bitmap;
+
+            var bounds = myTurtle.container.get2DBounds();
+            myTurtle.container.bounds = bounds;
 
             myTurtle.startBlock = startBlock;
             if (startBlock != null) {
                 myTurtle.decorationBitmap = myTurtle.bitmap.clone();
-                startBlock.container.addChild(myTurtle.decorationBitmap);
+                startBlock.container.add(myTurtle.decorationBitmap);
                 myTurtle.decorationBitmap.name = 'decoration';
-                var bounds = startBlock.container.getBounds();
-                myTurtle.decorationBitmap.x = bounds.width - 30 * startBlock.protoblock.scale / 2;
-                myTurtle.decorationBitmap.y = 35 * startBlock.protoblock.scale / 2;
-                myTurtle.decorationBitmap.scaleX = myTurtle.decorationBitmap.scaleY = myTurtle.decorationBitmap.scale = 0.5 * startBlock.protoblock.scale / 2
-                startBlock.container.updateCache();
-            }
+                var bounds = startBlock.container.get2DBounds();
+                startBlock.container.bounds = bounds;
+                // FIXME : Fix the position of the decorative bitmap
+                myTurtle.decorationBitmap.position.setX(bounds.width - 30 * startBlock.protoblock.scale / 2);
+                myTurtle.decorationBitmap.position.setY(35 * startBlock.protoblock.scale / 2);
 
-            me.refreshCanvas();
+                myTurtle.decorationBitmap.scale.setX(0.5 * startBlock.protoblock.scale / 2);
+                myTurtle.decorationBitmap.scale.setY(0.5 * startBlock.protoblock.scale / 2);
+                myTurtle.decorationBitmap.scaleStore = 0.5 * startBlock.protoblock.scale / 2;
+
+            }
+            loadTurtleDragHandler(me,myTurtle,blkInfoAvailable);
+            me.refreshCanvas(1);
         }
 
         makeTurtleBitmap(this, TURTLESVG.replace(/fill_color/g, FILLCOLORS[i]).replace(/stroke_color/g, STROKECOLORS[i]), 'turtle', processTurtleBitmap, startBlock);
