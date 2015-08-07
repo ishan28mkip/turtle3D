@@ -576,96 +576,118 @@ function Turtles(canvas, stage2D, stage3D, refreshCanvas) {
         }
 
         makeTurtleBitmap(this, TURTLESVG.replace(/fill_color/g, FILLCOLORS[i]).replace(/stroke_color/g, STROKECOLORS[i]), 'turtle', processTurtleBitmap, startBlock);
+    }
 
+    function loadTurtleDragHandler(turtles,myTurtle,blkInfoAvailable){
         myTurtle.color = i * 10;
         myTurtle.canvasColor = getMunsellColor(myTurtle.color, DEFAULTVALUE, DEFAULTCHROMA);
-
-        var turtles = this;
+        
+        var moving = false;
+        var lastCords;
 
         myTurtle.container.on('mousedown', function(event) {
             if (turtles.rotating) {
                 return;
             }
-
-            var offset = {
-                x: myTurtle.container.x - event.stageX,
-                y: myTurtle.container.y - event.stageY
-            }
-
-            myTurtle.container.on('pressup', function(event) {
-                myTurtle.bitmap.scaleX = 1;
-                myTurtle.bitmap.scaleY = 1;
-                myTurtle.bitmap.scale = 1;
-                turtles.refreshCanvas();
-            });
-
-            myTurtle.container.on('pressmove', function(event) {
-                if (turtles.rotating) {
-                    return;
-                }
-
-                myTurtle.container.x = event.stageX + offset.x;
-                myTurtle.container.y = event.stageY + offset.y;
-                myTurtle.x = turtles.screenX2turtleX(myTurtle.container.x);
-                myTurtle.y = turtles.screenY2turtleY(myTurtle.container.y);
-                turtles.refreshCanvas();
-            });
-        });
-
-        myTurtle.container.on('click', function(event) {
-            var fromX, fromY;
-
-            // If turtles listen for clicks then they can be used as buttons.
-            turtles.stage.dispatchEvent('click' + myTurtle.name);
-
-            myTurtle.container.on('mousedown', function(event) {
-                // Rotation interferes with button click events.
-                // turtles.rotating = true;
-                fromX = event.stageX;
-                fromY = event.stageY;
-            }, null, true);  // once = true
-
-            myTurtle.container.on('pressmove', function(event) {
-                if (turtles.rotating && fromX !== undefined) {
-                    var rad = Math.atan2(fromY - event.stageY, fromX - event.stageX);
-                    var deg = rad * 180 / Math.PI - 90;
-                    deg %= 360;
-
-                    // Only rotate if there is a more than 1/2 deg difference
-                    if (Math.abs(deg - myTurtle.orientation) > 0.5) {
-                        myTurtle.doSetHeading(deg);
-                        turtles.refreshCanvas();
-                    }
-                }
-            });
-
-            myTurtle.container.on('pressup', function(event) {
-                turtles.rotating = false;
-            });
+            moving = true;
+            lastCords = {x: event.clientX, y: event.clientY};
         });
 
         myTurtle.container.on('mouseover', function(event) {
-            myTurtle.bitmap.scaleX = 1.2;
-            myTurtle.bitmap.scaleY = 1.2;
-            myTurtle.bitmap.scale = 1.2;
-            turtles.refreshCanvas();
+            myTurtle.bitmap.scale.setX(1.1);
+            myTurtle.bitmap.scale.setY(1.1);
+            myTurtle.bitmap.scaleStore = 1.2;
+            turtles.refreshCanvas(1);
         });
 
         myTurtle.container.on('mouseout', function(event) {
-            myTurtle.bitmap.scaleX = 1;
-            myTurtle.bitmap.scaleY = 1;
-            myTurtle.bitmap.scale = 1;
-            turtles.refreshCanvas();
+            myTurtle.bitmap.scale.setX(1);
+            myTurtle.bitmap.scale.setY(1);
+            myTurtle.bitmap.scaleStore = 1;
+            turtles.refreshCanvas(1);
         });
 
+
+        myTurtle.container.on('pressmove', function(event) {
+            if (turtles.rotating) {
+                return;
+            }
+            else if(!moving){
+                return;
+            }
+            // TODO : Project the axis to 2D screen and get the turtle coordinates
+            // TODO : Later make the turtle 3D itself
+
+            myTurtle.container.position.setX(myTurtle.container.position.x + event.clientX - lastCords.x);
+            myTurtle.container.position.setY(myTurtle.container.position.y - event.clientY + lastCords.y);
+            
+            myTurtle.axis.position.setX(myTurtle.axis.position.x + event.clientX - lastCords.x);
+            myTurtle.axis.position.setY(myTurtle.axis.position.y - event.clientY + lastCords.y);
+
+            myTurtle.x = myTurtle.container.position.x;
+            myTurtle.y = myTurtle.container.position.y;
+            
+            // myTurtle.x = turtles.screenX2turtleX(myTurtle.container.x);
+            // myTurtle.y = turtles.screenY2turtleY(myTurtle.container.y);
+            turtles.refreshCanvas(1);
+            turtles.refreshCanvas(2);
+            lastCords = {x: event.clientX, y: event.clientY};
+        });
+
+        myTurtle.container.on('pressup', function(event) {
+                myTurtle.bitmap.scale.setX(1);
+                myTurtle.bitmap.scale.setY(1);
+                myTurtle.bitmap.scaleStore = 1;
+                moving = false;
+                turtles.refreshCanvas(1);
+        });
+
+        
+
+        // TODO : Implement the pressmove to rotate function
+
+        // myTurtle.container.on('click', function(event) {
+        //     var fromX, fromY;
+
+        //     // If turtles listen for clicks then they can be used as buttons.
+        //     turtles.stage.dispatchEvent('click' + myTurtle.name);
+
+        //     myTurtle.container.on('mousedown', function(event) {
+        //         // Rotation interferes with button click events.
+        //         // turtles.rotating = true;
+        //         fromX = event.stageX;
+        //         fromY = event.stageY;
+        //     }, null, true);  // once = true
+
+        //     myTurtle.container.on('pressmove', function(event) {
+        //         if (turtles.rotating && fromX !== undefined) {
+        //             var rad = Math.atan2(fromY - event.stageY, fromX - event.stageX);
+        //             var deg = rad * 180 / Math.PI - 90;
+        //             deg %= 360;
+
+        //             // Only rotate if there is a more than 1/2 deg difference
+        //             if (Math.abs(deg - myTurtle.orientation) > 0.5) {
+        //                 myTurtle.doSetHeading(deg);
+        //                 turtles.refreshCanvas(1);
+        //             }
+        //         }
+        //     });
+
+        //     myTurtle.container.on('pressup', function(event) {
+        //         turtles.rotating = false;
+        //     });
+        // });
+
+
+        // TODO : When the blkInfoAvailable data is fixed in blocks.js update this file
         document.getElementById('loader').className = '';
         setTimeout(function() {
             if (blkInfoAvailable) {
-                myTurtle.doSetHeading(infoDict['heading']);
-                myTurtle.doSetPensize(infoDict['pensize']);
-                myTurtle.doSetChroma(infoDict['grey']);
-                myTurtle.doSetValue(infoDict['shade']);
-                myTurtle.doSetColor(infoDict['color']);
+                // myTurtle.doSetHeading(infoDict['heading']);
+                // myTurtle.doSetPensize(infoDict['pensize']);
+                // myTurtle.doSetChroma(infoDict['grey']);
+                // myTurtle.doSetValue(infoDict['shade']);
+                // myTurtle.doSetColor(infoDict['color']);
             }
         }, 1000);
         turtles.refreshCanvas(1);
