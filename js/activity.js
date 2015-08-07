@@ -446,13 +446,15 @@ define(function(require) {
             palettesContainer = new THREE.Group();
             blocksContainer = new THREE.Group();
             trashContainer = new THREE.Group();
-            turtleContainer = new THREE.Group();
-            scriptingScene.add(palettesContainer,blocksContainer,trashContainer);
-            turtleScene.add(turtleContainer);
+            turtle2DContainer = new THREE.Group();
+            turtle3DContainer = new THREE.Group();
+
+            scriptingScene.add(palettesContainer,blocksContainer,trashContainer,turtle2DContainer);
+            turtleScene.add(turtle3DContainer);
             setupBlocksContainerEvents();
 
             trashcan = new Trashcan(canvas, trashContainer, cellSize, refreshCanvas);
-            turtles = new Turtles(canvas, turtleContainer, refreshCanvas);
+            turtles = new Turtles(canvas, turtle2DContainer, turtle3DContainer, refreshCanvas);
             blocks = new Blocks(canvas, blocksContainer, refreshCanvas, trashcan);
             palettes = initPalettes(canvas, refreshCanvas, palettesContainer, cellSize, trashcan, blocks);
 
@@ -463,7 +465,7 @@ define(function(require) {
             blocks.makeCopyPasteButtons(makeButton, updatePasteButton);
 
             // TODO: clean up this mess.
-            logo = new Logo(canvas, blocks, turtles, turtleContainer,
+            logo = new Logo(canvas, blocks, turtles, turtle2DContainer, turtle3DContainer,
                             refreshCanvas,
                             textMsg, errorMsg, hideMsgs, onStopTurtle,
                             onRunTurtle, prepareExport, getStageX, getStageY,
