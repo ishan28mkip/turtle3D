@@ -660,19 +660,11 @@ function editText(mesh,text,options){
         options.style = (options.style === undefined) ? mesh.options.style : options.style;
         options.curveSegments = (options.curveSegments === undefined) ? mesh.options.curveSegments : options.curveSegments;
     }
-    var currScale = new THREE.Vector3();
-    var currPosition = new THREE.Vector3();
-    currScale.copy(mesh.scale);
-    currPosition.copy(mesh.position);
-    containerCache = mesh.parent;
-    containerCache.remove(mesh);
+    
     var textShapes = THREE.FontUtils.generateShapes( text, options );
-    var text = new THREE.ShapeGeometry( textShapes );
-    var textMesh = new THREE.Mesh( text, new THREE.MeshBasicMaterial( { color: color } ) ) ;
-    textMesh.options = options;
-    textMesh.position.copy(currPosition);
-    textMesh.scale.copy(currScale);
-    containerCache.add(textMesh);
+    var newText = new THREE.ShapeGeometry( textShapes );
+    mesh.geometry = newText;
+    mesh.geometry.needsUpdate = true;
     // Call refreshCanvas after call to this function
 }
 
