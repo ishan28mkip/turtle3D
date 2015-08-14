@@ -1020,7 +1020,6 @@ var blocks = undefined;
 
 function initPalettes(canvas, refreshCanvas, stage, cellSize, trashcan, b) {
     // Instantiate the palettes object on first load.
-    // (canvas, refreshCanvas, palettesContainer, cellSize, refreshCanvas, trashcan, blocks);
     var palettes = new Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashcan).
     add('turtle').
     add('pen').
@@ -1048,20 +1047,20 @@ var MODEDRAG = 1;
 var MODESCROLL = 2;
 var DECIDEDISTANCE = 20;
 
-// TODO : Fix the background events once the background is in place
+// FIXME : background events once the background is in place
 function setupBackgroundEvents(palette) {
-    var scrolling = false;
-    var lastY;
+    // var scrolling = false;
+    // var lastY;
 
-    palette.background.on('click',function(event){
-        // console.log('background clicked');
-    });
+    // palette.background.on('click',function(event){
+    //     // console.log('background clicked');
+    // });
 
-    palette.background.on('mousedown', function(event) {
-        // console.log('background mousedown');
-        scrolling = true;
-        lastY = event.clientY;
-    });
+    // palette.background.on('mousedown', function(event) {
+    //     // console.log('background mousedown');
+    //     scrolling = true;
+    //     lastY = event.clientY;
+    // });
     
 //     palette.background.on('pressmove', function(event) {
 //         if (!scrolling) {
@@ -1078,7 +1077,7 @@ function setupBackgroundEvents(palette) {
 }
 
 function removeBackgroundEvents(palette){
-    palette.background.off();
+    palette.palettePages[palette.currentPage].background.off();
 }
 
 
@@ -1150,7 +1149,7 @@ function loadPaletteMenuItemHandler(palette, blk, blkname) {
 
     palette.protoContainers[blkname].on('mousedown', function(event) {
         var stage = palette.palettes.stage;
-        // FIXME : What does setting child index/mask does?
+        // FIXME : Brings to top
         // // stage.setChildIndex(palette.protoContainers[blkname], stage.getNumChildren() - 1);
         // // palette.protoContainers[blkname].mask = null;
 
@@ -1317,6 +1316,7 @@ function loadPaletteMenuHandler(palette) {
                 }
             }
         }
+
         if (palette.visible) {
             palette.hideMenuItems(false);
         } else {
@@ -1396,7 +1396,7 @@ function loadPaletteMenuHandler(palette) {
     });
 }
 
-
+// FIXME
 function promptPaletteDelete(palette) {
     var msg = 'Do you want to remove all "%s" blocks from your project?'.replace('%s', palette.name)
     if (!confirm(msg)) {
@@ -1420,7 +1420,7 @@ function promptPaletteDelete(palette) {
     localStorage.plugins = preparePluginExports({});
 }
 
-
+// FIXME
 function promptMacrosDelete(palette) {
     var msg = 'Do you want to remove all the stacks from your custom palette?';
     if (!confirm(msg)) {
