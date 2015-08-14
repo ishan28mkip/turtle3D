@@ -109,13 +109,17 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
                 this.y -= this.cellSize;
                 var me = this;
 
+                var scale;
+                if(this.cellSize != this.originalSize){
+                    scale = this.cellSize / this.originalSize;
+                }
+                else{
+                    scale = 1;
+                }
+
                 function processButtonIcon(me, name, bitmap, extras) {
                     me.buttons[name].add(bitmap);
-                    // TODO : Fix these scalling
-                    if (me.cellSize != me.originalSize) {
-                        bitmap.scaleX = me.cellSize / me.originalSize;
-                        bitmap.scaleY = me.cellSize / me.originalSize;
-                    }
+
 
                     var circleRadius = me.halfCellSize;
                     var circleShape = new THREE.Shape();
@@ -134,6 +138,7 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
 
                     me.refreshCanvas(1);
 
+                    // FIXME : Scaling
                     var paletteWidth = MENUWIDTH + (me.dict[name].columns * 160);
                     me.dict[name].paletteWidth = paletteWidth;
 
