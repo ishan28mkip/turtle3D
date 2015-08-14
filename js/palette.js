@@ -772,22 +772,6 @@ function Palette(palettes, name) {
                             break;
                     }
 
-                    // // TODO : Fix this hitarea
-                    // function calculateBounds(palette, blk, modname) {
-                    //     var bounds = palette.protoContainers[modname].get2DBounds();
-                    //     // palette.protoContainers[modname].cache(bounds.x, bounds.y, Math.ceil(bounds.width), Math.ceil(bounds.height)); // PE : Why is caching done?
-
-                    //     // TODO : Create the hitarea
-                    //     // var hitArea = new createjs.Shape();
-                    //     // // Trim the hitArea height slightly to make
-                    //     // // it easier to select single-height blocks
-                    //     // // below double-height blocks.
-                    //     // hitArea.graphics.beginFill('#FFF').drawRect(0, 0, Math.ceil(bounds.width), Math.ceil(bounds.height * 0.75));
-                    //     // palette.protoContainers[modname].hitArea = hitArea;
-
-                        
-                    //     palette.palettes.refreshCanvas(1);
-                    // }
 
                     function processBitmap(palette, modname, bitmap, args) {
                         var myBlock = args[0];
