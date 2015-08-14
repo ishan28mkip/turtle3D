@@ -973,102 +973,28 @@ function Palette(palettes, name) {
         }
     }
 
- // FIXME : Instead of normal scroll add scroll pages instead
- this.scrollEvent = function(direction, scrollSpeed) {
-        var diff = direction * scrollSpeed;
-        var h = Math.min(maxPaletteHeight(this.palettes.cellSize, this.palettes.scale), this.y);
-
-        if (this.y < maxPaletteHeight(this.palettes.cellSize, this.palettes.scale)) {
-            this.upButton.visible = false;
-            this.downButton.visible = false;
-            this.FadedUpButton.visible = false;
-            this.FadedDownButton.visible = false;
-            return;
-        }
-        if (this.scrollDiff + diff > 0 && direction > 0) {
-            var x =  - this.scrollDiff;
-
-            if(x == 0)
-            {
-                this.downButton.visible = true;
-                this.upButton.visible = false;
-                this.FadedUpButton.visible = true;
-                this.FadedDownButton.visible = false;
-                return;
+    this.setPageButtons = function() {
+        if( this.palettePages.length > 1 ){
+            if(this.onPage === 0){
+                this.leftButton.visible = false;
+                this.rightButton.visible = true;
+                this.FadedLeftButton.visible = true;
+                this.FadedRightButton.visible = false;
             }
-            
-            this.scrollDiff += x;
-            this.FadedDownButton.visible = false;
-            this.downButton.visible = true;
-            
-            for (var i in this.protoContainers) {
-            this.protoContainers[i].y += x;
-            this.protoContainers[i].visible = true;
-        
-            if(this.scrollDiff == 0)
-            {
-                this.downButton.visible = true;
-                this.upButton.visible = false;
-                this.FadedUpButton.visible = true;
-                this.FadedDownButton.visible = false;
-                
+            else if(this.onPage > 0 && this.onPage < this.palettePages.length - 1){
+                this.leftButton.visible = true;
+                this.rightButton.visible = true;
+                this.FadedLeftButton.visible = false;
+                this.FadedRightButton.visible = false;
             }
+            else if(this.onPage === this.palettePages.length - 1){
+                this.leftButton.visible = true;
+                this.rightButton.visible = false;
+                this.FadedLeftButton.visible = false;
+                this.FadedRightButton.visible = true;
             }
         }
-        else if (this.y + this.scrollDiff +diff < h && direction < 0) {
-            var x = -this.y + h - this.scrollDiff;
-            if(x == 0)
-            {
-                this.upButton.visible = true;
-                this.downButton.visible = false;
-                this.FadedDownButton.visible = true;
-                this.FadedUpButton.visible = false;
-                
-                return;
-            }
-            this.scrollDiff += -this.y + h - this.scrollDiff;
-            this.FadedUpButton.visible = false;
-            this.upButton.visible = true;
-            
-            for (var i in this.protoContainers) {
-                this.protoContainers[i].y += x;
-                this.protoContainers[i].visible = true;
-            }
-
-            if(-this.y + h - this.scrollDiff == 0)
-            {
-                this.upButton.visible   = true;
-                this.downButton.visible = false;
-                this.FadedDownButton.visible = true;
-                this.FadedUpButton.visible = false;
-                
-            }
-
-        }
-        else if(this.count == 0){
-            this.FadedUpButton.visible = true;
-            this.FadedDownButton.visible = false;
-            this.upButton.visible = false;
-            this.downButton.visible = true;
-        }
-        else
-        {
-            this.scrollDiff += diff;
-            this.FadedUpButton.visible = false;
-            this.FadedDownButton.visible = false;
-            this.upButton.visible = true;
-            this.downButton.visible = true;
-
-        for (var i in this.protoContainers) {
-            this.protoContainers[i].y += diff;
-            this.protoContainers[i].visible = true;
-            }
-        }
-
-        var stage = this.palettes.stage;
-        // stage.setChildIndex(this.menuContainer, stage.getNumChildren() - 1); // PE : See why is index being set 
         this.palettes.refreshCanvas(1);
-        this.count += 1;
     } 
 
 
