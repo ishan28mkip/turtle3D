@@ -782,8 +782,8 @@ function Block(protoblock, blocks, overrideName) {
             }
 
             myBlock.container.add(bitmap);
-            bitmap.position.setX = (MEDIASAFEAREA[0] - 10) * (myBlock.protoblock.scale / 2);
-            bitmap.position.setY = MEDIASAFEAREA[1] * (myBlock.protoblock.scale / 2);
+            // bitmap.position.setX = (MEDIASAFEAREA[0] - 10) * (myBlock.protoblock.scale / 2);
+            // bitmap.position.setY = MEDIASAFEAREA[1] * (myBlock.protoblock.scale / 2);
 
             myBlock.blocks.refreshCanvas(1);
         }
@@ -872,9 +872,8 @@ function Block(protoblock, blocks, overrideName) {
                 }
             }
 
-            // Make sure the text is on top.
-            var z = myBlock.container.getNumChildren() - 1;
-            myBlock.container.setChildIndex(myBlock.collapseText, z);
+            // TODO :  Make sure the text is on top.
+
 
             // Set collapsed state of blocks in drag group.
             if (myBlock.blocks.dragGroup.length > 0) {
@@ -909,7 +908,7 @@ function $() {
 
 
 function calculateCollapseHitArea(myBlock) {
-    var bounds = myBlock.collapseContainer.get2DBounds(true);
+    // var bounds = myBlock.collapseContainer.get2DBounds(true);
     // TODO : Create hitmesh once the basic is done
     // var hitArea = new createjs.Shape();
     // var w2 = bounds.width;
@@ -1058,13 +1057,15 @@ document.addEventListener('mousemove', function (e) {
 // DONE
 function calculateBlockHitArea(myBlock) {
     
-    var bounds = myBlock.container.get2DBounds();
+    var bounds = new THREE.Box3().setFromObject( myBlock.container );
+    bounds.size = bounds.size();
+
     var hitmesh;
 
     // Only detect hits on top section of block.
     // FIXME : Why is hitmesh height reduced?
     // if (myBlock.isClampBlock()) {
-        hitmesh = createRectangle(bounds.width, bounds.height, '#000000');
+        hitmesh = createRectangle(bounds.size.x, bounds.size.y, '#000000');
     // } else {
     //     hitmesh = createRectangle(bounds.width, bounds.height * 0.75, '#000000'); // Shrinking the height makes it easier to grab blocks below in the stack.
     //     hitmesh.position.setY(bounds.height * 0.25 / 2);
@@ -1081,8 +1082,8 @@ function loadEventHandlers(myBlock) {
     var thisBlock = myBlock.blocks.blockList.indexOf(myBlock);
     var blocks = myBlock.blocks;
 
-    calculateBlockHitArea(myBlock);
 
+    calculateBlockHitArea(myBlock);
     var moved = false;
     var locked = false;
     var getInput = window.hasMouse;
