@@ -416,33 +416,34 @@ function Palette(palettes, name) {
                         palette.mouseHandled = true;
                     }
 
-                    function processUpIcon(palette, name, bitmap, extras) {
-                        palette.palettes.stage.add(bitmap);
-                        bitmap.position.setX(palette.menuContainer.position.x + paletteWidth/2 + palette.palettes.cellSize/2);
-                        bitmap.position.setY(palette.menuContainer.position.y - STANDARDBLOCKHEIGHT);
-                        bitmap.scale.setX(0.7);
-                        bitmap.scale.setY(0.7);
+                    function processLeftIcon(palette, name, bitmap, extras) {
+                        bitmap.rotation.z = 90 * Math.PI / 180;
+                        palette.pageButtonContainer.add(bitmap);
+                        bitmap.position.setX(palette.menuContainer.position.x - paletteWidth/2 - palette.palettes.cellSize/2);
+                        bitmap.position.setY(palette.getButtonY());
 
                         bitmap.visible = false;
-                        palette.upButton = bitmap;
+                        palette.leftButton = bitmap;
 
-                        palette.upButton.on('click', function(event) {
-                            palette.scrollEvent(STANDARDBLOCKHEIGHT, 10); //Add next palette page handler here
+                        palette.leftButton.on('click', function(event) {
+                            palette.onPage--;
+                            palette.hideMenuItems(false);
+                            palette.showMenuItems(false);
                         });
 
-                        function processDownIcon(palette, name, bitmap, extras) {
-                            // bitmap.scaleX = bitmap.scaleY = bitmap.scale = 0.7; //TODO : Add scaling
-                            palette.palettes.stage.add(bitmap);
+                        function processRightIcon(palette, name, bitmap, extras) {
+                            bitmap.rotation.z = 90 * Math.PI / 180;
+                            palette.pageButtonContainer.add(bitmap);
                             bitmap.position.setX(palette.menuContainer.position.x + paletteWidth/2 + palette.palettes.cellSize/2);
-                            bitmap.position.setY(palette.getDownButtonY());
-                            bitmap.scale.setX(0.7);
-                            bitmap.scale.setY(0.7); 
-                            
-                            bitmap.visible = false;
-                            palette.downButton = bitmap;
+                            bitmap.position.setY(palette.getButtonY());
 
-                            palette.downButton.on('click', function(event) {
-                                palette.scrollEvent(-STANDARDBLOCKHEIGHT, 10); //Add next palette page handler here
+                            bitmap.visible = false;
+                            palette.rightButton = bitmap;
+
+                            palette.rightButton.on('click', function(event) {
+                                palette.onPage++;
+                                palette.hideMenuItems(false);
+                                palette.showMenuItems(false);
                             });
                         } 
                         makePaletteBitmap(palette, DOWNICON, name, processRightIcon, null, 0.7);
