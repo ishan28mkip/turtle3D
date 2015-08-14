@@ -175,7 +175,7 @@ define(function(require) {
         // Set up a file chooser for the doOpenPlugin function.
         var pluginChooser = docById('myOpenPlugin');
         // The file chooser for all files.
-        var allFilesChooser = docById('myOpenAll')
+        var allFilesChooser = docById('myOpenAll');
 
         // Are we running off of a server?
         var server = true;
@@ -189,8 +189,10 @@ define(function(require) {
         var thumbnails;
         var buttonsVisible = true;
         var headerContainer = null;
+        var errorContainer = null;
         var toolbarButtonsVisible = true;
         var menuButtonsVisible = false;
+        var rightMenuContainer = null;
         var menuContainer = null;
         var currentKey = '';
         var currentKeyCode = 0;
@@ -438,11 +440,11 @@ define(function(require) {
             // Create a orthographic camera for the graphical scripting
             scriptingCameraWidth = window.innerWidth;
             scriptingCameraHeight = window.innerHeight; 
-            scriptingCamera = new THREE.OrthographicCamera( scriptingCameraWidth / - 2, scriptingCameraWidth / 2, scriptingCameraHeight / 2, scriptingCameraHeight / - 2, 1, 1000 );
+            scriptingCamera = new THREE.OrthographicCamera( scriptingCameraWidth / - 2, scriptingCameraWidth / 2, scriptingCameraHeight / 2, scriptingCameraHeight / - 2, 1, 100000 );
 
             turtleCameraWidth = window.innerWidth;
             turtleCameraHeight = window.innerHeight;
-            turtleCamera = new THREE.PerspectiveCamera( 45, turtleCameraWidth / turtleCameraHeight, 1, 2000 );
+            turtleCamera = new THREE.PerspectiveCamera( 45, turtleCameraWidth / turtleCameraHeight, 1, 10000 );
 
             // Create a scripting renderer and set the size
             scriptingRenderer = new THREE.WebGLRenderer( { alpha: true, antialias : true} );
@@ -458,15 +460,15 @@ define(function(require) {
             document.getElementById("turtleOutput").appendChild(turtleRenderer.domElement);
 
             // Position and point the scripting camera to the center of the scene
-            scriptingCamera.position.x = 0;
-            scriptingCamera.position.y = 0;
-            scriptingCamera.position.z = 10000;
+            scriptingCamera.position.x = (0);
+            scriptingCamera.position.y = (0);
+            scriptingCamera.position.z = (100000);
             scriptingCamera.lookAt(new THREE.Vector3(0, 0, 0));
 
             // Position and point the turtle camera to the center of the screen
-            turtleCamera.position.x = 50;
-            turtleCamera.position.y = 50;
-            turtleCamera.position.z = 50;
+            turtleCamera.position.x = (60);
+            turtleCamera.position.y = (60);
+            turtleCamera.position.z = (60);
             turtleCamera.lookAt(new THREE.Vector3(0,0,0));
 
             // Add ambient light to the scripting scene
