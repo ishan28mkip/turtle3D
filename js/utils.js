@@ -95,102 +95,6 @@ function buildAxis( src, dst, colorHex, dashed ) {
     return axis;
 }
 
-// Binding the on event to Object3D prototype
-// to be used to get bounds of a container, recursively should be set to false if only no container nesting is there
-// TODO
-// Use a better algorithm here when time permits to get the maximum and minimum
-// See if traverse uses a better appoach to iterate
-// Recursive has a problem that the bounding box is giving local bounding and not global
-// FIXME : Should bounds contain the scaling factor or not?
-
-Object.defineProperty(THREE.Object3D.prototype, 'get2DBounds', {
-    enumerable: false,
-    configurable: false,
-    writable: false,
-    value: function(recursively,bound){
-        var bounds;
-        var flag;
-        if(bound === undefined)
-        {
-            flag = true;
-        }
-        else{
-            bounds = bound;
-            flag = false;
-        }
-
-        for(var i = 0; i<this.children.length; i++){
-            if(this.children[i].geometry !== undefined){
-                if(flag){
-                    bounds = returnGlobalBounds(this,i);
-                    flag = false;
-                }
-                else{
-                    var newBounds = returnGlobalBounds(this,i);
-                    bounds.max.x = ( newBounds.max.x > bounds.max.x) ?  newBounds.max.x : bounds.max.x;
-                    bounds.max.y = ( newBounds.max.y > bounds.max.y) ?  newBounds.max.y : bounds.max.y;
-                    bounds.min.x = ( newBounds.min.x < bounds.min.x) ?  newBounds.min.x : bounds.min.x;
-                    bounds.min.y = ( newBounds.min.x < bounds.min.x) ?  newBounds.min.y : bounds.min.y;
-                }
-            }
-            else if(recursively){
-                if(flag){
-                    bounds = this.children[i].get2DBounds(true);
-                    flag = false;
-                }
-                else{
-                    bounds = this.children[i].get2DBounds(true, bounds);
-                }
-            }
-        }
-        bounds.width = bounds.max.x - bounds.min.x;
-        bounds.height = bounds.max.y - bounds.min.y;
-        return bounds;
-    }
-});
-
-function returnGlobalBounds(container, i){
-    container.children[i].geometry.computeBoundingBox();
-    var bounds = container.children[i].geometry.boundingBox;
-    bounds.max.x = bounds.max.x + container.children[i].position.x + globalX(container);
-    bounds.min.x = bounds.min.x + container.children[i].position.x + globalX(container);
-    bounds.max.y = bounds.max.y + container.children[i].position.y + globalY(container);
-    bounds.min.y = bounds.min.y + container.children[i].position.y + globalY(container);
-    return bounds;
-}
-
-function globalX(container){
-    if(container.parent === undefined){
-        return 0; 
-    }
-    else{
-        return container.position.x + globalX(container.parent);
-    }
-}
-
-function globalY(container){
-    if(container.parent === undefined){
-        return 0; 
-    }
-    else{
-        return container.position.y + globalY(container.parent);
-    }
-}
-
-function globalZ(container){
-    if(container.parent === undefined){
-        return 0; 
-    }
-    else{
-        return container.position.z + globalZ(container.parent);
-    }
-}
-
-
-// Gets the 3D bound of any object
-function get3DBounds(container,recursively){
-
-}
 
 // News 
 // Bubbling needs to be added
@@ -223,6 +127,15 @@ Object.defineProperty(THREE.Object3D.prototype, 'on', {
                 this.hitmesh.parentMesh = this;
             }
         }
+        else if(!(this.hasOwnProperty('hitmesh'))){
+            // TODO : Later log this in a debugger instead
+            // console.log(this , 'does not have a hitmesh and is not a mesh');
+        }
+        else if(this.hitmesh.type !== 'Mesh'){
+            // TODO : Later log this in a debugger instead
+            // console.log(this ,  'has a hitmesh which is not a mesh');
+        }
+
         if(this.hasOwnProperty('hitmesh') && this.hitmesh.type == 'Mesh'){
             this.hitmesh.parentMesh = this;
             this.addEventListener(eventName, function(event){
