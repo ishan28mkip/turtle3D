@@ -547,14 +547,22 @@ function Palette(palettes, name) {
                 this.hide();
             }
         }
+
+        if(this.currentPage === null){
+            this.currentPage = 0;
+            this.palettePages.push(new THREE.Group());
+            this.blockContainer.add(this.palettePages[0]);
+        }
+
         this.y = 0;
 
         for (var blk in this.protoList) {
             // Don't show hidden blocks on the menus
 
             if (this.protoList[blk].hidden) {
-                if(blk == this.protoList.length - 1){
-                    this.updateBackground();
+                if(blk === this.protoList.length - 1){
+                    if(this.currentPage === 0)
+                        this.updateBackground();
                 }
                 continue;
             }
@@ -565,6 +573,7 @@ function Palette(palettes, name) {
 
             switch (blkname) {
                 // Use the name of the action in the label
+                // TODO : What do these special blocks do?
                 case 'storein':
                     modname = 'store in ' + this.protoList[blk].defaults[0];
                     var arg = this.protoList[blk].defaults[0];
@@ -610,9 +619,9 @@ function Palette(palettes, name) {
                 } else if (['and', 'or'].indexOf(blkname) != -1) {
                     size += 1;
                 }
-                // TODO : Fix this height expression in accordance with three.js
                 var height = STANDARDBLOCKHEIGHT * size;
-                // * palette.protoList[blk].scale / 2.0; add scaling later on
+                // FIXME : Scale
+                // * palette.protoList[blk].scale / 2.0;
                 return height;
             }
 
