@@ -1478,29 +1478,31 @@ function promptMacrosDelete(palette) {
 }
 
 
-function makePaletteBitmap(palette, data, name, callback, extras) {
+function makePaletteBitmap(palette, data, name, callback, extras, scale) {
     // Async creation of bitmap from SVG data
     // Works with Chrome, Safari, Firefox (untested on IE)
+    scale = (scale === undefined) ? 1 : scale;
+
     var img = new Image();
         img.onload = function () {
             var canvas = document.createElement('canvas');
-            canvas.width = img.width;
-            canvas.height = img.height;
+            canvas.width = img.width * scale;
+            canvas.height = img.height * scale;
             var context = canvas.getContext('2d');
-            context.drawImage(img, 0, 0);
+            context.drawImage(img, 0, 0, img.width * scale, img.height * scale);
             var texture = new THREE.Texture(canvas);
             texture.needsUpdate = true;
             texture.minFilter = THREE.NearestFilter; 
             var material = new THREE.MeshBasicMaterial( {map: texture} );
             material.transparent = true;
             material.depthWrite = false;
-            // me.container.scaleX = size/me.iconsize; //See if the scale variable is required here
-            // me.container.scaleY = size/me.iconsize;
-            // var bitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(me.container.scaleX*img.width, me.container.scaleY*img.height),material);
-            var bitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(img.width, img.height),material);
+
+            var bitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(img.width * scale, img.height * scale),material);
             bitmap.name = name;
-            bitmap.imgWidth = img.width;
-            bitmap.imgHeight = img.height;
+            bitmap.imgWidth = img.width * scale;
+            bitmap.imgHeight = img.height * scale;
+            bitmap.initialWidth = img.width;
+            bitmap.initialHeight = img.height;
             callback(palette, name, bitmap, extras);
     }
     img.src = 'data:image/svg+xml;base64,' + window.btoa(
