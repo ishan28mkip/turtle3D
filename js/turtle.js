@@ -286,26 +286,26 @@ function Turtle (name, turtles) {
     // FIXME
     this.doShowImage = function(size, myImage) {
         // Add an image object to the canvas
-        if (myImage == null) {
-            return;
-        }
-        var image = new Image();
-        var me = this;
-        image.onload = function() {
-            var bitmap = new createjs.Bitmap(image);
-            me.turtles.stage.addChild(bitmap);
-            me.media.push(bitmap);
-            bitmap.scaleX = Number(size) / image.width;
-            bitmap.scaleY = bitmap.scaleX;
-            bitmap.scale = bitmap.scaleX;
-            bitmap.x = me.container.x;
-            bitmap.y = me.container.y;
-            bitmap.regX = image.width / 2;
-            bitmap.regY = image.height / 2;
-            bitmap.rotation = me.orientation;
-            me.turtles.refreshCanvas(1);
-        }
-        image.src = myImage;
+        // if (myImage == null) {
+        //     return;
+        // }
+        // var image = new Image();
+        // var me = this;
+        // image.onload = function() {
+        //     var bitmap = new createjs.Bitmap(image);
+        //     me.turtles.stage.addChild(bitmap);
+        //     me.media.push(bitmap);
+        //     bitmap.scaleX = Number(size) / image.width;
+        //     bitmap.scaleY = bitmap.scaleX;
+        //     bitmap.scale = bitmap.scaleX;
+        //     bitmap.x = me.container.x;
+        //     bitmap.y = me.container.y;
+        //     bitmap.regX = image.width / 2;
+        //     bitmap.regY = image.height / 2;
+        //     bitmap.rotation = me.orientation;
+        //     me.turtles.refreshCanvas(1);
+        // }
+        // image.src = myImage;
     }
 
     this.doShow3DModel = function(){
@@ -315,26 +315,26 @@ function Turtle (name, turtles) {
     // FIXME
     this.doShowURL = function(size, myURL) {
         // Add an image object from a URL to the canvas
-        if (myURL == null) {
-            return;
-        }
-        var image = new Image();
-        image.src = myURL;
-        var me = this;
-        image.onload = function() {
-            var bitmap = new createjs.Bitmap(image);
-            me.turtles.stage.addChild(bitmap);
-            me.media.push(bitmap);
-            bitmap.scaleX = Number(size) / image.width;
-            bitmap.scaleY = bitmap.scaleX;
-            bitmap.scale = bitmap.scaleX;
-            bitmap.x = me.container.x;
-            bitmap.y = me.container.y;
-            bitmap.regX = image.width / 2;
-            bitmap.regY = image.height / 2;
-            bitmap.rotation = me.orientation;
-            me.turtles.refreshCanvas(1);
-        }
+        // if (myURL == null) {
+        //     return;
+        // }
+        // var image = new Image();
+        // image.src = myURL;
+        // var me = this;
+        // image.onload = function() {
+        //     var bitmap = new createjs.Bitmap(image);
+        //     me.turtles.stage.addChild(bitmap);
+        //     me.media.push(bitmap);
+        //     bitmap.scaleX = Number(size) / image.width;
+        //     bitmap.scaleY = bitmap.scaleX;
+        //     bitmap.scale = bitmap.scaleX;
+        //     bitmap.x = me.container.x;
+        //     bitmap.y = me.container.y;
+        //     bitmap.regX = image.width / 2;
+        //     bitmap.regY = image.height / 2;
+        //     bitmap.rotation = me.orientation;
+        //     me.turtles.refreshCanvas(1);
+        // }
     }
 
     // TODO : Fix this function to change the turtle image, to be done when turtle graphic is finalized
