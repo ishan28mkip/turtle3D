@@ -478,13 +478,12 @@ function Palette(palettes, name) {
         makePaletteBitmap(this, PALETTEHEADER.replace('fill_color', '#282828').replace('palette_label', _(this.name)).replace(/header_width/g, paletteWidth), this.name, processHeader, null);
     }
 
-    this.getDownButtonY = function () {
-        var h = this.y;
-        var max = maxPaletteHeight(this.palettes.cellSize, this.palettes.scale);
-        if (mouseCoorY(this.y) > max) { //TODO : See where is the this.y value being edited
-            h = max;
-        }
-        return this.menuContainer.position.y - h + STANDARDBLOCKHEIGHT * 2 ;
+    // FIXME : Now this logic is wrong because multiple palette pages exist.
+    this.getButtonY = function () {
+        var y;
+        if(this.palettePages.length > 1)
+            y = this.palettePages[0].lastY
+        return this.menuContainer.position.y - y/2;
     }
 
     // FIXME : Resize
