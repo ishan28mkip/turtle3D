@@ -1176,12 +1176,22 @@ function loadEventHandlers(myBlock) {
                 myBlock.label.addEventListener('change', function() {
                     labelChanged(myBlock);
                 });
-                // FIXME : Fix the positioning of the label
-                myBlock.label.style.left = Math.round((x + blocks.stage.position.x) * blocks.scale + canvasLeft) + 'px';
-                myBlock.label.style.top = Math.round((y + blocks.stage.position.y) * blocks.scale + canvasTop) + 'px';
-                myBlock.label.style.width = Math.round(100 * blocks.scale) * myBlock.protoblock.scale / 2 + 'px';
-                myBlock.label.style.fontSize = Math.round(20 * blocks.scale * myBlock.protoblock.scale / 2) + 'px';
+
+
+                // FIXME : Add scaling fix here
+                var width = 100;
+                var height = 20;
+                // var width = Math.round(100 * blocks.scale) * myBlock.protoblock.scale / 2;
+                // var height = Math.round(20 * blocks.scale * myBlock.protoblock.scale / 2);
+
+                
+                myBlock.label.style.left = Math.round(mouseCoorX((x + blocks.stage.position.x)) - width/2)  + 'px';
+                myBlock.label.style.top = Math.round(mouseCoorY((y + blocks.stage.position.y)) - height/2) + 'px';
+                myBlock.label.style.width = width + 'px';
+                myBlock.label.style.fontSize = height + 'px';
                 myBlock.label.style.display = '';
+                // Keep the z-index above the scripting output index
+                myBlock.label.style.zIndex = 25;
                 myBlock.label.focus();
 
                 // Firefox fix
@@ -1481,6 +1491,7 @@ function labelChanged(myBlock) {
     if (label.length > 8) {
         label = label.substr(0, 7) + '...';
     }
+    
     myBlock.text.text = label;
 
     // and hide the DOM textview...
