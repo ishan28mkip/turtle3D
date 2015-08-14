@@ -700,14 +700,16 @@ function createText(text,color,size,font,weight,style,curveSegments){
     return textMesh;
 }
 
-// TODO : Make and test these functions when required  
 function editText(mesh,text,options){
+    if(mesh === undefined){ 
+        return;
+    }
+
     if(options === undefined){
         options = mesh.options;
     }
     else{
         options.text = (options.text === undefined) ? mesh.options.text : options.text;
-        options.color = (options.color === undefined) ? mesh.options.color  : options.color;
         options.size = (options.size === undefined) ? mesh.options.size : options.size;
         options.font = (options.font === undefined) ? mesh.options.font : options.font;
         options.weight = (options.weight === undefined) ? mesh.options.weight : options.weight;
@@ -718,10 +720,87 @@ function editText(mesh,text,options){
     var textShapes = THREE.FontUtils.generateShapes( text, options );
     var newText = new THREE.ShapeGeometry( textShapes );
     mesh.geometry = newText;
+    if(options.color !== undefined){
+        mesh.material.color.copy(new THREE.Color(options.color));
+    }
     mesh.geometry.needsUpdate = true;
     // Call refreshCanvas after call to this function
+    mesh.geometry.computeBoundingBox();
+    mesh.options.bounds = mesh.geometry.boundingBox;
+    mesh.options.baselineHeight = mesh.options.bounds.min.y;
 }
 
+
+function alignText(mesh,value){
+    if(mesh === undefined){
+        return;
+    }
+    if(mesh.parent === null || mesh.parent === undefined){
+        return;
+    }
+
+    mesh.options.margin = (mesh.options.margin === undefined) ? 15 : mesh.options.margin;
+
+    if(mesh.options.bounds === undefined){
+        mesh.geometry.computeBoundingBox();
+        mesh.options.bounds = mesh.geometry.boundingBox;
+    }
+    
+    var width = mesh.options.bounds.max.x - mesh.options.bounds.min.x;
+    var height = mesh.options.bounds.max.y - mesh.options.bounds.min.y;
+
+    var parentHeight;
+    var parentWidth;
+    
+    if(mesh.parent.type === 'Scene'){
+        parentHeight = window.innerHeight;
+        parentWidth = window.innerWidth;
+    }
+    else{
+        mesh.parent.bounds = new THREE.Box3().setFromObject( mesh.parent );
+        mesh.parent.bounds.size = mesh.parent.bounds.size();
+        parentHeight = mesh.parent.bounds.size.y;
+        parentWidth = mesh.parent.bounds.size.x;
+    }
+
+    switch(value){
+        case 'left': 
+            mesh.position.setX(-parentWidth/2 + mesh.options.margin);
+            break;
+        case 'center':
+            mesh.position.setX(-width/2);
+            break;
+        case 'right':
+            mesh.position.setX(parentWidth/2 - width - mesh.options.margin);
+            break;
+        case 'top':
+            mesh.position.setY(parentHeight/2 - mesh.options.baselineHeight - height - mesh.options.margin);
+            break;
+        case 'middle':
+            mesh.position.setY(-height/2 - mesh.options.baselineHeight);
+            break;
+        case 'bottom':
+            mesh.position.setY(-parentHeight/2 + mesh.options.margin);
+            break;
+    }
+}
+
+// TODO : Find a better way to find the scene
+function getMeshScene(mesh){
+    if(mesh === undefined)
+        return;
+    if(mesh.parent === undefined){
+        if(mesh.type === 'Scene'){
+            return mesh;
+        }
+    }    
+    else{
+        return getMeshScene(mesh.parent);
+    }
+}
+
+
+// WARNING : Recursive function avoid usage
 function visibilityCheck(object){
     if(object.parent === undefined && object.visible === true)
         return true;
