@@ -110,13 +110,16 @@
         // axes = buildAxes( 1000 );
         // container.add( axes );
 
+// Z indexes :
 
 
-// var lang = document.webL10n.getLanguage();
-// if (lang.indexOf("-") != -1) {
-//     lang = lang.slice(0, lang.indexOf("-"));
-//     document.webL10n.setLanguage(lang);
-// }
+
+
+var lang = document.webL10n.getLanguage();
+if (lang.indexOf("-") != -1) {
+    lang = lang.slice(0, lang.indexOf("-"));
+    document.webL10n.setLanguage(lang);
+}
 
 define(function(require) {
     require('easeljs');
