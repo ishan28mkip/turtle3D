@@ -329,21 +329,42 @@ function Palette(palettes, name) {
     this.palettes = palettes;
     this.name = name;
     this.visible = false;
+    // Containes the complete Palette
+    this.paletteContainer = new THREE.Group();
+    palettes.container.add(this.paletteContainer);
+
+    // Holds the palette header and side buttons
     this.menuContainer = null;
+    this.pageButtonContainer = new THREE.Group();
+    this.paletteContainer.add(this.pageButtonContainer);
+    
+    // Holds the protoblocks, background, Page Number and palettePages
+    this.blockContainer = new THREE.Group();
+    palettes.container.add(this.blockContainer);
+    this.palettePages = [];
+    // Used to construct the palettes
+    this.currentPage = null;
+    // Used to determine the page user is on
+    this.onPage = null;
+
     this.protoList = [];
     this.protoContainers = {};
     this.background = null;
+
     this.scrollDiff = 0
+
     this.y = 0;
     this.size = 0;
     this.padding = 5;
     this.columns = 0;
     this.draggingProtoBlock = false;
     this.mouseHandled = false;
-    this.upButton = null;
-    this.downButton = null;
-    this.FadedUpButton = null;
-    this.FadedDownButton = null;
+
+    this.leftButton = null;
+    this.rightButton = null;
+    this.FadedLeftButton = null;
+    this.FadedRightButton = null;
+
     this.count = 0;
 
     this.makeMenu = function(createHeader) {
