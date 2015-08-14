@@ -13,7 +13,52 @@
 
 // NEWS
 
+// Bounds testing code
+// var Cgeometry = new THREE.BoxGeometry( 100, 100, 100 );
+// var Cmaterial = new THREE.MeshBasicMaterial( {color: 0xff0000} );
+// var Ccube = new THREE.Mesh( Cgeometry, Cmaterial );
 
+// var Cmaterial2 = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
+// var Ccube2 = new THREE.Mesh( Cgeometry, Cmaterial2 );
+
+// var con2 = new THREE.Group();
+// con2.add(Ccube);
+// con2.add(Ccube2);
+// Ccube.rotateZ(2);
+// Ccube2.position.setX(200);
+// Ccube2.scale.setX(0.5);
+// var bounds = new THREE.Box3().setFromObject( Ccube2 );
+// console.log( bounds.min, bounds.max, bounds.size() );
+// scriptingScene.add(con2);
+
+// Ordering testing code
+// Code to test box geometry
+// var Cgeometry = new THREE.BoxGeometry( 100, 100, 100 );
+// var Cmaterial = new THREE.MeshBasicMaterial( {color: 0xff0000} );
+// var red = new THREE.Mesh( Cgeometry, Cmaterial );
+
+// var Cmaterial3 = new THREE.MeshBasicMaterial( {color: 0x0000ff} );
+// var blue = new THREE.Mesh( Cgeometry, Cmaterial3 );
+
+// var Cmaterial2 = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
+// var green = new THREE.Mesh( Cgeometry, Cmaterial2 );
+
+// red.name = 'red';
+// green.name = 'green';
+// blue.name = 'blue';
+
+// eventHandler(blue);
+// eventHandler(red);
+// eventHandler(green);
+
+// green.position.set(180,-200,0.0001);
+// red.position.set(220,-200,0.0002);
+// blue.position.set(200,-200,0.0003);
+
+// scriptingScene.add(red);
+// scriptingScene.add(blue);
+// scriptingScene.add(green);           
+// refreshCanvas(1);
 
 // Code Snippets
     // createMsgContainer
@@ -21,31 +66,45 @@
         // var box = new THREE.BoxHelper( msgBlock );
         // scriptingScene.add(box);
 
-        // Code to get 2D bounds of the container
-        // console.log(get2DBounds(container,false));
+        // Code to add/edit/align text
+        // var textMesh = createText();
+        // refreshCanvas(1);
+        // textMesh.text = 'Hello there is something wrong here';
+        // textMesh.size = 50;
+        // textMesh.color = 'rgb(40,40,180)';
+        // scriptingScene.add(textMesh);
+        // textMesh.align = 'right';
+        // textMesh.vAlign = 'middle';
+        // refreshCanvas(1);
 
-        // Code to make the error handler draggable
-        // var px,py;
-        // var coor = new THREE.Vector3();
-        // coor.z = 0;
-        // container.on('pressmove',function(event){
-        //     if(!px || !py){
-        //         px = event.clientX;
-        //         py = event.clientY;
-        //     }
-            // else{
-        //         coor.x = event.clientX - px;
-        //         coor.y = py - event.clientY;
-        //     }
-        //     container.position.add(coor);
-        //     px = event.clientX;
-        //     py = event.clientY;
-        //     refreshCanvas(1);
-        // });
-        // container.on('pressup',function(event){
-            // px = false;
-            // py = false;
-        // });
+        // Code to get global bounds of the container
+        // var box = new THREE.Box3().setFromObject( con2 );
+        // console.log( box.min, box.max, box.size() );
+
+        // Drag handler code
+        // function eventHandler(mesh){
+        //     var moved = false;
+        //     var oldX,oldY;
+        //     var dx,dy;
+        //     mesh.on('mousedown',function(event){
+        //         moved = true;
+        //         oldX = event.clientX;
+        //         oldY = event.clientY;
+        //     });
+        //     mesh.on('pressmove',function(event){
+        //         dx = event.clientX - oldX;
+        //         dy = oldY - event.clientY;
+        //         mesh.position.setX(mesh.position.x + dx);
+        //         mesh.position.setY(mesh.position.y + dy);
+        //         refreshCanvas(1);
+        //         oldX = event.clientX;
+        //         oldY = event.clientY;
+
+        //     });
+        //     mesh.on('pressup',function(event){
+        //         moved = false;
+        //     });
+        // }
 
         // Code to add axes to any container
         // axes = buildAxes( 1000 );
