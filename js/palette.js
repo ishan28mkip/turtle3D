@@ -619,22 +619,38 @@ function Palette(palettes, name) {
             if (!this.protoContainers[modname]) {
                 // create graphics for the palette entry for this block
                 this.protoContainers[modname] = new THREE.Group();
+                // TODO : Snap to pixel
+                // this.protoContainers[modname].snapToPixelEnabled = true;
 
-                // this.protoContainers[modname].snapToPixelEnabled = true; //TODO : How to snap to pixel?
+                var height = calculateHeight(this, blkname);
+
+                if(this.y + height > this.palettes.maxPaletteHeight){
+                    this.palettePages[this.currentPage].lastY = this.y;
+                    if(this.currentPage === 0)
+                        this.updateBackground();
+                    this.currentPage++;
+                    this.y = 0;
+                    this.palettePages.push(new THREE.Group());
+                    this.blockContainer.add(this.palettePages[this.currentPage]);   
+                }
 
                 this.protoContainers[modname].position.setX(this.menuContainer.position.x - this.paletteWidth/2 + PALETTELEFTMARGIN);
-                this.protoContainers[modname].position.setY(this.menuContainer.position.y - this.y - STANDARDBLOCKHEIGHT/2);
+                this.protoContainers[modname].position.setY(this.menuContainer.position.y - this.y - STANDARDBLOCKHEIGHT / 2);
 
-                this.palettes.stage.add(this.protoContainers[modname]);
+                // FIXME : Scaling
+                // this.size += Math.ceil(height * PROTOBLOCKSCALE);
+                // this.y += Math.ceil(height * PROTOBLOCKSCALE);
+                this.size += Math.ceil(height);
+                this.y += Math.ceil(height);
+
+                this.palettePages[this.currentPage].add(this.protoContainers[modname]);
                 this.protoContainers[modname].visible = false;
                 this.protoContainers[modname].name = modname;
 
-                var height = calculateHeight(this, blkname);
-                this.size += Math.ceil(height * PROTOBLOCKSCALE);
-                this.y += Math.ceil(height * PROTOBLOCKSCALE);
-
                 if(blk == this.protoList.length - 1){
-                    this.updateBackground();
+                    if(this.currentPage === 0){
+                        this.updateBackground();
+                    }
                 }
 
                 function processFiller(palette, modname, bitmap, extras) {
