@@ -862,50 +862,84 @@ define(function(require) {
 
         function createErrorContainers() {
             // Some error messages have special artwork.
+            if(errorContainer === null){
+                errorContainer = new THREE.Group();
+                scriptingScene.add(errorContainer);
+                // Set the z-index
+                setZindex(errorContainer, 98700,98799);
+                errorContainer.zIndex = 98700;
+                errorContainer.position.setZ(98700);
+                errorContainer.currentZindex = 0;
+            }
+            else{
+                // TODO : Instead of return here, remove all artwork and re-call makeErrorArtwork
+                return;
+            }
             for (var i = 0; i < ERRORARTWORK.length; i++) {
                 var name = ERRORARTWORK[i];
                 makeErrorArtwork(name);
             }
         }
 
-        // TODO : Replace the manual text creation with function
         function makeErrorArtwork(name) {
             var container = new THREE.Group();
-            scriptingScene.add(container);
-            container.position.set(-200 , threeCoorY(cellSize*2)-100,1);
+            errorContainer.add(container);
+            container.position.setX(-200)
+            container.position.setY(threeCoorY(cellSize*2)-100); //TODO : How is this position decided
+            
+            container.position.setZ(errorContainer.currentZindex);
+            container.zIndex = errorContainer.currentZindex;
+            container.currentZindex = 0;
+
+            errorContainer.currentZindex += 1;
+            if(errorContainer.currentZindex >= 98800)
+                console.log('Error Containers have exceeded the z-index limit of 98799');
+
             errorArtwork[name] = container;
             errorArtwork[name].name = name;
             errorArtwork[name].visible = false;
 
             var img = new Image();
+
             img.onload = function() {
-                console.log('creating error message artwork for ' + img.src);
-                var texture = new THREE.Texture(img) 
+                var originalSize = 55; // this is the original svg size
+                // var halfSize = Math.floor(size / 2);
+
+                var canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                var context = canvas.getContext('2d');
+                context.drawImage(img, 0, 0);
+                var texture = new THREE.Texture(canvas);
                 texture.needsUpdate = true;
                 texture.minFilter = THREE.NearestFilter; 
-                var material = new THREE.MeshBasicMaterial( {map: texture, side: THREE.DoubleSide} );
-                material.transparent = true;
+                var material = new THREE.MeshBasicMaterial( {map: texture, transparent : true, depthWrite : false} );
                 var artwork = new THREE.Mesh(new THREE.PlaneBufferGeometry(img.width, img.height),material);
+                artwork.name = name;
+                artwork.imgWidth = img.width;
+                artwork.imgHeight = img.height;
+
                 container.add(artwork);
-
-                var options = {'font' : 'helvetiker','weight' : 'normal', 'style' : 'normal','size' : 10,'curveSegments' : 20};
-                var textShapes = THREE.FontUtils.generateShapes( '', options );
-                var text = new THREE.ShapeGeometry( textShapes );
-                var textMesh = new THREE.Mesh( text, new THREE.MeshBasicMaterial( { color: 0x000000 } ) ) ;
-                
-                textMesh.geometry.computeBoundingBox(); 
-                var textbounds = textMesh.geometry.boundingBox.size();
-                textMesh.position.set(-textbounds.x/2,-textbounds.y/4,1); // FLAG : See why -textbounds.y/4 works
-                container.add(textMesh);
-
                 container.hitmesh = artwork;
+                container.zIndex = 0;
+
+                var errorText = createText(name + 'error occured','#ffffff',10); //TODO : Adjust scaling here
+                container.add(errorText);
+                errorText.align = 'center';
+                errorText.vAlign = 'middle';
+                errorText.zIndex = 0.1;
+                errorText.position.setZ(0.1);
+
 
                 container.on('click', function(event) {
                     container.visible = false;
                     // On the possibility that there was an error
                     // arrow associated with this container
                     if (errorMsgArrow !== null) {
-                        errorMsgArrow.removeAllChildren(); // Hide the error arrow.
+                        // Hide the error arrow
+                        for(var i = errorMsgArrow.children.length - 1 ; i>=0 ; i--){
+                            errorMsgArrow.remove(errorMsgArrow.children[i]);
+                        }
                     }
                     refreshCanvas(1);
                 });
