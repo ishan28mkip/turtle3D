@@ -899,46 +899,52 @@ function Palette(palettes, name) {
         }
     }
 
-    this.hideMenu = function() {
-        if (this.menuContainer != null) {
+    this.hideMenu = function(init) {
+        if (this.menuContainer !== null) {
             this.menuContainer.visible = false;
             this.hideMenuItems(true);
         }
-        this.moveMenu(threeCoorX(this.palettes.cellSize + this.palettes.margin*2) + this.paletteWidth/2, threeCoorY(this.palettes.cellSize*1.5));
-    }
-
-    this.showMenu = function() {
-        this.menuContainer.visible = true;
+        this.moveMenu(threeCoorX(this.palettes.cellSize + this.palettes.margin*2) + this.paletteWidth/2 + this.palettes.cellSize / 2, threeCoorY(this.palettes.cellSize + STANDARDBLOCKHEIGHT / 2));
     }
 
     this.hideMenuItems = function(init) {
+        this.visible = false;
         for (var i in this.protoContainers) {
             this.protoContainers[i].visible = false;
         }
         if (this.background !== null) {
             this.background.visible = false;
         }
-        if (this.upButton != null) {
-            this.upButton.visible = false;
-            this.downButton.visible = false;
-            this.FadedUpButton.visible = false;
-            this.FadedDownButton.visible = false;
+        if(this.leftButton !== null){
+            this.leftButton.visible = false;
+            this.rightButton.visible = false;
+            this.FadedLeftButton.visible = false;
+            this.FadedRightButton.visible = false;
         }
-        this.visible = false;
+    }
+
+    this.showMenu = function(init) {
+        this.menuContainer.visible = true;
     }
 
     this.showMenuItems = function(init) {
-        if(this.scrollDiff == 0)
-            this.count = 0;
-        for (var i in this.protoContainers) {
-            this.protoContainers[i].visible = true;
+        this.visible = true;
+
+        if(init){
+            this.onPage = 0;
+        }
+
+        this.onPage = (this.onPage === undefined) ? 0 : this.onPage;
+
+        for (var i in this.palettePages[this.onPage].children) {
+            this.palettePages[this.onPage].children[i].visible = true;
         }
         if (this.background !== null) {
             this.background.visible = true;
         }
-        // Use scroll position to determine visibility
-        this.scrollEvent(0, 10);
-        this.visible = true;
+        if(this.leftButton !== null){
+            this.setPageButtons();
+        }
     }
 
     this.moveMenuItems = function(x, y) {
