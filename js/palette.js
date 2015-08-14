@@ -946,9 +946,13 @@ function Palette(palettes, name) {
             this.protoContainers[i].position.setX(x);
             this.protoContainers[i].position.setY(y);
         }
-        if (this.background !== null) {
+        if(this.background !== null){
             this.background.position.setX(x);
             this.background.position.setY(y);
+        }
+        if(this.leftButton !== null){
+            this.pageButtonContainer.position.setX(x);
+            this.pageButtonContainer.position.setY(y);
         }
     }
 
@@ -957,19 +961,13 @@ function Palette(palettes, name) {
             this.protoContainers[i].position.setX(this.protoContainers[i].position.x + dx);
             this.protoContainers[i].position.setY(this.protoContainers[i].position.y + dy);
         }
-        if (this.background !== null) {
+        if(this.background !== null){
             this.background.position.setX(this.background.position.x + dx);
             this.background.position.setY(this.background.position.y + dy);
         }
-        if (this.upButton !== null) {
-            this.upButton.position.setX(this.upButton.position.x + dx);
-            this.upButton.position.setY(this.upButton.position.y + dy);
-            this.downButton.position.setX(this.downButton.position.x + dx);
-            this.downButton.position.setY(this.downButton.position.y + dy);
-            this.FadedUpButton.position.setX(this.FadedUpButton.position.x + dx);
-            this.FadedUpButton.position.setY(this.FadedUpButton.position.y + dy);
-            this.FadedDownButton.position.setX(this.FadedDownButton.position.x + dx);
-            this.FadedDownButton.position.setY(this.FadedDownButton.position.y + dy);
+        if (this.leftButton !== null) {
+            this.pageButtonContainer.position.setX(this.pageButtonContainer.position.x + dx);
+            this.pageButtonContainer.position.setY(this.pageButtonContainer.position.y + dy);
         }
     }
 
