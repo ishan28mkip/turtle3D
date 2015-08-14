@@ -18,6 +18,7 @@ function Block(protoblock, blocks, overrideName) {
     this.blocks = blocks;
     this.x = 0;
     this.y = 0;
+    this.zIndex = 0;
     this.collapsed = false; // Is this block in a collapsed stack?
     this.trash = false; // Is this block in the trash?
     this.loadComplete = false; // Has the block finished loading?
@@ -67,6 +68,10 @@ function Block(protoblock, blocks, overrideName) {
     // DONE
     this.getInfo = function() {
         return this.name + ' block';
+    }
+
+    this.updateZindex = function(currentZindex){
+        this.container.position.setZ(currentZindex);
     }
 
     // DONE
@@ -259,8 +264,11 @@ function Block(protoblock, blocks, overrideName) {
         // See where this is used and adjust the message and color
         // parameters accordingly. Also make a function that edits the
         // text easily.
-        var fontSize = 10 * this.protoblock.scale;
-        this.text = createText('Default','#000000',fontSize);
+        
+        // FIXME : Scaling
+        // var fontSize = 10 * this.protoblock.scale;
+        var fontSize = 10;
+        this.text = createText('','#000000',fontSize);
         this.generateArtwork(true, []);
     }
 
@@ -303,9 +311,11 @@ function Block(protoblock, blocks, overrideName) {
             }
 
             myBlock.container.add(bitmap);
-            // FIXME : Fix the image positioning
+
+            // FIXME : Fix this positioning
             // bitmap.position.setX(threeCoorX((MEDIASAFEAREA[0] - 10) * (myBlock.protoblock.scale / 2)));
             // bitmap.position.setY(threeCoorY(MEDIASAFEAREA[1] * (myBlock.protoblock.scale / 2)));
+
             bitmap.position.setX(0);
             bitmap.position.setY(0);
 
@@ -314,7 +324,7 @@ function Block(protoblock, blocks, overrideName) {
         image.src = this.image;
     }
 
-    // DONE | TEST
+
     this.regenerateArtwork = function(collapse) {
         // Sometimes (in the case of namedboxes and nameddos) we need
         // to regenerate the artwork associated with a block.
@@ -354,10 +364,9 @@ function Block(protoblock, blocks, overrideName) {
             myBlock.bitmap.name = 'bmp_' + thisBlock;
             myBlock.bitmap.cursor = 'pointer';
  
-            // REMOVE : After graphics work perfect
+            // TODO : Remove after graphics work perfect
             // var boundingBox = new THREE.BoxHelper( myBlock.bitmap );
             // myBlock.blocks.stage.add( boundingBox );
-
 
             myBlock.blocks.refreshCanvas(1);
 
@@ -378,7 +387,8 @@ function Block(protoblock, blocks, overrideName) {
                 // At me point, it should be safe to calculate the
                 // bounds of the container and cache its contents.
 
-                myBlock.bounds = myBlock.container.get2DBounds();
+                myBlock.bounds = new THREE.Box3().setFromObject( myBlock.container );
+                myBlock.bounds.size = myBlock.bounds.size();
                 myBlock.container.bounds = myBlock.bounds;
                 
                 myBlock.blocks.refreshCanvas(1);
@@ -444,33 +454,35 @@ function Block(protoblock, blocks, overrideName) {
 
     this.finishImageLoad = function(firstTime) {
         var thisBlock = this.blocks.blockList.indexOf(this);
-        // TODO : Add text here once the graphic is done
-        // Value blocks ge t a modifiable text label
-        // if (this.name == 'text' || this.name == 'number') {
-        //     if (this.value == null) {
-        //         if (this.name == 'text') {
-        //             this.value = '---';
-        //         } else {
-        //             this.value = 100;
-        //         }
-        //     }
+        // Value blocks get a modifiable text label
+        if (this.name == 'text' || this.name == 'number') {
+            if (this.value == null) {
+                if (this.name == 'text') {
+                    this.value = '---';
+                } else {
+                    this.value = 100;
+                }
+            }
 
-        //     var label = this.value.toString();
-        //     if (label.length > 8) {
-        //         label = label.substr(0, 7) + '...';
-        //     }
-        //     this.text.text = label;
-        //     this.text.textAlign = 'center';
-        //     this.text.textBaseline = 'alphabetic';
-        //     this.container.addChild(this.text);
-        //     this.text.x = VALUETEXTX * this.protoblock.scale / 2.;
-        //     this.text.y = VALUETEXTY * this.protoblock.scale / 2.;
+            var label = this.value.toString();
+            if (label.length > 8) {
+                label = label.substr(0, 7) + '...';
+            }
+            this.text.text = label;
+            
+            this.container.add(this.text);
+            this.text.align = 'center';
+            this.text.vAlign = 'middle';
+            // this.text.textBaseline = 'alphabetic';
 
-        //     // Make sure text is on top.
-        //     z = this.container.getNumChildren() - 1;
-        //     this.container.setChildIndex(this.text, z);
-        //     this.container.updateCache();
-        // } else if (this.protoblock.parameter) {
+            //     this.text.x = VALUETEXTX * this.protoblock.scale / 2.;
+            //     this.text.y = VALUETEXTY * this.protoblock.scale / 2.;
+            
+            // Make sure text is on top.
+            this.text.position.setZ(100);
+
+
+        } else if (this.protoblock.parameter) {
         //     // Parameter blocks get a text label to show their current value
         //     this.text.textBaseline = 'alphabetic';
         //     this.container.addChild(this.text);
@@ -492,7 +504,7 @@ function Block(protoblock, blocks, overrideName) {
         //     z = this.container.getNumChildren() - 1;
         //     this.container.setChildIndex(this.text, z);
         //     this.container.updateCache();
-        // }
+        }
 
         if (['start', 'action'].indexOf(this.name) == -1) {
             this.loadComplete = true;
@@ -550,10 +562,10 @@ function Block(protoblock, blocks, overrideName) {
                     } else {
                         myBlock.collapseText = createText(_('start'), '#000000',fontSize);
                     }
-                    myBlock.collapseText.x = COLLAPSETEXTX * (myBlock.protoblock.scale / 2);
-                    myBlock.collapseText.y = COLLAPSETEXTY * (myBlock.protoblock.scale / 2);
+                    myBlock.collapseText.position.setX(COLLAPSETEXTX * (myBlock.protoblock.scale / 2));
+                    myBlock.collapseText.position.setY(COLLAPSETEXTY * (myBlock.protoblock.scale / 2));
                     // myBlock.collapseText.textAlign = 'left'; // FIXME : Implement a proper text plugin with all easel options 
-                    // myBlock.collapseText.textBaseline = 'alphabetic'; // TODO : Implement a baseline
+                    // myBlock.collapseText.textBaseline = 'alphabetic'; // TODO : Implement a tex
                     myBlock.container.add(myBlock.collapseText);
                     myBlock.collapseText.visible = myBlock.collapsed;
 
