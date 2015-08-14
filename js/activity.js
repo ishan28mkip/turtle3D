@@ -480,7 +480,9 @@ define(function(require) {
 
             // Axes
             axes = buildAxes( 1000 );
-            scriptingScene.add( axes );
+            turtleScene.add( axes );
+            var grid = new THREE.GridHelper(100, 10);
+            turtleScene.add(grid);
 
             // Initialize the DOM Mouse Events
             var events = ['click','dblclick','mousedown','mouseup','mousemove'];
@@ -505,7 +507,7 @@ define(function(require) {
              *   trash
              *   turtles
              *   logo (drawing)
-             */
+            */
 
             palettesContainer = new THREE.Group();
             blocksContainer = new THREE.Group();
@@ -781,6 +783,7 @@ define(function(require) {
         };
 
 
+        // TODO : Rewrite this function using the text utility and implement proper drag handlers
         function createMsgContainer(fillColor, strokeColor, callback, y) {
             var container = new THREE.Group();
             scriptingScene.add(container);
