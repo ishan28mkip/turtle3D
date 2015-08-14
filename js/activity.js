@@ -1420,7 +1420,7 @@ define(function(require) {
             var msgContainer = msgText.parent;
             msgContainer.visible = true;
             msgText.text = msg;
-            // stage.setChildIndex(msgContainer, stage.getNumChildren() - 1);
+            // TODO : Bring the text to the front
         }
 
 
@@ -1502,7 +1502,6 @@ define(function(require) {
                     // errorMsgText.text = msg;
                     break;
             }
-
             update = true;
         }
 
@@ -1615,11 +1614,11 @@ define(function(require) {
         }
 
         function updatePasteButton() {
-            // pasteContainer.remove(pasteContainer.children[0]);
-            // FIXME : How to remove children in three.js ?
+            pasteContainer.remove(pasteContainer.children[0]);
+
             var img = new Image();
             img.onload = function() {
-                var originalSize = 55; // this is the original svg size
+                var originalSize = 55;
                 var halfSize = Math.floor(cellSize / 2);
 
                 var canvas = document.createElement('canvas');
@@ -1640,8 +1639,6 @@ define(function(require) {
                     bitmap.scale.setY(size/originalSize);
                 }
                 pasteContainer.add(bitmap);
-                // bitmap.regX = halfSize / bitmap.scaleX; //PE : Why is this regX,regY set here?
-                // bitmap.regY = halfSize / bitmap.scaleY;
                 refreshCanvas(1);
             }
             img.src = 'icons/paste-button.svg';
@@ -1662,7 +1659,7 @@ define(function(require) {
             headerContainer.position.setY(threeCoorY(cellSize/2));
             scriptingScene.add(headerContainer);
 
-
+            // TODO : Create false shadow effect 
             // headerContainer.graphics.f('#2196f3').r(0, 0,
             //     screen.width / scale, cellSize);
             // headerContainer.shadow = new createjs.Shadow('#777', 0, 2, 2);
@@ -1682,14 +1679,13 @@ define(function(require) {
 
             var btnSize = cellSize;
             var x = threeCoorX(cellSize/2);
-            var y = threeCoorY(cellSize/2);
+            var y = 0;
             var dx = btnSize;
             var dy = 0;
 
             for (var name in buttonNames) {
                 var container = makeButton(buttonNames[name][0],
-                    x, y, btnSize, 0 , buttonNames[name][1]);
-                
+                    x, y, btnSize, 0 , buttonNames[name][1], headerContainer);
                 onscreenButtons.push(container);
                 
                 if (buttonNames[name][0] == 'stop-turtle') {
@@ -1706,10 +1702,16 @@ define(function(require) {
         }
 
         function setupRightMenu(scale) {
-            if (menuContainer !== undefined) {
-                    scriptingScene.remove(menuContainer);
+            var rightMenuContainer = new THREE.Group();
+            scriptingScene.add(rightMenuContainer);
+            // Set the zIndex;
+            rightMenuContainer.zIndex = 98900;
+            rightMenuContainer.position.setZ(98900);
+
+            if (rightMenuContainer !== undefined) {
+                    rightMenuContainer.remove(menuContainer);
                 for (i in onscreenMenu) {
-                    scriptingScene.remove(onscreenMenu[i]);
+                    rightMenuContainer.remove(onscreenMenu[i]);
                 }
             }
 
@@ -1727,20 +1729,20 @@ define(function(require) {
             ];
 
             var btnSize = cellSize;
-            var x = window.innerWidth/2 - cellSize/2; //PE : x is dependent on cellSize see how this works on resize
+            var x = window.innerWidth/2 - cellSize/2; //TODO : Fix scaling here
             var y = threeCoorY(cellSize/2);
 
             var dx = 0;
             var dy = btnSize;
 
             menuContainer = makeButton('menu', x, y, btnSize,
-                                       menuButtonsVisible? 90 : undefined, doMenuButton);
+                                       menuButtonsVisible? 90 : undefined, doMenuButton,rightMenuContainer);
 
             for (var name in menuNames) {
                 x += dx;
                 y -= dy;
                 var container = makeButton(menuNames[name][0],
-                    x, y, btnSize, 0, menuNames[name][1]);
+                    x, y, btnSize, 0, menuNames[name][1],rightMenuContainer);
                 onscreenMenu.push(container);
                 container.visible = false;
             }
@@ -1923,14 +1925,20 @@ define(function(require) {
         }
 
         // creates a button
-        function makeButton(name, x, y, size, rotation, action) {
+        function makeButton(name, x, y, size, rotation, action, parentContainer) {
             var container = new THREE.Group();
             var buttonName = name + '-button';
             if (buttonName == 'paste-disabled-button') {
                 pasteContainer = container;
             }
 
-            scriptingScene.add(container);
+            if(parentContainer === undefined){
+                scriptingScene.add(container);
+            }
+            else{
+                parentContainer.add(container);
+            }
+
             container.position.setX(x);
             container.position.setY(y);
             
