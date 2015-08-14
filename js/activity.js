@@ -1794,10 +1794,12 @@ define(function(require) {
 
                         refreshCanvas(1);
 
-                        var bounds = helpContainer.get2DBounds(true);
 
-                        var h = bounds.height * scale; //Scaling has to be included
-                        var w = bounds.width * scale;
+                        var bounds = new THREE.Box3().setFromObject( helpContainer );
+                        bounds.size = bounds.size();
+
+                        var h = bounds.size.y * scale; //Scaling has to be included
+                        var w = bounds.size.x * scale;
                         var rectShape = new THREE.Shape();
                         rectShape.moveTo( -w/2, h/2 );
                         rectShape.lineTo( w/2, h/2 );
