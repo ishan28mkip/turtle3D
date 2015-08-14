@@ -18,6 +18,11 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
     this.stage = stage;
     this.refreshCanvas = refreshCanvas;
     this.trashcan = trashcan;
+    
+    // Indicated the current z-index;
+    this.currentZindex = 90000;
+    // A store at all blocks at indexed locations
+    this.indexBlockList = [];
 
     // We keep a dictionary for the proto blocks,
     this.protoBlockDict = {}
@@ -203,7 +208,6 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
 
     // Walk through all of the proto blocks in order to make lists of
     // any blocks that need special treatment.
-    // DONE
     this.findBlockTypes = function() {
         for (var proto in this.protoBlockDict) {
             if (this.protoBlockDict[proto].expandable) {
@@ -225,13 +229,11 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
             if (this.protoBlockDict[proto].style == 'doubleclamp') {
                 this.doubleExpandable.push(this.protoBlockDict[proto].name);
             }
-
         }
     }
 
     // Adjust the docking postions of all blocks in the current drag
     // group.
-    // DONE
     this.adjustBlockPositions = function() {
         if (this.dragGroup.length < 2) {
             return;
@@ -239,7 +241,7 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
 
         // Just in case the block list is corrupted, count iterations.
         this.loopCounter = 0;
-        this.adjustDocks(this.dragGroup[0])
+        this.adjustDocks(this.dragGroup[0]);
     }
 
     // Adjust the size of the clamp in an expandable block when blocks
@@ -340,6 +342,7 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
         }
     }
 
+    // TODO : What are V space blocks?
     this.addRemoveVspaceBlock = function(blk) {
         var myBlock = blockBlocks.blockList[blk];
 
@@ -402,7 +405,7 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
         // How many block units in this stack?
         var size = 0;
         this.sizeCounter += 1;
-        if (this.sizeCounter > this.blockList.length * 2) {
+        if (this.sizeCounter > this.blockList.length * 2) { //How is this logic working?
             console.log('Infinite loop encountered detecting size of expandable block? ' + blk);
             return size;
         }
@@ -843,7 +846,8 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
     this.updateBlockPositions = function() {
         // Create the block image if it doesn't yet exist.
         for (var blk = 0; blk < this.blockList.length; blk++) {
-            this.moveBlock(blk, this.blockList[blk].x, this.blockList[blk].y);
+            // FIXME : Why does the block position x and y are not updated till now
+            // this.moveBlock(blk, this.blockList[blk].x, this.blockList[blk].y);
         }
     }
 
@@ -1004,7 +1008,7 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
         this.stackList = [];
         for (i = 0; i < this.blockList.length; i++) {
             if (this.blockList[i].connections[0] == null) {
-                this.stackList.push(i)
+                this.stackList.push(i);
             }
         }
     }
@@ -1192,6 +1196,10 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
 
         // We need a container for the block graphics.
         myBlock.container = new THREE.Group();
+        
+        this.indexBlockList[this.currentZindex] = myBlock.container;
+        myBlock.updateZindex(this.currentZindex);
+        this.currentZindex += 50;
 
         // axes = buildAxes( 1000 );
         // myBlock.container.add( axes );
@@ -1203,7 +1211,6 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
         // TODO : Check this positioning, this is positioning everything at the center on a reload
         myBlock.container.position.setX(myBlock.x);
         myBlock.container.position.setY(myBlock.y);
-
 
         // and we need to load the images into the container.
         myBlock.imageLoad();
@@ -1581,7 +1588,6 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
                     label = label.substr(0, 7) + '...';
                 }
                 myBlock.text.text = label;
-                myBlock.container.updateCache();
             }
         }
     }
