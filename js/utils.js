@@ -696,6 +696,46 @@ function rotateAroundWorldAxis(object, axis, radians) {
     object.rotation.setFromRotationMatrix(object.matrix);
 }
 
+// Removes a mesh and deallocates heap
+// FIXME : removeMesh doesn't work anymore
+function removeMesh(obj) {
+    // FIXME : No dispose function is available for obj.type == Line, also check whether this is supported now
+    // if (obj.type === 'Mesh' || obj.type === 'Line'
+    if(obj.type === 'Mesh')
+    {
+        obj.geometry.dispose();
+        obj.geometry = null;
+        obj.dispose();
+        obj = null;
+    }
+    else
+    {
+        if (obj.children !== undefined) {
+            while (obj.children.length > 0) {
+                removeMesh(obj.children[0]);
+                obj.remove(obj.children[0]);
+            }
+        }
+    }
+}
+
+// Clears a drawing canvas
+function clearCanvas(canvas){
+    if (canvas.children !== undefined) {
+        while (canvas.children.length > 0) {
+            removeMesh(canvas.children[0]);
+            canvas.remove(canvas.children[0]);
+        }
+    }
+}
+
+function setZindex(container, minLimit, maxLimit){
+    container.zIndex = minLimit;
+    container.position.setZ(minLimit);
+    
+}
+
+
 
 
 // ------------------------------------------------------------------- //
