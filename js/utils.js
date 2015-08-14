@@ -1,14 +1,7 @@
-// TODO : Add 3D version to getBounds and add 2D version to intersect, using get2Dbounds
 // TODO : Fix the bug that if a object is present infront of a clickable object the object will still be clicked,
 //        this should not happen but if all objects on screen are again and again checked for clicks than the
 //        library will become very slow, so instead we will just add a new event handler to objects known as
 //        canObstruct which will be added in all arrays. 
-
-// NEWS : 
-    // Fixed the get2Dbounds function and optimized a bit // 12:09 14th June
-    // Fixed bug in mouse events about pressmove not getting activated when mousedown is on // 26th June
-
-
 
 function canvasPixelRatio() {
     var devicePixelRatio = window.devicePixelRatio || 1;
@@ -49,7 +42,7 @@ function canvasPixelRatio() {
         };
 }());
 
-// PE : Replace window.innerWidth & window.innerHeight with canvas width and height
+// TODO : Replace window.innerWidth & window.innerHeight with canvas width and height or with current scene height and width with scaling
 function threeCoorX(x){
     return (x - window.innerWidth/2);
 }
@@ -75,12 +68,12 @@ function mouseCoorY(y){
             // Add axis
 function buildAxes( length ) {
     var axes = new THREE.Object3D();
-    axes.add( buildAxis( new THREE.Vector3( 0, 0, 10 ), new THREE.Vector3( length, 0, 0 ), 0xFF0000, false ) ); // +X
-    axes.add( buildAxis( new THREE.Vector3( 0, 0, 10 ), new THREE.Vector3( -length, 0, 0 ), 0xFF0000, true) ); // -X
-    axes.add( buildAxis( new THREE.Vector3( 0, 0, 10 ), new THREE.Vector3( 0, length, 0 ), 0x00FF00, false ) ); // +Y
-    axes.add( buildAxis( new THREE.Vector3( 0, 0, 10 ), new THREE.Vector3( 0, -length, 0 ), 0x00FF00, true ) ); // -Y
-    axes.add( buildAxis( new THREE.Vector3( 0, 0, 10 ), new THREE.Vector3( 0, 0, length ), 0x0000FF, false ) ); // +Z
-    axes.add( buildAxis( new THREE.Vector3( 0, 0, 10 ), new THREE.Vector3( 0, 0, -length ), 0x0000FF, true ) ); // -Z
+    axes.add( buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( length, 0, 0 ), 0xFF0000, false ) ); // +X
+    axes.add( buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( -length, 0, 0 ), 0xFF0000, true) ); // -X
+    axes.add( buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, length, 0 ), 0x00FF00, false ) ); // +Y
+    axes.add( buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, -length, 0 ), 0x00FF00, true ) ); // -Y
+    axes.add( buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, length ), 0x0000FF, false ) ); // +Z
+    axes.add( buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, -length ), 0x0000FF, true ) ); // -Z
     return axes;
 
 }
@@ -89,13 +82,13 @@ function buildAxis( src, dst, colorHex, dashed ) {
     var geom = new THREE.Geometry(),mat; 
 
     if(dashed) {
-        mat = new THREE.LineDashedMaterial({ linewidth: 3, color: colorHex, dashSize: 3, gapSize: 3 });
+        mat = new THREE.LineDashedMaterial({ linewidth: 3, color: colorHex, dashSize: 1, gapSize: 1 });
     } else {
         mat = new THREE.LineBasicMaterial({ linewidth: 3, color: colorHex });
     }
     geom.vertices.push( src.clone() );
     geom.vertices.push( dst.clone() );
-    geom.computeLineDistances(); // This one is SUPER important, otherwise dashed lines will appear as simple plain lines
+    geom.computeLineDistances(); 
 
     var axis = new THREE.Line( geom, mat, THREE.LinePieces );
 
