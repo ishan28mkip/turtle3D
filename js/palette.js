@@ -47,11 +47,17 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
     this.current = 'turtle';
 
     this.container = new THREE.Group();
-    // this.container.snapToPixelEnabled = true; //TODO : Find a way to implement this feature when dragging
     this.stage.add(this.container);
+
+    this.paletteButtonContainer = new THREE.Group();
+    // Snap to pixel
+    this.container.add(this.paletteButtonContainer);
+    // Stores the maximum height palette can take
+    this.maxPaletteHeight = maximumPaletteHeight(cellSize,this.scale);
 
     this.setScale = function(scale) {
         this.scale = scale;
+        this.maxPaletteHeight = maximumPaletteHeight(this.cellSize,scale);
         for (var i in this.dict) {
             this.dict[i].resizeEvent();
         }
@@ -62,7 +68,7 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
         this.macroDict = obj;
     }
 
-    // TODO : Fix this scrolling event when other resize events have been handled
+    // FIXME
     this.menuScrollEvent = function(direction, scrollSpeed) {
         var keys = Object.keys(this.buttons);
 
@@ -94,10 +100,12 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
                 this.dict[name].updateMenu(true);
             } else {
                 this.buttons[name] = new THREE.Group();
-                // this.buttons[name].snapToPixelEnabled = true; //TODO implement a snap to pixel feature
-                this.stage.add(this.buttons[name]);
+                // TODO : Snap to pixel
+                this.paletteButtonContainer.add(this.buttons[name]);
 
-                this.buttons[name].position.set(this.x + this.halfCellSize, this.y + this.scrollDiff , 1);
+                this.buttons[name].position.setX(this.x + this.halfCellSize)
+                this.buttons[name].position.setY(this.y + this.scrollDiff);
+
                 this.y -= this.cellSize;
                 var me = this;
 
