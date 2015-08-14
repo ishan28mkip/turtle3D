@@ -10,9 +10,9 @@ var BUILTINPALETTES = ['turtle', 'pen', 'number', 'boolean', 'flow', 'blocks',
 ];
 
 
-function maxPaletteHeight(menuSize, scale) {
-    // PE : Why is STANDARDBLOCKHEIGHT / 2 added
-    var h = (windowHeight() * canvasPixelRatio()) / scale - (2 * menuSize);
+// FIXME : Scaling
+function maximumPaletteHeight(menuSize, scale) {
+    var h = window.innerHeight - (2 * menuSize);
     return h - (h % STANDARDBLOCKHEIGHT) + (STANDARDBLOCKHEIGHT / 2);
 }
 
