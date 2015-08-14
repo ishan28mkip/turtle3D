@@ -544,11 +544,159 @@ function createText(text,color,size,font,weight,style,curveSegments){
     style = (style === undefined) ? 'normal' : style;
     curveSegments = (curveSegments === undefined) ? 20 : curveSegments;
 
-    var options = {'font' : font,'weight' : weight, 'style' : style,'size' : size,'curveSegments' : curveSegments};
+    var options = {text : text, 'font' : font,'weight' : weight, 'style' : style,'size' : size,'curveSegments' : curveSegments};
+
     var textShapes = THREE.FontUtils.generateShapes( text, options );
-    var text = new THREE.ShapeGeometry( textShapes );
-    var textMesh = new THREE.Mesh( text, new THREE.MeshBasicMaterial( { color: color } ) ) ;
+    var textGeometry = new THREE.ShapeGeometry( textShapes );
+    var textMesh = new THREE.Mesh( textGeometry, new THREE.MeshBasicMaterial( { color: color } ) ) ;
+
+
+    // Setting the default options in the mesh
+    options.margin = 10;
+    options.color = color;
+    options.align = null;
+    options.vAlign = null;
+
     textMesh.options = options;
+
+    textMesh.geometry.computeBoundingBox();
+    textMesh.localBounds = textMesh.geometry.boundingBox;
+
+    Object.defineProperty(textMesh, 'text',{
+        configurable : false,
+        enumerable : false,
+        set: function(value) {
+            if (typeof value === 'string' || value instanceof String){
+                editText(this,value);
+                this.options.text = value;
+            }   
+            else{
+                // ERROR 
+                console.log('Text Set to non string value');
+            } 
+        }
+    });
+
+    // TODO : Check for valid rgb and hex values
+    Object.defineProperty(textMesh, 'color',{
+        configurable : false,
+        enumerable : false,
+        set: function(value) {
+            if (typeof value === 'string' || value instanceof String){
+                editText(this,this.options.text,{color : value});
+                this.options.color = value;
+            }   
+            else{
+                // ERROR 
+                console.log('Color set to non string value');
+            } 
+        }
+    });
+
+    // TODO : Place a check to verify if font is loaded otherwise try to load font, otherwise hit error.
+    Object.defineProperty(textMesh, 'font',{
+        set: function(value) {
+            if (typeof value === 'string' || value instanceof String){
+                editText(this,this.options.text,{font : value});
+                this.options.font = value;
+            }   
+            else{
+                // ERROR 
+                console.log('Color set to non string value');
+            } 
+        }
+    });
+
+    // TODO : Place a check to verify if font is loaded otherwise try to load font, otherwise hit error.
+    Object.defineProperty(textMesh, 'weight',{
+        configurable : false,
+        enumerable : false,
+        set: function(value) {
+            if (!isNaN(value)){
+                editText(this,this.options.text,{weight : value});
+                this.options.weight = value;
+            }   
+            else{
+                // ERROR 
+                console.log('Weight set to not a number');
+            } 
+        }
+    });
+
+    // TODO : Place a check to verify if font is loaded and style exists otherwise try to load font, otherwise hit error.
+    Object.defineProperty(textMesh, 'style',{
+        configurable : false,
+        enumerable : false,
+        set: function(value) {
+            if (typeof value === 'string' || value instanceof String){
+                editText(this,this.options.text,{style : value});
+                this.options.style = value;
+            }   
+            else{
+                // ERROR 
+                console.log('Style set to non string value');
+            } 
+        }
+    });
+
+    Object.defineProperty(textMesh, 'size',{
+        configurable : false,
+        enumerable : false,
+        set: function(value) {
+            if (!isNaN(value)){
+                editText(this,this.options.text,{size : value});
+                this.options.size = value;
+            }   
+            else{
+                // ERROR 
+                console.log('Size set to not a number');
+            } 
+        }
+    });
+
+    Object.defineProperty(textMesh, 'curveSegments',{
+        configurable : false,
+        enumerable : false,
+        set: function(value) {
+            if (!isNaN(value)){
+                editText(this,this.options.text,{curveSegments : value});
+                this.options.curveSegments = value;
+            }   
+            else{
+                // ERROR 
+                console.log('curveSegments set to non string value');
+            } 
+        }
+    });
+
+    Object.defineProperty(textMesh, 'align',{
+        configurable : false,
+        enumerable : false,
+        set: function(value) {
+            if ((typeof value === 'string' || value instanceof String) && (value === 'left' || value === 'center' || value === 'right')){
+                alignText(this,value);
+            }   
+            else{
+                // ERROR 
+                console.log('Align value is wrong');
+            } 
+        }
+    });
+
+    Object.defineProperty(textMesh, 'vAlign',{
+        configurable : false,
+        enumerable : false,
+        set: function(value) {
+            if ((typeof value === 'string' || value instanceof String) && (value === 'top' || value === 'middle' || value === 'bottom')){
+                alignText(this,value);
+            }   
+            else{
+                // ERROR 
+                console.log('vAlign value is wrong');
+            } 
+        }
+    });
+
     return textMesh;
 }
 
