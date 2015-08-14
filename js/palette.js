@@ -370,7 +370,8 @@ function Palette(palettes, name) {
     this.makeMenu = function(createHeader) {
         if (this.menuContainer == null) {
             this.menuContainer = new THREE.Group();
-            // this.menuContainer.snapToPixelEnabled = true; //TODO how to enable pixel snapping in three.js
+            this.paletteContainer.add(this.menuContainer);
+            // TODO : Snap to pixel
         }
         if (!createHeader) {
             return;
@@ -391,25 +392,25 @@ function Palette(palettes, name) {
             palette.menuContainer.processHeader.height = bitmap.imgHeight;
             palette.menuContainer.processHeader.name = name;
             palette.menuContainer.visible = false;
+            // TODO : SetZindex
             bitmap.position.setZ(2);
-            
+
             palette.menuContainer.hitmesh = bitmap;
 
             function processButtonIcon(palette, name, bitmap, extras) {
                 palette.menuContainer.add(bitmap);
-                palette.palettes.container.add(palette.menuContainer);
-                bitmap.position.set(-palette.menuContainer.processHeader.width/2 + bitmap.imgWidth*0.8/2 + palette.padding ,0,2);
-                bitmap.scale.set(0.8,0.8,1);
+                bitmap.position.setX(-palette.menuContainer.processHeader.width/2 + bitmap.imgWidth/2 + palette.padding);
 
+                // TODO : Set zIndex
+                bitmap.position.setZ(2);
 
                 function processCloseIcon(palette, name, bitmap, extras) {
-                    bitmap.scale.set(0.7,0.7,0.7);
                     palette.menuContainer.add(bitmap);
-                    bitmap.position.setX(palette.menuContainer.processHeader.width/2 - bitmap.imgWidth*0.7/2 - palette.padding);
-                    bitmap.position.setY(0);
+                    bitmap.position.setX(palette.menuContainer.processHeader.width/2 - bitmap.imgWidth/2 - palette.padding);
+                    // TODO : Set zIndex
                     bitmap.position.setZ(2);
 
-                    // TODO fix this
+                    // FIXME : Scaling
                     if (!palette.mouseHandled) {
                         loadPaletteMenuHandler(palette);
                         palette.mouseHandled = true;
