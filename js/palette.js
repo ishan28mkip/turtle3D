@@ -143,13 +143,13 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
                     me.dict[name].paletteWidth = paletteWidth;
 
                     me.dict[name].makeMenu(false);
-                    me.dict[name].moveMenu(threeCoorX(me.cellSize + me.margin*2) + paletteWidth/2, threeCoorY(me.cellSize*1.5));
+                    me.dict[name].moveMenu(threeCoorX(me.cellSize + me.margin*2) + paletteWidth/2 + me.cellSize / 2, threeCoorY(me.cellSize + STANDARDBLOCKHEIGHT / 2));
                     me.dict[name].updateMenu(false);
 
-                    // TODO : Fix the click handler in palette button handlers
                     loadPaletteButtonHandler(me, name);
                 }
-                makePaletteBitmap(me, PALETTEICONS[name], name, processButtonIcon, null);
+                // FIXME : Why are button icons becoming jagged when scale is set to 1, till 1.05 the lines are jagged and 1.06 above become fixed
+                makePaletteBitmap(me, PALETTEICONS[name], name, processButtonIcon, null, scale * 1.06);
             }
         }
     }
@@ -215,7 +215,7 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
         return this;
     }
 
-    // TODO : Fix this function
+    // FIXME
     this.remove = function(name) {
         // if (!(name in this.buttons)) {
         //     console.log('Palette.remove: Cannot find palette ' + name);
@@ -231,12 +231,12 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
         // this.y -= this.cellSize;
         // this.makePalettes();
     }
-
+    // FIXME
     this.findPalette = function(x, y) {
         // for (var name in this.dict) {
         //     var px = this.dict[name].menuContainer.x;
         //     var py = this.dict[name].menuContainer.y;
-        //     var height = Math.min(maxPaletteHeight(this.cellSize, this.scale), this.dict[name].y);
+        //     var height = Math.min(maximumPaletteHeight(this.cellSize, this.scale), this.dict[name].y);
         //     if (this.dict[name].menuContainer.visible && px < x &&
         //         x < px + MENUWIDTH && py < y && y < py + height) {
         //         return this.dict[name];
