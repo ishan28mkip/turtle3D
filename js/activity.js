@@ -945,6 +945,7 @@ define(function(require) {
                 });
 
                 refreshCanvas(1);
+
             }
             img.src = 'images/' + name + '.svg';
         }
@@ -1010,76 +1011,77 @@ define(function(require) {
 
         // FIXME : Important funciton to fix when fixing the scaling
         function onResize() {
-            if (docById('labelDiv').classList.contains('hasKeyboard')) {
-                return;
-            }
-            if (!onAndroid) {
-                var w = window.innerWidth;
-                var h = window.innerHeight;
-            } else {
-                var w = window.outerWidth;
-                var h = window.outerHeight;
-            }
+            // if (docById('labelDiv').classList.contains('hasKeyboard')) {
+            //     return;
+            // }
+            // if (!onAndroid) {
+            //     var w = window.innerWidth;
+            //     var h = window.innerHeight;
+            // } else {
+            //     var w = window.outerWidth;
+            //     var h = window.outerHeight;
+            // }
 
-            var smallSide = Math.min(w, h);
-            if (smallSide < cellSize * 10) {
-                if (w < cellSize * 10) {
-                    scale = smallSide / (cellSize * 10);
-                } else {
-                    scale = Math.max(smallSide / (cellSize * 10), 0.75);
-                }
-            } else {
-                if (w > h) {
-                    scale = w / 1200;
-                } else {
-                    scale = w / 900;
-                }
-            }
+            // var smallSide = Math.min(w, h);
+            // if (smallSide < cellSize * 10) {
+            //     if (w < cellSize * 10) {
+            //         scale = smallSide / (cellSize * 10);
+            //     } else {
+            //         scale = Math.max(smallSide / (cellSize * 10), 0.75);
+            //     }
+            // } else {
+            //     if (w > h) {
+            //         scale = w / 1200;
+            //     } else {
+            //         scale = w / 900;
+            //     }
+            // }
 
-            scriptingCameraWidth = window.innerWidth;
-            scriptingCameraHeight = window.innerHeight; 
+            // // FIXME : Fix the resizing
+            // // scriptingCameraWidth = window.innerWidth;
+            // // scriptingCameraHeight = window.innerHeight; 
 
-            turtleCameraWidth = window.innerWidth;
-            turtleCameraHeight = window.innerHeight;
+            // // turtleCameraWidth = window.innerWidth;
+            // // turtleCameraHeight = window.innerHeight;
 
-            scriptingRenderer.setSize(window.innerWidth, window.innerHeight);
-            turtleRenderer.setSize(window.innerWidth, window.innerHeight);
+            // // scriptingRenderer.setSize(window.innerWidth, window.innerHeight);
+            // // turtleRenderer.setSize(window.innerWidth, window.innerHeight);
 
-            scriptingCamera.position.x = 0;
-            scriptingCamera.position.y = 0;
-            scriptingCamera.position.z = 1000;
-            scriptingCamera.lookAt(new THREE.Vector3(0, 0, 0));
+            // // scriptingCamera.position.x = 0;
+            // // scriptingCamera.position.y = 0;
+            // // scriptingCamera.position.z = 1000;
+            // // scriptingCamera.lookAt(new THREE.Vector3(0, 0, 0));
 
-            turtleCamera.position.x = 50;
-            turtleCamera.position.y = 50;
-            turtleCamera.position.z = 50;
-            turtleCamera.lookAt(new THREE.Vector3(0,0,0));
+            // // turtleCamera.position.x = 50;
+            // // turtleCamera.position.y = 50;
+            // // turtleCamera.position.z = 50;
+            // // turtleCamera.lookAt(new THREE.Vector3(0,0,0));
 
-            // stage.scaleX = scale;
-            // stage.scaleY = scale;
+            // // stage.scaleX = scale;
+            // // stage.scaleY = scale;
 
             // stage.canvas.width = w;
             // stage.canvas.height = h;
 
-            console.log('Resize: scale ' + scale +
-                ', windowW ' + w + ', windowH ' + h +
-                ', canvasW ' + canvas.width + ', canvasH ' + canvas.height +
-                ', screenW ' + screen.width + ', screenH ' + screen.height);
+            // console.log('Resize: scale ' + scale +
+            //     ', windowW ' + w + ', windowH ' + h +
+            //     ', canvasW ' + canvas.width + ', canvasH ' + canvas.height +
+            //     ', screenW ' + screen.width + ', screenH ' + screen.height);
 
-            turtles.setScale(scale);
-            blocks.setScale(scale);
-            palettes.setScale(scale);
-            trashcan.resizeEvent(scale);
+            // turtles.setScale(scale);
+            // blocks.setScale(scale);
+            // palettes.setScale(scale);
+            // trashcan.resizeEvent(scale);
             setupAndroidToolbar();
 
-            // Reposition coordinate grids.
-            cartesianBitmap.position.setX(0);
-            cartesianBitmap.position.setY(0);
-            polarBitmap.position.setX(0);
-            polarBitmap.position.setY(0);
-            refreshCanvas(1);
+            // // Reposition coordinate grids.
+            // cartesianBitmap.position.setX(0);
+            // cartesianBitmap.position.setY(0);
+            // polarBitmap.position.setX(0);
+            // polarBitmap.position.setY(0);
+            // refreshCanvas(1);
 
-            // Setup help now that we have calculated scale.
+            // // Setup help now that we have calculated scale.
             showHelp(true);
         }
 
@@ -1225,7 +1227,7 @@ define(function(require) {
         function doOpenSamples() {
             console.log('save locally');
             saveLocally();
-            thumbnails.show()
+            thumbnails.show();
         }
 
         // FIXME 
