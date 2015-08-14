@@ -559,18 +559,20 @@ function Turtles(canvas, stage2D, stage3D, refreshCanvas) {
             // TODO : Add a sphere hitmesh for the axes
             myTurtle.container.hitmesh = myTurtle.bitmap;
 
-            var bounds = myTurtle.container.get2DBounds();
-            myTurtle.container.bounds = bounds;
+            myTurtle.container.bounds = new THREE.Box3().setFromObject( myTurtle.container );
+            myTurtle.container.bounds.size = myTurtle.container.bounds.size();
 
             myTurtle.startBlock = startBlock;
             if (startBlock != null) {
                 myTurtle.decorationBitmap = myTurtle.bitmap.clone();
                 startBlock.container.add(myTurtle.decorationBitmap);
                 myTurtle.decorationBitmap.name = 'decoration';
-                var bounds = startBlock.container.get2DBounds();
+
+                var bounds = new THREE.Box3().setFromObject( startBlock.container );
                 startBlock.container.bounds = bounds;
+                startBlock.container.bounds.size = startBlock.container.bounds.size();
                 // FIXME : Fix the position of the decorative bitmap
-                myTurtle.decorationBitmap.position.setX(bounds.width - 30 * startBlock.protoblock.scale / 2);
+                myTurtle.decorationBitmap.position.setX(bounds.size.x - 30 * startBlock.protoblock.scale / 2);
                 myTurtle.decorationBitmap.position.setY(35 * startBlock.protoblock.scale / 2);
 
                 myTurtle.decorationBitmap.scale.setX(0.5 * startBlock.protoblock.scale / 2);
@@ -631,8 +633,7 @@ function Turtles(canvas, stage2D, stage3D, refreshCanvas) {
             myTurtle.axis.position.setX(myTurtle.axis.position.x + event.clientX - lastCords.x);
             myTurtle.axis.position.setY(myTurtle.axis.position.y - event.clientY + lastCords.y);
 
-            myTurtle.x = myTurtle.container.position.x;
-            myTurtle.y = myTurtle.container.position.y;
+            myTurtle.position.copy(myTurtle.container.position);
             
             // myTurtle.x = turtles.screenX2turtleX(myTurtle.container.x);
             // myTurtle.y = turtles.screenY2turtleY(myTurtle.container.y);
@@ -726,7 +727,7 @@ function Queue (blk, count, parentBlk) {
 
 
 function makeTurtleBitmap(me, data, name, callback, extras) {
-    // TODO : Creating normal turtle also works but we need a 3D turtle
+    // TODO : Create a 3D turtle in place
 
     // Async creation of bitmap from SVG data
     // Works with Chrome, Safari, Firefox (untested on IE)
