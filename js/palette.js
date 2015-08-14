@@ -487,11 +487,11 @@ function Palette(palettes, name) {
         return this.menuContainer.position.y - h + STANDARDBLOCKHEIGHT * 2 ;
     }
 
+    // FIXME : Resize
     this.resizeEvent = function() {
         this.updateBackground();
-
         if (this.downButton !== null) {
-            this.downButton.y = this.getDownButtonY();
+            this.downButton.y = this.getButtonY();
         }
     }
 
@@ -508,14 +508,23 @@ function Palette(palettes, name) {
                 obj = this.background.children[ i ];
                 this.background.remove(obj);
             }
-        } else {
+        }
+        else if (this.currentPage > 0 && this.background !== null){
+            // Do nothing
+        }
+        else {
             this.background = new THREE.Group();
             // this.background.snapToPixelEnabled = true;
             this.background.visible = false;
-            this.palettes.stage.add(this.background);
+            this.blockContainer.add(this.background);
         }
 
-        var h = Math.min(maxPaletteHeight(this.palettes.cellSize, this.palettes.scale), this.y);
+        var h;
+        if(this.currentPage > 0)
+            h = this.palettes.maxPaletteHeight;
+        else
+            h = Math.min(this.palettes.maxPaletteHeight, this.y);
+
         var w = MENUWIDTH;
 
         var rectShape = new THREE.Shape();
@@ -532,14 +541,14 @@ function Palette(palettes, name) {
 
         this.background.hitmesh = rectMesh;
 
-        setupBackgroundEvents(this);
-
         this.background.position.setX(this.menuContainer.position.x);
         this.background.position.setY(this.menuContainer.position.y - STANDARDBLOCKHEIGHT/2 -h/2);
+
+        setupBackgroundEvents(this);
     }
 
     this.updateMenu = function(hide) {
-        if (this.menuContainer == null) {
+        if (this.menuContainer === null) {
             this.makeMenu(false);
         } else {
             // Hide the menu while we update.
