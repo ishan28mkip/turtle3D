@@ -67,7 +67,7 @@ function Turtle (name, turtles) {
     this.fillState = false;
     this.penState = true;
     this.font = DEFAULTFONT;
-    this.material = new THREE.LineBasicMaterial({color: this.canvasColor,linewidth : this.stroke});
+    this.material = new THREE.LineBasicMaterial({color: this.canvasColor, 3 : this.stroke});
     this.media = [];  // Media (text, images) we need to remove on clear.
 
 
@@ -98,8 +98,13 @@ function Turtle (name, turtles) {
         this.font = DEFAULTFONT;
 
         if(this.axis !== null){ // Can occur if the turtle is still not initialized
-            this.axis.position.copy(this.position);
+            this.axis.position.copy(ORIGIN);
         }
+
+        this.position.copy(ORIGIN);
+
+
+        clearCanvas(this.drawingCanvas);
 
         // TODO : Port the do turtle shell function
         // if (this.skinChanged) {
@@ -107,7 +112,9 @@ function Turtle (name, turtles) {
         //     this.skinChanged = false;
         // }
 
-        // TODO : Add calls to make all types of rotation to 0
+        this.setRoll(0);
+        this.setPitch(0);
+        this.setYaw(0);
 
         // Clear all media.
         for (i = 0; i < this.media.length; i++) {
@@ -158,7 +165,7 @@ function Turtle (name, turtles) {
         var lineBegin = new THREE.Vector3();
         var lineClose = new THREE.Vector3();
         var alongX = new THREE.Vector3();
-        alongX.copy(XAXIS);
+        alongX.copy(this.axisX);
         alongX.multiplyScalar(x);
         lineBegin.copy(this.position);
         geometry.vertices.push(lineBegin);
