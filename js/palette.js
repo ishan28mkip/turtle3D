@@ -445,35 +445,36 @@ function Palette(palettes, name) {
                                 palette.scrollEvent(-STANDARDBLOCKHEIGHT, 10); //Add next palette page handler here
                             });
                         } 
-                        makePaletteBitmap(palette, DOWNICON, name, processDownIcon, null);
-                    function makeFadedDownIcon(palette, name, bitmap, extras) {
-                            palette.palettes.stage.add(bitmap);
+                        makePaletteBitmap(palette, DOWNICON, name, processRightIcon, null, 0.7);
+
+                    function makeFadedRightIcon(palette, name, bitmap, extras) {
+                            bitmap.rotation.z = 90 * Math.PI / 180;
+                            palette.pageButtonContainer.add(bitmap);
                             bitmap.position.setX(palette.menuContainer.position.x + paletteWidth/2 + palette.palettes.cellSize/2);
-                            bitmap.position.setY(palette.getDownButtonY());
-                            bitmap.scale.setX(0.7);
-                            bitmap.scale.setY(0.7); 
+                            bitmap.position.setY(palette.getButtonY());
 
                             bitmap.visible = false;
-                            palette.FadedDownButton = bitmap;
+                            palette.FadedRightButton = bitmap;
                         } 
-                        makePaletteBitmap(palette, FADEDDOWNICON, name, makeFadedDownIcon, null);
-                        function makeFadedUpIcon(palette, name, bitmap, extras) {
-                            palette.palettes.stage.add(bitmap);
-                            bitmap.position.setX(palette.menuContainer.position.x + paletteWidth/2 + palette.palettes.cellSize/2);
-                            bitmap.position.setY(palette.menuContainer.position.y - STANDARDBLOCKHEIGHT);
-                            bitmap.scale.setX(0.7);
-                            bitmap.scale.setY(0.7);
+                        makePaletteBitmap(palette, FADEDDOWNICON, name, makeFadedRightIcon, null, 0.7);
+
+                        function makeFadedLeftIcon(palette, name, bitmap, extras) {
+                            bitmap.rotation.z = 90 * Math.PI / 180;
+                            palette.pageButtonContainer.add(bitmap);
+                            bitmap.position.setX(palette.menuContainer.position.x - paletteWidth/2 - palette.palettes.cellSize/2);
+                            bitmap.position.setY(palette.getButtonY());
 
                             bitmap.visible = false;
-                            palette.FadedUpButton = bitmap;
+                            palette.FadedLeftButton = bitmap;
+
                         } 
-                        makePaletteBitmap(palette, FADEDUPICON, name, makeFadedUpIcon, null);
+                        makePaletteBitmap(palette, FADEDUPICON, name, makeFadedLeftIcon, null, 0.7);
                     } 
-                    makePaletteBitmap(palette, UPICON, name, processUpIcon, null);
+                    makePaletteBitmap(palette, UPICON, name, processLeftIcon, null, 0.7);
                 }
-                makePaletteBitmap(palette, CLOSEICON, name, processCloseIcon, null);
+                makePaletteBitmap(palette, CLOSEICON, name, processCloseIcon, null, 0.7);
             }
-            makePaletteBitmap(palette, PALETTEICONS[name], name, processButtonIcon, null);
+            makePaletteBitmap(palette, PALETTEICONS[name], name, processButtonIcon, null, 0.8);
         }
         makePaletteBitmap(this, PALETTEHEADER.replace('fill_color', '#282828').replace('palette_label', _(this.name)).replace(/header_width/g, paletteWidth), this.name, processHeader, null);
     }
