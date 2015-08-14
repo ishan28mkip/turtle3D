@@ -1088,7 +1088,7 @@ function loadEventHandlers(myBlock) {
     var getInput = window.hasMouse;
     var px,py,dx,dy;
 
-    // DONE
+
     myBlock.container.on('mouseover', function(event) {
         blocks.highlight(thisBlock, true);
         blocks.activeBlock = thisBlock;
@@ -1116,17 +1116,8 @@ function loadEventHandlers(myBlock) {
             } else if (myBlock.name == 'text' || myBlock.name == 'number') {
                 var x = myBlock.container.position.x
                 var y = myBlock.container.position.y
-                // FIXME : Fix these values
-                var canvasLeft = blocks.canvas.offsetLeft + 28;
-                var canvasTop = blocks.canvas.offsetTop + 6;
 
                 var movedStage = false;
-                // FIXME : Fix this value of 75 in accordance with the new values
-                if (!window.hasMouse && blocks.stage.y + y > 75) {
-                    movedStage = true;
-                    var fromY = blocks.stage.y;
-                    blocks.stage.y = -y + 75;
-                }
 
                 if (myBlock.name == 'text') {
                     var type = 'text';
