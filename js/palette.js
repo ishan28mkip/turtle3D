@@ -637,7 +637,6 @@ function Palette(palettes, name) {
                 }
 
                 function processFiller(palette, modname, bitmap, extras) {
-                    // TODO : Set bitmap position 
                     var blkname = extras[0];
                     var blk = extras[1];
                     var currY = extras[2];
@@ -762,6 +761,7 @@ function Palette(palettes, name) {
                         palette.protoContainers[modname].add(bitmap);
                         bitmap.position.setX(bitmap.imgWidth/2);
                         bitmap.position.setY(-bitmap.imgHeight/2);
+                        // TODO : Set zindex
                         bitmap.position.setZ(2);
 
                         bitmap.scale.setX(PROTOBLOCKSCALE);
@@ -775,7 +775,6 @@ function Palette(palettes, name) {
 
                         var hexColor = '#'+Math.floor(Math.random()*16777215).toString(16);
 
-                        // TODO : Fix the scaling in this hitmesh 
                         var rectShape = new THREE.Shape();
                         rectShape.moveTo( 0,0 );
                         rectShape.lineTo( 0, -height );
@@ -789,16 +788,12 @@ function Palette(palettes, name) {
                         rectMesh.visible = false;
                         palette.protoContainers[modname].add(rectMesh);
                         
+                        // TODO : Set zIndex
                         rectMesh.position.setZ(3);
 
                         palette.protoContainers[modname].hitmesh = rectMesh;
 
-                        // Fix this function, continuity is lost and also implement this is the scroll event
-                        // if(palette.protoContainers[modname].position.y - bitmap.imgHeight/2 < bounds.min.y)
-                        // {
-                        //     bitmap.visible = false;
-                        // }
-
+                        // Add the new image function with scale
                         if (myBlock.image) {
                             var image = new Image(); 
                             image.onload = function() {
@@ -859,9 +854,12 @@ function Palette(palettes, name) {
                     makePaletteBitmap(palette, artwork, modname, processBitmap, [myBlock, blk, currY]);
                 }
                 makePaletteBitmap(this, PALETTEFILLER.replace(/filler_height/g, height.toString()), modname, processFiller, [blkname, blk, this.y]);
+
             } else {
                 var height = calculateHeight(this, blkname);
-                this.y += Math.ceil(height * PROTOBLOCKSCALE);
+                // FIXME : Scaling
+                // this.y += Math.ceil(height * PROTOBLOCKSCALE);
+                this.y += Math.ceil(height);
             }
 
         }
