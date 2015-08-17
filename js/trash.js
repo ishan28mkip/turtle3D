@@ -194,23 +194,3 @@ function Trashcan (canvas, stage, size, refreshCanvas) {
     }
 }
 
-
-// PE : Currently the animation frame is not being cancelled, might cause multiple instances.
-
-// var requestId;
-
-
-// function startAnim() {
-//     if (!requestId) {
-//        loopAnim();
-//     }
-// }
-
-// function stopAnim() {
-//     if (requestId) {
-//        window.cancelAnimationFrame(requestId);
-//        requestId = undefined;
-//     }
-// }
-
-
