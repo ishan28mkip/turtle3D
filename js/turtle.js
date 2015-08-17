@@ -7,7 +7,7 @@
 var DEFAULTCOLOR = 0;
 var DEFAULTVALUE = 50;
 var DEFAULTCHROMA = 100;
-var DEFAULTSTROKE = 5;
+var DEFAULTSTROKE = 3;
 var DEFAULTFONT = 'sans-serif';
 var XAXIS = new THREE.Vector3(1,0,0);
 var YAXIS = new THREE.Vector3(0,1,0);
@@ -67,7 +67,7 @@ function Turtle (name, turtles) {
     this.fillState = false;
     this.penState = true;
     this.font = DEFAULTFONT;
-    this.material = new THREE.LineBasicMaterial({color: this.canvasColor, 3 : this.stroke});
+    this.material = new THREE.LineBasicMaterial({color: this.canvasColor, linewidth: this.stroke});
     this.media = [];  // Media (text, images) we need to remove on clear.
 
 
@@ -420,7 +420,8 @@ function Turtle (name, turtles) {
         this.canvasValue = results[0];
         this.canvasChroma = results[1];
         this.canvasColor = results[2];
-        // TODO : Set color to this.canvasColor
+        this.material = new THREE.LineBasicMaterial({color: this.canvasColor, linewidth: this.stroke});
+        this.turtles.refreshCanvas(2);
     }
 
     this.doSetHue = function(hue) {
@@ -444,8 +445,7 @@ function Turtle (name, turtles) {
 
     this.doSetPensize = function(size) {
         this.stroke = size;
-        // TODO : Add option to set pen styles
-        // this.drawingCanvas.graphics.setStrokeStyle(this.stroke, 'round', 'round');
+        this.material = new THREE.LineBasicMaterial({color: this.canvasColor, linewidth: this.stroke});
     }
 
     this.doPenUp = function() {
@@ -456,15 +456,15 @@ function Turtle (name, turtles) {
         this.penState = true;
     }
 
+     // TODO : Add a function to check and do fill operations
     this.doStartFill = function() {
         // start tracking points here
-        // TODO : Add a function to check and do fill operations
         this.fillState = true;
     }
 
+    // TODO : Add a function to check and do fill operations
     this.doEndFill = function() {
         /// redraw the points with fill enabled
-        // TODO : Add a function to check and do fill operations
         this.fillState = false;
     }
 

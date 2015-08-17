@@ -464,7 +464,6 @@ function onSceneEvent(event,eventName){
                 }
              }
 
-
              // Check for mouseout
              for(i=0; i < mousemotionArray.length; i++){
                 if(mousemotionArray[i].parentMesh._listeners.hasOwnProperty('mouseover') && mousemotionArray[i].parentMesh._listeners.mouseover.active == true){
