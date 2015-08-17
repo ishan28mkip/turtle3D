@@ -876,16 +876,9 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
             myBlock.x = x;
             myBlock.y = y;
             if (myBlock.collapseContainer != null) {
-
-                var parentHeight = myBlock.bitmap.imgHeight;
-                var parentWidth = myBlock.bitmap.imgWidth;
-
-                var height = myBlock.collapseBitmap.imgHeight;
-                var width = myBlock.collapseBitmap.imgWidth;
-
-                myBlock.collapseContainer.position.setX(myBlock.container.position.x + COLLAPSEBUTTONXOFF - parentWidth / 2 - width / 2);
-                myBlock.collapseContainer.position.setY(myBlock.container.position.y - COLLAPSEBUTTONYOFF + parentHeight / 2 - height / 2);
-
+                // FIXME : Fix this positioning
+                myBlock.collapseContainer.position.setX(x + COLLAPSEBUTTONXOFF * (this.blockList[blk].protoblock.scale / 2));
+                myBlock.collapseContainer.position.setY(y + COLLAPSEBUTTONYOFF * (this.blockList[blk].protoblock.scale / 2));
             }
         } else {
             console.log('no container yet');
@@ -2350,17 +2343,8 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
 
         for (var blk = 0; blk < this.blockList.length; blk++) {
             if(this.blockList[blk].collapseContainer != null) {
-                // FIXME : Scaling
-                // this.blockList[blk].collapseContainer.position.setX(this.blockList[blk].container.position.x + COLLAPSEBUTTONXOFF * (this.blockList[blk].protoblock.scale / 2));
-                // this.blockList[blk].collapseContainer.position.setY(this.blockList[blk].container.position.y + COLLAPSEBUTTONYOFF * (this.blockList[blk].protoblock.scale / 2));
-                var parentHeight = this.blockList[blk].bitmap.imgHeight;
-                var parentWidth = this.blockList[blk].bitmap.imgWidth;
-
-                var height = this.blockList[blk].collapseBitmap.imgHeight;
-                var width = this.blockList[blk].collapseBitmap.imgWidth;
-
-                this.blockList[blk].collapseContainer.position.setX(this.blockList[blk].container.position.x + COLLAPSEBUTTONXOFF - parentWidth / 2 - width / 2);
-                this.blockList[blk].collapseContainer.position.setY(this.blockList[blk].container.position.y - COLLAPSEBUTTONYOFF + parentHeight / 2 - height / 2);
+                this.blockList[blk].collapseContainer.x = this.blockList[blk].container.x + COLLAPSEBUTTONXOFF * (this.blockList[blk].protoblock.scale / 2);
+                this.blockList[blk].collapseContainer.y = this.blockList[blk].container.y + COLLAPSEBUTTONYOFF * (this.blockList[blk].protoblock.scale / 2);
             }
         }
         this.refreshCanvas(1);

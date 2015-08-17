@@ -56,13 +56,6 @@ function initBasicProtoBlocks(palettes, blocks) {
     blocks.palettes = palettes;
         //3D blocks
 
-    var clearBlock = new ProtoBlock('clear');
-    clearBlock.palette = palettes.dict['turtle'];
-    blocks.protoBlockDict['clear'] = clearBlock;
-    clearBlock.staticLabels.push(_('clear'));
-    clearBlock.adjustWidthToLabel();
-    clearBlock.zeroArgBlock();
-
     var setCursorPosition = new ProtoBlock('setCursorPosition');
     setCursorPosition.palette = palettes.dict['turtle'];
     blocks.protoBlockDict['setCursorPosition'] = setCursorPosition;
@@ -98,50 +91,29 @@ function initBasicProtoBlocks(palettes, blocks) {
     doForwardZ.oneArgBlock();
     doForwardZ.defaults.push(5);
 
-    var xBlock = new ProtoBlock('x');
-    xBlock.palette = palettes.dict['turtle'];
-    blocks.protoBlockDict['x'] = xBlock;
-    xBlock.staticLabels.push(_('x'));
-    xBlock.adjustWidthToLabel();
-    xBlock.parameterBlock();
+    var setRoll = new ProtoBlock('setRoll');
+    setRoll.palette = palettes.dict['turtle'];
+    blocks.protoBlockDict['setRoll'] = setRoll;
+    setRoll.staticLabels.push(_('setRoll'));
+    setRoll.adjustWidthToLabel(); 
+    setRoll.oneArgBlock();
+    setRoll.defaults.push(10);
 
-    var yBlock = new ProtoBlock('y');
-    yBlock.palette = palettes.dict['turtle'];
-    blocks.protoBlockDict['y'] = yBlock;
-    yBlock.staticLabels.push(_('y'));
-    yBlock.adjustWidthToLabel();
-    yBlock.parameterBlock();
+    var setPitch = new ProtoBlock('setPitch');
+    setPitch.palette = palettes.dict['turtle'];
+    blocks.protoBlockDict['setPitch'] = setPitch;
+    setPitch.staticLabels.push(_('setPitch'));
+    setPitch.adjustWidthToLabel(); 
+    setPitch.oneArgBlock();
+    setPitch.defaults.push(10);
 
-    var zBlock = new ProtoBlock('z');
-    zBlock.palette = palettes.dict['turtle'];
-    blocks.protoBlockDict['z'] = zBlock;
-    zBlock.staticLabels.push(_('z'));
-    zBlock.adjustWidthToLabel();
-    zBlock.parameterBlock();
-    
-    // var setRoll = new ProtoBlock('setRoll');
-    // setRoll.palette = palettes.dict['turtle'];
-    // blocks.protoBlockDict['setRoll'] = setRoll;
-    // setRoll.staticLabels.push(_('setRoll'));
-    // setRoll.adjustWidthToLabel(); 
-    // setRoll.oneArgBlock();
-    // setRoll.defaults.push(10);
-
-    // var setPitch = new ProtoBlock('setPitch');
-    // setPitch.palette = palettes.dict['turtle'];
-    // blocks.protoBlockDict['setPitch'] = setPitch;
-    // setPitch.staticLabels.push(_('setPitch'));
-    // setPitch.adjustWidthToLabel(); 
-    // setPitch.oneArgBlock();
-    // setPitch.defaults.push(10);
-
-    // var setYaw = new ProtoBlock('setYaw');
-    // setYaw.palette = palettes.dict['turtle'];
-    // blocks.protoBlockDict['setYaw'] = setYaw;
-    // setYaw.staticLabels.push(_('setYaw'));
-    // setYaw.adjustWidthToLabel(); 
-    // setYaw.oneArgBlock();
-    // setYaw.defaults.push(10);
+    var setYaw = new ProtoBlock('setYaw');
+    setYaw.palette = palettes.dict['turtle'];
+    blocks.protoBlockDict['setYaw'] = setYaw;
+    setYaw.staticLabels.push(_('setYaw'));
+    setYaw.adjustWidthToLabel(); 
+    setYaw.oneArgBlock();
+    setYaw.defaults.push(10);
 
     var doRoll = new ProtoBlock('doRoll');
     doRoll.palette = palettes.dict['turtle'];
@@ -166,7 +138,6 @@ function initBasicProtoBlocks(palettes, blocks) {
     doYaw.adjustWidthToLabel(); 
     doYaw.oneArgBlock();
     doYaw.defaults.push(10);
-
     // // Turtle palette
     // var clearBlock = new ProtoBlock('clear');
     // clearBlock.palette = palettes.dict['turtle'];

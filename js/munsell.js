@@ -67,7 +67,7 @@ interpColor = function(hex1, hex2, p) {
         var ng = Math.floor(g1 * p + g2 * (1 - p));
         var nb = Math.floor(b1 * p + b2 * (1 - p));
 
-        return "rgb("+nr+","+ng+","+nb+")";
+        return createjs.Graphics.getRGB(nr, ng, nb, 1.0);
     }
 };
 
