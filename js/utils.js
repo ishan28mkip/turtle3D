@@ -550,7 +550,8 @@ function createText(text,color,size,font,weight,style,curveSegments){
     textMesh.options = options;
 
     textMesh.geometry.computeBoundingBox();
-    textMesh.localBounds = textMesh.geometry.boundingBox;
+    textMesh.options.bounds = textMesh.geometry.boundingBox;
+    textMesh.options.baselineHeight = textMesh.options.bounds.min.y;
 
     Object.defineProperty(textMesh, 'text',{
         configurable : false,
@@ -564,6 +565,9 @@ function createText(text,color,size,font,weight,style,curveSegments){
                 // ERROR 
                 console.log('Text Set to non string value');
             } 
+        },
+        get: function() {
+            return this.options.text;
         }
     });
 
@@ -580,6 +584,9 @@ function createText(text,color,size,font,weight,style,curveSegments){
                 // ERROR 
                 console.log('Color set to non string value');
             } 
+        },
+        get: function() {
+            return this.options.color;
         }
     });
 
@@ -594,6 +601,9 @@ function createText(text,color,size,font,weight,style,curveSegments){
                 // ERROR 
                 console.log('Color set to non string value');
             } 
+        },
+        get: function() {
+            return this.options.font;
         }
     });
 
@@ -610,6 +620,9 @@ function createText(text,color,size,font,weight,style,curveSegments){
                 // ERROR 
                 console.log('Weight set to not a number');
             } 
+        },
+        get: function() {
+            return this.options.weight;
         }
     });
 
@@ -626,6 +639,9 @@ function createText(text,color,size,font,weight,style,curveSegments){
                 // ERROR 
                 console.log('Style set to non string value');
             } 
+        },
+        get: function() {
+            return this.options.style;
         }
     });
 
@@ -641,6 +657,9 @@ function createText(text,color,size,font,weight,style,curveSegments){
                 // ERROR 
                 console.log('Size set to not a number');
             } 
+        },
+        get: function() {
+            return this.options.size;
         }
     });
 
@@ -656,6 +675,9 @@ function createText(text,color,size,font,weight,style,curveSegments){
                 // ERROR 
                 console.log('curveSegments set to non string value');
             } 
+        },
+        get: function() {
+            return this.options.curveSegments;
         }
     });
 
@@ -665,11 +687,15 @@ function createText(text,color,size,font,weight,style,curveSegments){
         set: function(value) {
             if ((typeof value === 'string' || value instanceof String) && (value === 'left' || value === 'center' || value === 'right')){
                 alignText(this,value);
+                this.options.align = value;
             }   
             else{
                 // ERROR 
                 console.log('Align value is wrong');
             } 
+        },
+        get: function() {
+            return this.options.align;
         }
     });
 
@@ -679,11 +705,15 @@ function createText(text,color,size,font,weight,style,curveSegments){
         set: function(value) {
             if ((typeof value === 'string' || value instanceof String) && (value === 'top' || value === 'middle' || value === 'bottom')){
                 alignText(this,value);
+                this.options.vAlign = value;
             }   
             else{
                 // ERROR 
                 console.log('vAlign value is wrong');
             } 
+        },
+        get: function() {
+            return this.options.valign;
         }
     });
 
