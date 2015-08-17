@@ -1,6 +1,6 @@
 // TODO :
     // (1) : Apply transform on hitmesh also when the block expands
-    // (2) : Fix scaling along with code in block so only palette and main screen scaling is required to be fixed later on.
+    // (2) : When scaling is applied change the imgHeight and imgWidth parameters as well
 
 // Length of a long touch
 var LONGPRESSTIME = 2000;
@@ -19,6 +19,7 @@ function Block(protoblock, blocks, overrideName) {
     this.x = 0;
     this.y = 0;
     this.zIndex = 0;
+    this.colors = null; // An array that stores the block colors
     this.collapsed = false; // Is this block in a collapsed stack?
     this.trash = false; // Is this block in the trash?
     this.loadComplete = false; // Has the block finished loading?
@@ -44,6 +45,7 @@ function Block(protoblock, blocks, overrideName) {
     // Start and Action blocks has a collapse button (in a separate
     // container).
     this.collapseContainer = null;
+    this.collapseBlockContainer = null;
     this.collapseBitmap = null;
     this.expandBitmap = null;
     this.collapseBlockBitmap = null;
@@ -74,11 +76,10 @@ function Block(protoblock, blocks, overrideName) {
         this.container.position.setZ(currentZindex);
     }
 
-    // DONE
     this.highlight = function() {
         if (this.collapsed && ['start', 'action'].indexOf(this.name) != -1) {
             // We may have a race condition.
-            if (this.highlightCollapseBlockBitmap) {
+            if (this.highlightCollapseBlockBitmap !== null) {
                 this.highlightCollapseBlockBitmap.visible = true;
                 this.collapseBlockBitmap.visible = false;
                 this.collapseText.visible = true;
@@ -91,7 +92,7 @@ function Block(protoblock, blocks, overrideName) {
             if (['start', 'action'].indexOf(this.name) != -1) {
                 // There could be a race condition when making a
                 // new action block.
-                if (this.highlightCollapseBlockBitmap) {
+                if (this.highlightCollapseBlockBitmap !== null) {
                     if (this.collapseText != null) {
                         this.collapseText.visible = false;
                     }
@@ -107,10 +108,9 @@ function Block(protoblock, blocks, overrideName) {
         this.blocks.refreshCanvas(1);
     }
 
-    // DONE
     this.unhighlight = function() {
         if (this.collapsed && ['start', 'action'].indexOf(this.name) != -1) {
-            if (this.highlightCollapseBlockBitmap) {
+            if (this.highlightCollapseBlockBitmap !== null) {
                 this.highlightCollapseBlockBitmap.visible = false;
                 this.collapseBlockBitmap.visible = true;
                 this.collapseText.visible = true;
@@ -121,7 +121,7 @@ function Block(protoblock, blocks, overrideName) {
             this.bitmap.visible = true;
             this.highlightBitmap.visible = false;
             if (['start', 'action'].indexOf(this.name) != -1) {
-                if (this.highlightCollapseBlockBitmap) {
+                if (this.highlightCollapseBlockBitmap !== null) {
                     this.highlightCollapseBlockBitmap.visible = false;
                     this.collapseBlockBitmap.visible = false;
                     this.collapseText.visible = false;
@@ -131,7 +131,6 @@ function Block(protoblock, blocks, overrideName) {
         this.blocks.refreshCanvas(1);
     }
 
-    // DONE
     this.updateSlots = function(clamp, plusMinus, blocksToCheck) {
         // Resize an expandable block.
         var thisBlock = this.blocks.blockList.indexOf(this);
@@ -147,11 +146,11 @@ function Block(protoblock, blocks, overrideName) {
         // artwork and recalculate the hitarea.
         // this.postProcess = function(myBlock) {
             // if (myBlock.imageBitmap != null) {
-                // if (myBlock.imageBitmap.image.width > myBlock.imageBitmap.image.height) {
-        //             myBlock.imageBitmap.scaleX = myBlock.imageBitmap.scaleY = myBlock.imageBitmap.scale = MEDIASAFEAREA[2] / myBlock.imageBitmap.image.width * scale / 2;
-        //         } else {
-        //             myBlock.imageBitmap.scaleX = myBlock.imageBitmap.scaleY = myBlock.imageBitmap.scale = MEDIASAFEAREA[3] / myBlock.imageBitmap.image.height * scale / 2;
-        //         }
+                // if (myBlock.imageBitmap.imgWidth > myBlock.imageBitmap.imgHeight) {
+                    // myBlock.imageBitmap.scaleX = myBlock.imageBitmap.scaleY = myBlock.imageBitmap.scale = MEDIASAFEAREA[2] / myBlock.imageBitmap.image.width * scale / 2;
+                // } else {
+                    // myBlock.imageBitmap.scaleX = myBlock.imageBitmap.scaleY = myBlock.imageBitmap.scale = MEDIASAFEAREA[3] / myBlock.imageBitmap.image.height * scale / 2;
+                // }
         //         myBlock.imageBitmap.x = (MEDIASAFEAREA[0] - 10) * scale / 2;
         //         myBlock.imageBitmap.y = MEDIASAFEAREA[1] * scale / 2;
         //         z = myBlock.container.getNumChildren() - 1;
@@ -201,7 +200,6 @@ function Block(protoblock, blocks, overrideName) {
         // }
     }
 
-    // DONE | TEST 
     this.newArtwork = function(plusMinus) {
         switch (this.name) {
             case 'start':
@@ -267,61 +265,55 @@ function Block(protoblock, blocks, overrideName) {
         
         // FIXME : Scaling
         // var fontSize = 10 * this.protoblock.scale;
-        var fontSize = 10;
+        var fontSize = 12;
         this.text = createText('','#000000',fontSize);
         this.generateArtwork(true, []);
     }
 
     // DONE 
-    // FIXME : Adjust the positioning and TEST
     this.addImage = function() {
-        var image = new Image();
+        var img = new Image();
         var myBlock = this;
 
-        image.onload = function() {
+        img.onload = function () {
+            // FIXME : Scaling using myBlock.scale
+            // bitmap.scaleStore = (MEDIASAFEAREA[2] / image.width * (myBlock.scale / 2));
+            var scale = 1;
+            if(img.width > img.height){
+                scale = myBlock.bitmap.imgWidth * 0.8 / img.width;
+                // FIXME : What does MEDIASAFEAREA signify?
+                // scale = MEDIASAFEAREA[2] / img.width;
+            }
+            else{
+                scale = myBlock.bitmap.imgHeight * 0.8 / img.height;
+                // FIXME : What does MEDIASAFEAREA signify?
+                // scale =  MEDIASAFEAREA[2] / img.height;
+            }
             var canvas = document.createElement('canvas');
-            canvas.width = image.width;
-            canvas.height = image.height;
+            canvas.width = img.width * scale;
+            canvas.height = img.height * scale;
             var context = canvas.getContext('2d');
-            context.drawImage(image, 0, 0);
+            context.drawImage(img, 0, 0, img.width * scale, img.height * scale);
             var texture = new THREE.Texture(canvas);
             texture.needsUpdate = true;
             texture.minFilter = THREE.NearestFilter; 
             var material = new THREE.MeshBasicMaterial( {map: texture} );
             material.transparent = true;
             material.depthWrite = false;
-            // FIXME : Set image height and width using scaling
-            // var bitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(me.container.scaleX*image.width, me.container.scaleY*image.height),material);
-            
-            var bitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(image.width, image.height),material);
-            bitmap.name = 'media';
-            bitmap.imgWidth = image.width;
-            bitmap.imgHeight = image.height;
 
-            // Check this media safe area
-            // FIXME : Fix this image scaling
-            if (image.width > image.height){
-                bitmap.scale.setX(MEDIASAFEAREA[2] / image.width * (myBlock.protoblock.scale / 2));
-                bitmap.scale.setY(MEDIASAFEAREA[2] / image.width * (myBlock.protoblock.scale / 2));
-                bitmap.scaleStore = MEDIASAFEAREA[2] / image.width * (myBlock.protoblock.scale / 2);    
-            } else {
-                bitmap.scale.setX(MEDIASAFEAREA[3] / image.height * (myBlock.protoblock.scale / 2));
-                bitmap.scale.setY(MEDIASAFEAREA[3] / image.height * (myBlock.protoblock.scale / 2));
-                bitmap.scaleStore = MEDIASAFEAREA[3] / image.height * (myBlock.protoblock.scale / 2); 
-            }
+            var bitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(img.width * scale, img.height * scale),material);
+            bitmap.name = myBlock.name;
+            bitmap.imgWidth = img.width * scale;
+            bitmap.imgHeight = img.height * scale;
+            bitmap.initialWidth = img.width;
+            bitmap.initialHeight = img.height;
+            bitmap.scaleStore = scale;
+            // FIXME : Scale Position? Also position is a bit off due to non consideration of the docks
 
             myBlock.container.add(bitmap);
-
-            // FIXME : Fix this positioning
-            // bitmap.position.setX(threeCoorX((MEDIASAFEAREA[0] - 10) * (myBlock.protoblock.scale / 2)));
-            // bitmap.position.setY(threeCoorY(MEDIASAFEAREA[1] * (myBlock.protoblock.scale / 2)));
-
-            bitmap.position.setX(0);
-            bitmap.position.setY(0);
-
             myBlock.blocks.refreshCanvas(1);
         }
-        image.src = this.image;
+        img.src = myBlock.image;
     }
 
 
@@ -358,7 +350,6 @@ function Block(protoblock, blocks, overrideName) {
 
         // Create the bitmap for the block.
         function processBitmap(name, bitmap, myBlock) {
-            // No need to set the position as by default is center of the container
             myBlock.bitmap = bitmap;
             myBlock.container.add(myBlock.bitmap);
             myBlock.bitmap.name = 'bmp_' + thisBlock;
@@ -367,8 +358,7 @@ function Block(protoblock, blocks, overrideName) {
             // TODO : Remove after graphics work perfect
             // var boundingBox = new THREE.BoxHelper( myBlock.bitmap );
             // myBlock.blocks.stage.add( boundingBox );
-
-            myBlock.blocks.refreshCanvas(1);
+            // myBlock.blocks.refreshCanvas(1);
 
             // Create the highlight bitmap for the block.
             function processHighlightBitmap(name, bitmap, myBlock) {
@@ -379,18 +369,19 @@ function Block(protoblock, blocks, overrideName) {
                 // Hide it to start
                 myBlock.highlightBitmap.visible = false;
 
+                // FIXME : Z-index
                 if (myBlock.text != null) {
                     // Make sure text is on top.
                     bringTextToTop(myBlock);
                 }
 
-                // At me point, it should be safe to calculate the
+                // At this point, it should be safe to calculate the
                 // bounds of the container and cache its contents.
 
                 myBlock.bounds = new THREE.Box3().setFromObject( myBlock.container );
                 myBlock.bounds.size = myBlock.bounds.size();
                 myBlock.container.bounds = myBlock.bounds;
-                
+
                 myBlock.blocks.refreshCanvas(1);
 
                 if (firstTime) {
@@ -401,6 +392,7 @@ function Block(protoblock, blocks, overrideName) {
                     myBlock.finishImageLoad(firstTime);
                 } else {
                     if (myBlock.name == 'start') {
+                        // FIXME : Z-index
                         ensureDecorationOnTop(myBlock);
                     }
 
@@ -415,6 +407,7 @@ function Block(protoblock, blocks, overrideName) {
                             myBlock.blocks.adjustExpandableClampBlock(blocksToCheck);
                         }
                     }
+
                     if (['start', 'action'].indexOf(myBlock.name) != -1) {
                         myBlock.bitmap.visible = !myBlock.collapsed;
                         myBlock.highlightBitmap.visible = false;
@@ -427,7 +420,20 @@ function Block(protoblock, blocks, overrideName) {
                 }
             }
 
-            var artwork = myBlock.artwork.replace(/fill_color/g, PALETTEHIGHLIGHTCOLORS[myBlock.protoblock.palette.name]).replace(/stroke_color/g, HIGHLIGHTSTROKECOLORS[myBlock.protoblock.palette.name]).replace('block_label', block_label);
+            if (PALETTEBLOCKFILLCOLORS.hasOwnProperty(myBlock.name)) {
+                var paletteColors = [
+                    PALETTEBLOCKHIGHLIGHTCOLORS[myBlock.name],
+                    HIGHLIGHTBLOCKSTROKECOLORS[myBlock.name]
+                ];    
+            }
+            else{
+                var paletteColors = [
+                    PALETTEHIGHLIGHTCOLORS[myBlock.protoblock.palette.name],
+                    HIGHLIGHTSTROKECOLORS[myBlock.protoblock.palette.name]
+                ];
+            }
+
+            var artwork = myBlock.artwork.replace(/fill_color/g, paletteColors[0]).replace(/stroke_color/g, paletteColors[1]).replace('block_label', block_label);
 
             for (var i = 1; i < myBlock.protoblock.staticLabels.length; i++) {
                 artwork = artwork.replace('arg_label_' + i, myBlock.protoblock.staticLabels[i]);
@@ -444,7 +450,20 @@ function Block(protoblock, blocks, overrideName) {
             }
         }
 
-        var artwork = this.artwork.replace(/fill_color/g, PALETTEFILLCOLORS[this.protoblock.palette.name]).replace(/stroke_color/g, PALETTESTROKECOLORS[this.protoblock.palette.name]).replace('block_label', block_label);
+        if (PALETTEBLOCKFILLCOLORS.hasOwnProperty(this.name)) {
+            var paletteColors = [
+                PALETTEBLOCKFILLCOLORS[this.name],
+                PALETTEBLOCKSTROKECOLORS[this.name]
+            ];    
+        }
+        else{
+            var paletteColors = [
+                PALETTEFILLCOLORS[this.protoblock.palette.name],
+                PALETTESTROKECOLORS[this.protoblock.palette.name]
+            ];
+        }
+
+        var artwork = this.artwork.replace(/fill_color/g, paletteColors[0]).replace(/stroke_color/g, paletteColors[1]).replace('block_label', block_label);
 
         for (var i = 1; i < this.protoblock.staticLabels.length; i++) {
             artwork = artwork.replace('arg_label_' + i, this.protoblock.staticLabels[i]);
@@ -473,37 +492,38 @@ function Block(protoblock, blocks, overrideName) {
             this.container.add(this.text);
             this.text.align = 'center';
             this.text.vAlign = 'middle';
-            // this.text.textBaseline = 'alphabetic';
 
-            //     this.text.x = VALUETEXTX * this.protoblock.scale / 2.;
-            //     this.text.y = VALUETEXTY * this.protoblock.scale / 2.;
-            
-            // Make sure text is on top.
+            // FIXME : Z-index
             this.text.position.setZ(100);
 
 
         } else if (this.protoblock.parameter) {
-        //     // Parameter blocks get a text label to show their current value
-        //     this.text.textBaseline = 'alphabetic';
-        //     this.container.addChild(this.text);
-        //     var bounds = this.container.getBounds();
-        //     if (this.protoblock.args == 0) {
-        //         this.text.textAlign = 'right';
-        //         this.text.x = bounds.width - 25;
-        //         this.text.y = VALUETEXTY * this.protoblock.scale / 2.;
-        //     } else if (this.isArgBlock()) {
-        //         this.text.textAlign = 'left';
-        //         this.text.x = BOXTEXTX;
-        //         if (this.docks[0][2] == 'booleanout') {
-        //             this.text.y = bounds.height - 15;
-        //         } else {
-        //             this.text.y = VALUETEXTY * this.protoblock.scale / 2.;
-        //         }
-        //     }
+            // Parameter blocks get a text label to show their current value
+            this.container.add(this.text);
+            if (this.protoblock.args == 0) {
+                // FIXME : Scaling, set font size according to scale
+                this.text.vAlign = 'middle';
+                this.text.align = 'right';
+                // FIXME : Z-index
+                this.text.position.setZ(20);
 
-        //     z = this.container.getNumChildren() - 1;
-        //     this.container.setChildIndex(this.text, z);
-        //     this.container.updateCache();
+            } else if (this.isArgBlock()) {
+                // FIXME : Scaling, set font size according to scale
+                this.text.align = 'left';
+                this.text.vAlign = 'bottom';
+                // FIXME : Z-index
+                this.text.position.setZ(20);
+
+                // TODO : Set special position for booleanout
+                // this.text.x = BOXTEXTX;
+                if (this.docks[0][2] == 'booleanout') {
+                    // this.text.y = bounds.height - 15;
+                } else {
+                    // this.text.y = VALUETEXTY * this.protoblock.scale / 2.;
+                }
+            }
+
+            // FIXME : Z-index, Push to the top of the container.
         }
 
         if (['start', 'action'].indexOf(this.name) == -1) {
@@ -542,109 +562,121 @@ function Block(protoblock, blocks, overrideName) {
 
     this.generateCollapseArtwork = function(postProcess) {
         var thisBlock = this.blocks.blockList.indexOf(this);
+        this.collapseBlockContainer = new THREE.Group();
+        this.container.add(this.collapseBlockContainer);
 
             function processCollapseBitmap(name, bitmap, myBlock) {
                 myBlock.collapseBlockBitmap = bitmap;
                 myBlock.collapseBlockBitmap.name = 'collapse_' + thisBlock;
-                myBlock.container.add(myBlock.collapseBlockBitmap);
+                myBlock.collapseBlockContainer.add(myBlock.collapseBlockBitmap);
                 myBlock.collapseBlockBitmap.visible = myBlock.collapsed;
                 myBlock.blocks.refreshCanvas(1);
 
                 function processHighlightCollapseBitmap(name, bitmap, myBlock) {
                     myBlock.highlightCollapseBlockBitmap = bitmap;
                     myBlock.highlightCollapseBlockBitmap.name = 'highlight_collapse_' + thisBlock;
-                    myBlock.container.add(myBlock.highlightCollapseBlockBitmap);
+                    myBlock.collapseBlockContainer.add(myBlock.highlightCollapseBlockBitmap);
                     myBlock.highlightCollapseBlockBitmap.visible = false;
 
-                    var fontSize = 10 * myBlock.protoblock.scale;
+                    // FIXME : Scaling
+                    // var fontSize = 10 * myBlock.protoblock.scale; 
+                    var fontSize  = 12;
+
                     if (myBlock.name == 'action') {
                         myBlock.collapseText = createText(_('action'), '#000000',fontSize);
                     } else {
                         myBlock.collapseText = createText(_('start'), '#000000',fontSize);
                     }
-                    myBlock.collapseText.position.setX(COLLAPSETEXTX * (myBlock.protoblock.scale / 2));
-                    myBlock.collapseText.position.setY(COLLAPSETEXTY * (myBlock.protoblock.scale / 2));
-                    // myBlock.collapseText.textAlign = 'left'; // FIXME : Implement a proper text plugin with all easel options 
-                    // myBlock.collapseText.textBaseline = 'alphabetic'; // TODO : Implement a tex
-                    myBlock.container.add(myBlock.collapseText);
+                    
+                    myBlock.collapseBlockContainer.add(myBlock.collapseText);
+                    myBlock.collapseText.align = 'left';
+                    myBlock.collapseText.vAlign = 'middle';
+
+                    // FIXME : Z-index
+                    myBlock.collapseText.position.setZ(20);                    
                     myBlock.collapseText.visible = myBlock.collapsed;
 
-                    ensureDecorationOnTop(myBlock);
+                    // FIXME : Z-index
+                    // ensureDecorationOnTop(myBlock);
+
+                    // FIXME : Scale
+                    myBlock.collapseBlockContainer.position.setY(myBlock.bitmap.imgHeight / 2 - myBlock.collapseBlockBitmap.imgHeight / 2);
 
                     myBlock.blocks.refreshCanvas(1);
 
                     myBlock.collapseContainer = new THREE.Group();
-                    // myBlock.collapseContainer.snapToPixelEnabled = true; //TODO : Implement a snap feature
 
-                    var image = new Image();
+                    var img = new Image();
+                    img.onload = function () {
+                        // FIXME : Scaling using myBlock.scale
+                        var scale = myBlock.protoblock.scale / 2;
 
-                    image.onload = function() {
                         var canvas = document.createElement('canvas');
-                        canvas.width = image.width;
-                        canvas.height = image.height;
+                        canvas.width = img.width * scale;
+                        canvas.height = img.height * scale;
                         var context = canvas.getContext('2d');
-                        context.drawImage(image, 0, 0);
+                        context.drawImage(img, 0, 0, img.width * scale, img.height * scale);
                         var texture = new THREE.Texture(canvas);
                         texture.needsUpdate = true;
                         texture.minFilter = THREE.NearestFilter; 
                         var material = new THREE.MeshBasicMaterial( {map: texture} );
                         material.transparent = true;
                         material.depthWrite = false;
-                        // me.container.scaleX = size/me.iconsize; //See if the scale variable is required here
-                        // me.container.scaleY = size/me.iconsize;
-                        // var bitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(me.container.scaleX*image.width, me.container.scaleY*image.height),material);
+
+                        myBlock.collapseBitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(img.width * scale, img.height * scale),material);
+                        myBlock.collapseBitmap.name = myBlock.name + 'collapseBitmap';
+                        myBlock.collapseBitmap.imgWidth = img.width * scale;
+                        myBlock.collapseBitmap.imgHeight = img.height * scale;
+                        myBlock.collapseBitmap.initialWidth = img.width;
+                        myBlock.collapseBitmap.initialHeight = img.height;
                         
-                        myBlock.collapseBitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(image.width, image.height),material);
-                        myBlock.collapseBitmap.name = 'collapseBitmap '
-                        myBlock.collapseBitmap.imgWidth = image.width;
-                        myBlock.collapseBitmap.imgHeight = image.height;
-
-                        bitmap.scale.setX(myBlock.protoblock.scale / 2);
-                        bitmap.scale.setY(myBlock.protoblock.scale / 2);
-                        bitmap.scaleStore = myBlock.protoblock.scale / 2;
-
                         myBlock.collapseContainer.add(myBlock.collapseBitmap);
 
                         finishCollapseButton(myBlock);
+
                     }
-                    image.src = 'images/collapse.svg';
+                    img.src = 'images/collapse.svg';
 
                     finishCollapseButton = function(myBlock) {
-                        var image = new Image();
-                        image.onload = function() {
+                        var img = new Image();
+                        img.onload = function () {
+                            // FIXME : Scaling using myBlock.scale
+                            var scale = myBlock.protoblock.scale / 2;
+
                             var canvas = document.createElement('canvas');
-                            canvas.width = image.width;
-                            canvas.height = image.height;
+                            canvas.width = img.width * scale;
+                            canvas.height = img.height * scale;
                             var context = canvas.getContext('2d');
-                            context.drawImage(image, 0, 0);
+                            context.drawImage(img, 0, 0, img.width * scale, img.height * scale);
                             var texture = new THREE.Texture(canvas);
                             texture.needsUpdate = true;
                             texture.minFilter = THREE.NearestFilter; 
                             var material = new THREE.MeshBasicMaterial( {map: texture} );
                             material.transparent = true;
                             material.depthWrite = false;
-                            // me.container.scaleX = size/me.iconsize; //See if the scale variable is required here
-                            // me.container.scaleY = size/me.iconsize;
-                            // var bitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(me.container.scaleX*image.width, me.container.scaleY*image.height),material);
-                            myBlock.expandBitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(image.width, image.height),material);
-                            myBlock.expandBitmap.name = 'expandBitmap';
-                            myBlock.expandBitmap.imgWidth = image.width;
-                            myBlock.expandBitmap.imgHeight = image.height;
 
-                            myBlock.expandBitmap.scale.setX(myBlock.protoblock.scale / 2);
-                            myBlock.expandBitmap.scale.setY(myBlock.protoblock.scale / 2);
-                            myBlock.expandBitmap.scaleStore = myBlock.protoblock.scale / 2;
-                            myBlock.collapseContainer.add(myBlock.collapseBitmap);
+                            myBlock.expandBitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(img.width * scale, img.height * scale),material);
+                            myBlock.expandBitmap.name = myBlock.name+'expandBitmap';
+                            myBlock.expandBitmap.imgWidth = img.width * scale;
+                            myBlock.expandBitmap.imgHeight = img.height * scale;
+                            myBlock.expandBitmap.initialWidth = img.width;
+                            myBlock.expandBitmap.initialHeight = img.height;
                             myBlock.expandBitmap.visible = false;
+                            
+                            myBlock.collapseContainer.add(myBlock.expandBitmap);
 
+                            // FIXME : Z-index
                             myBlock.blocks.stage.add(myBlock.collapseContainer);
+
                             if (postProcess != null) {
                                 postProcess(myBlock);
                             }
+
                             myBlock.blocks.refreshCanvas(1);
                             myBlock.blocks.cleanupAfterLoad();
                         }
-                        image.src = 'images/expand.svg';
+                        img.src = 'images/expand.svg';
+
                     }
                 }
 
@@ -716,16 +748,7 @@ function Block(protoblock, blocks, overrideName) {
         return '_' + number.toString();
     }
 
-    this.removeChildBitmap = function(name) {
-        for (var child = 0; child < this.container.children.length; child++) {
-            if (this.container.children[child].name == name) {
-                this.container.remove(this.container.children[child]);
-                break;
-            }
-        }
-    }
 
-    // DONE | TEST
     this.loadThumbnail = function (imagePath) {
         // Load an image thumbnail onto block.
         var thisBlock = this.blocks.blockList.indexOf(this);
@@ -734,25 +757,40 @@ function Block(protoblock, blocks, overrideName) {
             // console.log('loadThumbnail: no image to load?');
             return;
         }
-        var image = new Image();
+        var img = new Image();
 
-        image.onload = function() {
+        img.onload = function() {
             // Before adding new artwork, remove any old artwork.
             console.log('Hello: ' + myBlock.children);
 
             // myBlock.removeChildBitmap('media');
-            for(var i = 0; i < myBlock.container.children.length; i++){
+            for(var i = myBlock.container.children.length -1 ; i >= 0 ; i++){
                 if(myBlock.container.children[i].name === 'media'){
                     myBlock.container.remove(myBlock.container.children[i]);
                     break;
                 }
             }
+            // FIXME : Scaling using myBlock.scaleStore
+            var scale = 1;
+
+            var parentHeight = myBlock.bitmap.imgHeight;
+            var parentWidth = myBlock.bitmap.imgWidth;
+
+            if (img.width > img.height) {
+                if (img.width > parentWidth * 0.8) {
+                    scale = parentWidth * 0.8 / img.width;
+                }
+            } else {
+                if (img.height > parentHeight * 0.9) {
+                    scale = parentHeight * 0.9 / img.height;
+                }
+            }
 
             var canvas = document.createElement('canvas');
-            canvas.width = image.width;
-            canvas.height = image.height;
+            canvas.width = img.width * scale;
+            canvas.height = img.height * scale;
             var context = canvas.getContext('2d');
-            context.drawImage(image, 0, 0);
+            context.drawImage(img, 0, 0, img.width * scale, img.height * scale);
             var texture = new THREE.Texture(canvas);
             texture.needsUpdate = true;
             texture.minFilter = THREE.NearestFilter; 
@@ -760,54 +798,29 @@ function Block(protoblock, blocks, overrideName) {
             material.transparent = true;
             material.depthWrite = false;
 
-            var bitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(image.width, image.height),material);
-            bitmap.name = 'media';
-            bitmap.imgWidth = image.width;
-            bitmap.imgHeight = image.height;
-
-            // Resize the image to a reasonable maximum.
-            if (image.width > image.height) {
-                if (image.width > 1200) {
-                    bitmap.scale.setX(1200 / image.width);
-                    bitmap.scale.setY(1200 / image.width);
-                    bitmap.scaleStore = 1200 / image.width;
-                }
-            } else {
-                if (image.height > 900) {
-                    bitmap.scale.setX(900 / image.height);
-                    bitmap.scale.setY(900 / image.height);
-                    bitmap.scaleStore = 900 / image.height;
-                }
-            }
+            bitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(img.width * scale, img.height * scale),material);
+            bitmap.name = myBlock.name + 'thumbnailImage';
+            bitmap.imgWidth = img.width * scale;
+            bitmap.imgHeight = img.height * scale;
+            bitmap.initialWidth = img.width;
+            bitmap.initialHeight = img.height;
 
             myBlock.imageBitmap = bitmap;
 
-            // Next, scale the bitmap for the thumbnail.
-            if (image.width > image.height) {
-                bitmap.scale.setX(MEDIASAFEAREA[2] / image.width * (myBlock.protoblock.scale / 2));
-                bitmap.scale.setY(MEDIASAFEAREA[2] / image.width * (myBlock.protoblock.scale / 2));
-                bitmap.scaleScore = MEDIASAFEAREA[2] / image.width * (myBlock.protoblock.scale / 2);
-            } else {
-                bitmap.scale.setX(MEDIASAFEAREA[3] / image.height * (myBlock.protoblock.scale / 2));
-                bitmap.scale.setY(MEDIASAFEAREA[3] / image.height * (myBlock.protoblock.scale / 2));
-                bitmap.scaleScore = MEDIASAFEAREA[3] / image.height * (myBlock.protoblock.scale / 2);
-            }
-
+            // FIXME : Z-index
             myBlock.container.add(bitmap);
-            // bitmap.position.setX = (MEDIASAFEAREA[0] - 10) * (myBlock.protoblock.scale / 2);
-            // bitmap.position.setY = MEDIASAFEAREA[1] * (myBlock.protoblock.scale / 2);
+            // FIXME : BringToTop
 
             myBlock.blocks.refreshCanvas(1);
-        }
 
+        }
         if (imagePath == null) {
-            image.src = this.value;
+            img.src = this.value;
         } else {
-            image.src = imagePath;
+            img.src = imagePath;
         }
     }
 
-    // DONE
     this.doOpenMedia = function (myBlock) {
         var fileChooser = docById('myOpenAll');
         var thisBlock = myBlock.blocks.blockList.indexOf(myBlock);
@@ -1277,23 +1290,10 @@ function loadEventHandlers(myBlock) {
         } else {
             // Make it eaiser to select text on mobile
             setTimeout(function () {
-                // FIXME : THIS Mobile version
                 // moved = Math.abs(event.clientX - original.x) + Math.abs(event.stageY - original.y) > 20 && !window.hasMouse;
                 getInput = !moved;
             }, 200);
         }
-
-        // var oldX = myBlock.container.x;
-        // var oldY = myBlock.container.y;
-        // myBlock.container.x = Math.round(event.stageX / blocks.scale) + offset.x;
-        // myBlock.container.y = Math.round(event.stageY / blocks.scale) + offset.y;
-        // myBlock.x = myBlock.container.x;
-        // myBlock.y = myBlock.container.y;
-        // var dx = Math.round(myBlock.container.x - oldX);
-        // var dy = Math.round(myBlock.container.y - oldY);
-
-        // TODO : When scaling is active throughout then put it here as well
-        // just divide event.clientX and event.clientY with blocks.scale
 
         if(!px || !py){
             px = event.clientX;
@@ -1309,10 +1309,7 @@ function loadEventHandlers(myBlock) {
         myBlock.container.position.setX(myBlock.container.position.x + dx);
         myBlock.container.position.setY(myBlock.container.position.y + dy);
 
-
-        // If we are over the trash, warn the user.
-        // Add scaling here
-        // if (trashcan.overTrashcan(event.stageX / blocks.scale, event.stageY / blocks.scale)) {
+        // FIXME : Scaling
         if(trashcan.overTrashcan(event.clientX, event.clientY)){
             trashcan.highlight();
         } else {
@@ -1323,13 +1320,22 @@ function loadEventHandlers(myBlock) {
             // Ensure text is on top
             bringTextToTop(myBlock);
         } else if (myBlock.collapseContainer != null) {
-            // PE : Check whether the positioning is working fine
-            myBlock.collapseContainer.position.setX(myBlock.container.position.x + COLLAPSEBUTTONXOFF * (myBlock.protoblock.scale / 2));
-            myBlock.collapseContainer.position.setY(myBlock.container.position.y + COLLAPSEBUTTONYOFF * (myBlock.protoblock.scale / 2));
+            
+            // TODO : Positioning not working fine on stack change
+            var parentHeight = myBlock.bitmap.imgHeight;
+            var parentWidth = myBlock.bitmap.imgWidth;
+
+            var height = myBlock.collapseBitmap.imgHeight;
+            var width = myBlock.collapseBitmap.imgWidth;
+
+            myBlock.collapseContainer.position.setX(myBlock.container.position.x + COLLAPSEBUTTONXOFF - parentWidth / 2 - width / 2);
+            myBlock.collapseContainer.position.setY(myBlock.container.position.y - COLLAPSEBUTTONYOFF + parentHeight / 2 - height / 2);
+            // FIXME : Scale
+            // myBlock.collapseContainer.position.setX(myBlock.container.position.x + COLLAPSEBUTTONXOFF * (myBlock.protoblock.scale / 2));
+            // myBlock.collapseContainer.position.setY(myBlock.container.position.y + COLLAPSEBUTTONYOFF * (myBlock.protoblock.scale / 2));
         }
 
         // Move any connected blocks.
-        // PE : Check whether this is working
         blocks.findDragGroup(thisBlock);
         if (blocks.dragGroup.length > 0) {
             for (var b = 0; b < blocks.dragGroup.length; b++) {
@@ -1390,27 +1396,6 @@ function mouseoutCallback(myBlock, event, moved) {
 // either fix the algo or reset all the z-indexes after a value is reached.
 function ensureDecorationOnTop(myBlock) {
     // Find the turtle decoration and move it to the top.
-    var decorationIndex;
-    var currZindex = myBlock.container.children[0].position.z;
-    var maxZindex = currZindex;
-    var flag = false;
-
-    for (var child = 1; child < myBlock.container.children.length; child++) {
-        if (myBlock.container.children[child].name == 'decoration') {
-            decorationIndex = child;        
-        }
-        else{
-            currZindex = myBlock.container.children[child].position.z;
-            if(currZindex > maxZindex){
-                maxZindex = currZindex;
-                flag = true;
-            }
-        }
-    }
-
-    if(decorationIndex !== undefined && flag){
-        myBlock.container.children[decorationIndex].position.setZ(maxZindex+1);
-    }
 }
 
 // DONE
@@ -1439,30 +1424,34 @@ function bringTextToTop(myBlock){
 
 
 // DONE
-function makeBitmap(data, name, callback, args) {
+function makeBitmap(data, name, callback, args, scale) {
     // Async creation of bitmap from SVG data
     // Works with Chrome, Safari, Firefox (untested on IE)
+    scale = (scale === undefined) ? 1 : scale;
+
     var img = new Image();
-        img.onload = function () {
-            var canvas = document.createElement('canvas');
-            canvas.width = img.width;
-            canvas.height = img.height;
-            var context = canvas.getContext('2d');
-            context.drawImage(img, 0, 0);
-            var texture = new THREE.Texture(canvas);
-            texture.needsUpdate = true;
-            texture.minFilter = THREE.NearestFilter; 
-            var material = new THREE.MeshBasicMaterial( {map: texture} );
-            material.transparent = true;
-            material.depthWrite = false;
-            // me.container.scaleX = size/me.iconsize; //See if the scale variable is required here
-            // me.container.scaleY = size/me.iconsize;
-            // var bitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(me.container.scaleX*img.width, me.container.scaleY*img.height),material);
-            var bitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(img.width, img.height),material);
-            bitmap.name = name;
-            bitmap.imgWidth = img.width;
-            bitmap.imgHeight = img.height;
-            callback(name, bitmap, args);
+    img.onload = function () {
+
+        var canvas = document.createElement('canvas');
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        var context = canvas.getContext('2d');
+        context.drawImage(img, 0, 0, img.width * scale, img.height * scale);
+        var texture = new THREE.Texture(canvas);
+        texture.needsUpdate = true;
+        texture.minFilter = THREE.NearestFilter; 
+        var material = new THREE.MeshBasicMaterial( {map: texture} );
+        material.transparent = true;
+        material.depthWrite = false;
+
+        var bitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(img.width * scale, img.height * scale),material);
+        bitmap.name = name;
+        bitmap.imgWidth = img.width * scale;
+        bitmap.imgHeight = img.height * scale;
+        bitmap.initialWidth = img.width;
+        bitmap.initialHeight = img.height;
+        
+        callback(name, bitmap, args);
     }
     img.src = 'data:image/svg+xml;base64,' + window.btoa(
         unescape(encodeURIComponent(data)));

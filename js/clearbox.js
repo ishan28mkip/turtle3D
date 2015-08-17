@@ -21,15 +21,17 @@ function ClearBox(canvas, stage, refreshCanvas, clear) {
     this.show = function(scale) {
         this.scale = scale;
         if (this.container == null) {
-            this.container = new createjs.Container();
-            this.stage.addChild(this.container);
-            this.container.x = Math.floor(((this.canvas.width / scale) - 180) / 2);
-            this.container.y = 27;
+            this.container = new THREE.Group();
+            this.stage.add(this.container);
+            this.container.position.setX(0);
+            this.container.position.setY(threeCoorY(27));
+            // FIXME : Z-index
+            this.container.position.setZ(2);
 
             function processBackground(box, name, bitmap, extras) {
                 box.container.addChild(bitmap);
-		loadClearContainerHandler(box);
-		box.completeShow();
+                loadClearContainerHandler(box);
+                box.completeShow();
             }
             makeBoxBitmap(this, CONFIRMBOX.replace(/confirm/g, 'confirm'), 'box', processBackground, null);
         } else {
@@ -39,7 +41,7 @@ function ClearBox(canvas, stage, refreshCanvas, clear) {
 
     this.completeShow = function() {
 	this.container.visible = true;
-	this.refreshCanvas();
+	this.refreshCanvas(1);
     }
 }
 

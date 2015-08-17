@@ -67,7 +67,7 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
     this.setMacroDictionary = function(obj) {
         this.macroDict = obj;
     }
-
+    
     // FIXME
     this.menuScrollEvent = function(direction, scrollSpeed) {
         var keys = Object.keys(this.buttons);
@@ -91,7 +91,6 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
         }
         this.refreshCanvas(1);
     }
-
 
     this.makePalettes = function() {
         // First, an icon/button for each palette
@@ -131,7 +130,7 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
                     var circleGeometry = new THREE.ShapeGeometry( circleShape );
                     var circleMesh = new THREE.Mesh( circleGeometry, new THREE.MeshBasicMaterial( { color: 0x333333 } ) ) ; 
                     me.buttons[name].add(circleMesh);
-                    circleMesh.material.opacity = 0.6;
+                    circleMesh.material.opacity = 0.26;
                     circleMesh.visible = false;
 
                     me.buttons[name].hitmesh = circleMesh;
@@ -256,13 +255,28 @@ function loadPaletteButtonHandler(palettes, name) {
 
     palettes.buttons[name].on('mouseover',function(event){
         event.target.hitmesh.visible = true;
-        // event.target.hitmesh.material.opacity = 0.6;
-        palettes.refreshCanvas(1);
+        var tween = TweenLite.to(event.target.hitmesh.material, 0.5, 
+        {   
+            opacity : 0.7,
+            onUpdate: function(){
+                palettes.refreshCanvas(1);
+            }
+        });
     });
 
+    // FIXME : Very odd behaviour when opacity set to zero
     palettes.buttons[name].on('mouseout',function(event){
-        event.target.hitmesh.visible = false;
-        palettes.refreshCanvas(1);
+        var tween = TweenLite.to(event.target.hitmesh.material, 0.5, 
+        {   
+            opacity : 0.26,
+            onUpdate: function() {
+                palettes.refreshCanvas(1);
+            },
+            onComplete : function(){
+                event.target.hitmesh.visible = false;
+                palettes.refreshCanvas(1);
+            }
+        });
     });
 
     palettes.buttons[name].on('mousedown', function(event) {
@@ -283,23 +297,7 @@ function loadPaletteButtonHandler(palettes, name) {
         scrolling = false;
     }, null, true); // once = true
 
-    // A palette button opens or closes a palette.
-    // TODO : Add this highlight function back later
-    // var circles = {};
-    // palettes.buttons[name].on('mouseover', function(event) {
-    //     var r = palettes.cellSize / 2;
-    //     circles = showMaterialHighlight(
-    //         palettes.buttons[name].x + r, palettes.buttons[name].y + r, r,
-    //         event, palettes.scale, palettes.stage);
-    // });
-
-    // palettes.buttons[name].on('pressup', function(event) {
-    //     hideMaterialHighlight(circles, palettes.stage);
-    // });
-
-    // palettes.buttons[name].on('mouseout', function(event) {
-    //     hideMaterialHighlight(circles, palettes.stage);
-    // });
+    // TODO : Add highlight animations
 
     palettes.buttons[name].on('click', function(event) {
         if (locked) {
@@ -570,7 +568,7 @@ function Palette(palettes, name) {
             // Don't show hidden blocks on the menus
 
             if (this.protoList[blk].hidden) {
-                if(blk === this.protoList.length - 1){
+                if(blk == this.protoList.length - 1){
                     if(this.currentPage === 0)
                         this.updateBackground();
                 }
@@ -772,25 +770,22 @@ function Palette(palettes, name) {
                             break;
                     }
 
-
                     function processBitmap(palette, modname, bitmap, args) {
                         var myBlock = args[0];
                         var blk = args[1];
                         var currY = args[2];
                         
                         palette.protoContainers[modname].add(bitmap);
+                        palette.protoContainers[modname].bitmap = bitmap;
                         bitmap.position.setX(bitmap.imgWidth/2);
                         bitmap.position.setY(-bitmap.imgHeight/2);
+                        
                         // TODO : Set zindex
                         bitmap.position.setZ(2);
 
-                        bitmap.scale.setX(PROTOBLOCKSCALE);
-                        bitmap.scale.setY(PROTOBLOCKSCALE);
-                        bitmap.scaleStore = PROTOBLOCKSCALE;
-
-                        // TODO : Fix theses width and height to include scaling
                         var width =  bitmap.imgWidth - 15;
                         var paletteRelative = palette.menuContainer.position.y - currY - STANDARDBLOCKHEIGHT/2;
+                        // FIXME : Scaling here
                         var height = palette.protoContainers[modname].position.y - paletteRelative;
 
                         var hexColor = '#'+Math.floor(Math.random()*16777215).toString(16);
@@ -809,49 +804,53 @@ function Palette(palettes, name) {
                         palette.protoContainers[modname].add(rectMesh);
                         
                         // TODO : Set zIndex
-                        rectMesh.position.setZ(3);
+                        rectMesh.position.setZ(1);
 
                         palette.protoContainers[modname].hitmesh = rectMesh;
 
+
                         // Add the new image function with scale
                         if (myBlock.image) {
-                            var image = new Image(); 
-                            image.onload = function() {
+                            var img = new Image();
+                            img.onload = function () {
+                                // FIXME : Scaling using myBlock.scale
+                                // bitmap.scaleStore = (MEDIASAFEAREA[2] / image.width * (myBlock.scale / 2));
+                                var scale = 1;
+                                if(img.width > img.height){
+                                    scale = palette.protoContainers[modname].bitmap.imgWidth * 0.8 / img.width;
+                                    // FIXME : What does MEDIASAFEAREA signify?
+                                    // scale = MEDIASAFEAREA[2] / img.width;
+                                }
+                                else{
+                                    scale = palette.protoContainers[modname].bitmap.imgHeight * 0.8 / img.height;
+                                    // FIXME : What does MEDIASAFEAREA signify?
+                                    // scale =  MEDIASAFEAREA[2] / img.height;
+                                }
                                 var canvas = document.createElement('canvas');
-                                canvas.width = image.width;
-                                canvas.height = image.height;
+                                canvas.width = img.width * scale;
+                                canvas.height = img.height * scale;
                                 var context = canvas.getContext('2d');
-                                context.drawImage(image, 0, 0);
+                                context.drawImage(img, 0, 0, img.width * scale, img.height * scale);
                                 var texture = new THREE.Texture(canvas);
                                 texture.needsUpdate = true;
                                 texture.minFilter = THREE.NearestFilter; 
-                                var material = new THREE.MeshBasicMaterial( {map: texture, transparent : true, depthWrite : false} );
-                                var bitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(image.width, image.height),material);
-                                bitmap.name = modname;
-                                bitmap.imageWidth = image.width;
-                                bitmap.imageHeight = image.height;
-                                if(image.width > image.height){
-                                    // FIXME : Fix the scaling issues together
-                                    bitmap.scale.setX(MEDIASAFEAREA[2] / image.width);
-                                    bitmap.scale.setY(MEDIASAFEAREA[2] / image.width );
-                                    bitmap.scaleStore = (MEDIASAFEAREA[2] / image.width );
-                                    // bitmap.scale.setX(MEDIASAFEAREA[2] / image.width * (myBlock.scale / 2));
-                                    // bitmap.scale.setY(MEDIASAFEAREA[2] / image.width * (myBlock.scale / 2));
-                                    // bitmap.scaleStore = (MEDIASAFEAREA[2] / image.width * (myBlock.scale / 2));
-                                }
+                                var material = new THREE.MeshBasicMaterial( {map: texture} );
+                                material.transparent = true;
+                                material.depthWrite = false;
 
-                                palette.protoContainers[modname].add(bitmap);
-                                // FIXME : fix the image positions or just add these in the mesh
-                                // bitmap.position.setX(MEDIASAFEAREA[0] * (myBlock.scale / 2));
-                                // bitmap.position.setY(MEDIASAFEAREA[1] * (myBlock.scale / 2));
+                                var bitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(img.width * scale, img.height * scale),material);
+                                bitmap.name = modname+'image';
+                                bitmap.imgWidth = img.width * scale;
+                                bitmap.imgHeight = img.height * scale;
+                                bitmap.initialWidth = img.width;
+                                bitmap.initialHeight = img.height;
+                                // FIXME : Scale Position? Also position is a bit off due to non consideration of the docks
 
-                                // bitmap.position.setX(MEDIASAFEAREA[0]);
-                                // bitmap.position.setY(MEDIASAFEAREA[1]);
-                                bitmap.position.setX(0);
-                                bitmap.position.setY(0);
-                                loadPaletteMenuItemHandler(palette, blk, modname); //Here the calculate bounds function call was there
+                                palette.protoContainers[modname].bitmap.add(bitmap);
+
+                                loadPaletteMenuItemHandler(palette, blk, modname);
                             }
-                            image.src = myBlock.image;
+                            img.src = myBlock.image;
                         } else {
                             loadPaletteMenuItemHandler(palette, blk, modname); //Here the calculate bounds function call was there
                         }
@@ -863,7 +862,20 @@ function Palette(palettes, name) {
                         }
                     }
 
-                    artwork = artwork.replace(/fill_color/g, PALETTEFILLCOLORS[myBlock.palette.name]).replace(/stroke_color/g, PALETTESTROKECOLORS[myBlock.palette.name]).replace('block_label', block_label);
+                    if (PALETTEBLOCKFILLCOLORS.hasOwnProperty(myBlock.name)) {
+                        var paletteColors = [
+                            PALETTEBLOCKFILLCOLORS[myBlock.name],
+                            PALETTEBLOCKSTROKECOLORS[myBlock.name]
+                        ];    
+                    }
+                    else{
+                        var paletteColors = [
+                            PALETTEFILLCOLORS[myBlock.palette.name],
+                            PALETTESTROKECOLORS[myBlock.palette.name]
+                        ];
+                    }
+
+                    artwork = artwork.replace(/fill_color/g, paletteColors[0]).replace(/stroke_color/g, paletteColors[1]).replace('block_label', block_label);
 
                     while (myBlock.staticLabels.length < myBlock.args + 1) {
                         myBlock.staticLabels.push('');
@@ -871,7 +883,7 @@ function Palette(palettes, name) {
                     for (var i = 1; i < myBlock.staticLabels.length; i++) {
                         artwork = artwork.replace('arg_label_' + i, myBlock.staticLabels[i]);
                     }
-                    makePaletteBitmap(palette, artwork, modname, processBitmap, [myBlock, blk, currY]);
+                    makePaletteBitmap(palette, artwork, modname, processBitmap, [myBlock, blk, currY],PROTOBLOCKSCALE);
                 }
                 makePaletteBitmap(this, PALETTEFILLER.replace(/filler_height/g, height.toString()), modname, processFiller, [blkname, blk, this.y]);
 
@@ -1069,7 +1081,7 @@ var MODEDRAG = 1;
 var MODESCROLL = 2;
 var DECIDEDISTANCE = 20;
 
-// FIXME : background events once the background is in place
+// FIXME : Add background events when drag animation is placed
 function setupBackgroundEvents(palette) {
     // var scrolling = false;
     // var lastY;
@@ -1099,7 +1111,7 @@ function setupBackgroundEvents(palette) {
 }
 
 function removeBackgroundEvents(palette){
-    palette.palettePages[palette.currentPage].background.off();
+    palette.background.off();
 }
 
 

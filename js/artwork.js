@@ -1,5 +1,5 @@
 
-var COLLAPSEBUTTONXOFF = -48;
+var COLLAPSEBUTTONXOFF = 1;
 var COLLAPSEBUTTONYOFF = 9;
 
 // With default scaling, blocks are multiples of a standard height.
@@ -93,6 +93,55 @@ var MSGBLOCK = '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100
 var BORDER = '<svg xmlns="http://www.w3.org/2000/svg" width="320" height="120">' + '<rect width="315" height="115" x="2.5" y="2.5" style="fill:none;stroke:stroke_color;stroke-width:5.0;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:15, 15;stroke-dashoffset:0" />' + '</svg>';
 
 // palette artwork
+// individual blocks can be given individual coloring
+var PALETTEBLOCKFILLCOLORS = {
+    'doForwardX': '#F83641',
+    'doForwardY': '#15B853',
+    'doForwardZ': '#3193C9',
+    'setRoll': '#F83641',
+    'setPitch': '#15B853',
+    'setYaw': '#3193C9',
+    'doRoll': '#F83641',
+    'doPitch': '#15B853',
+    'doYaw': '#3193C9'
+}
+
+var PALETTEBLOCKSTROKECOLORS = {
+    'doForwardX': '#E72530',
+    'doForwardY': '#04A742',
+    'doForwardZ': '#2082B8',
+    'setRoll': '#E72530',
+    'setPitch': '#04A742',
+    'setYaw': '#2082B8',
+    'doRoll': '#E72530',
+    'doPitch': '#04A742',
+    'doYaw': '#2082B8'
+}
+
+var PALETTEBLOCKHIGHLIGHTCOLORS = {
+    'doForwardX': '#FA5863',
+    'doForwardY': '#26C764',
+    'doForwardZ': '#42A4DA',
+    'setRoll': '#FA5863',
+    'setPitch': '#26C764',
+    'setYaw': '#42A4DA',
+    'doRoll': '#FA5863',
+    'doPitch': '#26C764',
+    'doYaw': '#42A4DA'
+}
+
+var HIGHLIGHTBLOCKSTROKECOLORS = {
+    'doForwardX': '#DA4752',
+    'doForwardY': '#04A542',
+    'doForwardZ': '#2082B8',
+    'setRoll': '#DA4752',
+    'setPitch': '#04A542',
+    'setYaw': '#2082B8',
+    'doRoll': '#DA4752',
+    'doPitch': '#04A542',
+    'doYaw': '#2082B8'
+}
+
 // Palettes have different colored blocks
 var PALETTEFILLCOLORS = {
     'turtle': '#00b700',
