@@ -1960,7 +1960,8 @@ define(function(require) {
                 circleShape.quadraticCurveTo( -circleRadius, -circleRadius, -circleRadius, 0 );
                 circleShape.quadraticCurveTo( -circleRadius, circleRadius, 0, circleRadius );
                 var circleGeometry = new THREE.ShapeGeometry( circleShape );
-                var circleMesh = new THREE.Mesh( circleGeometry, new THREE.MeshBasicMaterial( { color: 0xdddddd } ) ) ; 
+                var circleMesh = new THREE.Mesh( circleGeometry, new THREE.MeshBasicMaterial( { color: 0x000000, transparent : true, depthWrite : false } ) ) ; 
+                circleMesh.material.opacity = 0;
                 circleMesh.position.setZ(2);
                 circleMesh.visible = false;
                 container.add(circleMesh);
@@ -1992,34 +1993,33 @@ define(function(require) {
 
             container.on('mousedown', function(event) {
                 moved = true;
-                // TODO : Use when you have fixed the scale 
-                // var offset = {
-                //     x: container.x - Math.round(event.clientX / blocks.scale),
-                //     y: container.y - Math.round(event.clientY / blocks.scale)
-                // };
-                
-                // container.traverse(function(node){
-                //     console.log(node);
-                // });
+                container.hitmesh.visible = true;
+                container.hitmesh.material.opacity = 0.8;
+                var tween = TweenLite.to(container.hitmesh.material, 0.5, 
+                {   
+                    opacity : 0,
+                    onUpdate: function() {
+                        refreshCanvas(1);
+                    },
+                    onComplete : function(){
+                        container.hitmesh.visible = false;
+                        refreshCanvas(1);
+                    }
+                });
 
-                // TODO : Enable when the circle hover has been fixed
-                // var circles = showMaterialHighlight(ox, oy, cellSize / 2, //Add circle hover on this
-                //                                     event, scale, stage);
             });
             container.on('mouseup', function(event) {
-                    // hideMaterialHighlight(circles, stage);
-                    container.position.setX(ox);
-                    container.position.setY(oy);
-                    if (action != null && moved && !locked) {
-                        locked = true;
-                        setTimeout(function() {
-                            locked = false;
-                        }, 500);
-                        action();
-                    }
-                    moved = false;
+                container.position.setX(ox);
+                container.position.setY(oy);
+                if (action != null && moved && !locked) {
+                    locked = true;
+                    setTimeout(function() {
+                        locked = false;
+                    }, 500);
+                    action();
+                }
+                moved = false;
             });
         }
-        
     });
 });
