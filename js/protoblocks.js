@@ -219,10 +219,10 @@ function ProtoBlock(name) {
 	return [artwork, svg.docks];
     }
 
-    // E.g., ??? These are expandable.
+    // E.g., setXYZ These are expandable.
     this.threeArgBlock = function() {
         this.expandable = true;
-        this.style = 'twoarg';
+        this.style = 'threearg';
         this.size = 3;
         this.args = 3;
         this.dockTypes.push('out');
