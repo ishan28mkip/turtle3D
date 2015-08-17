@@ -456,11 +456,7 @@ function onSceneEvent(event,eventName){
                         intersected.parentMesh.dispatchEvent(setEventTypeMesh(event,'mousemove', intersected.parentMesh));
                     }
                     else if(intersected.parentMesh._listeners.hasOwnProperty('mouseover')){
-                        if(intersected.parentMesh._listeners.mouseover.active == undefined){
-                            intersected.parentMesh._listeners.mouseover.active = true;
-                            intersected.parentMesh.dispatchEvent(setEventTypeMesh(event,'mouseover', intersected.parentMesh));
-                        }
-                        else if(intersected.parentMesh._listeners.mouseover.active == false){
+                        if(!intersected.parentMesh._listeners.mouseover.active){
                             intersected.parentMesh._listeners.mouseover.active = true;
                             intersected.parentMesh.dispatchEvent(setEventTypeMesh(event,'mouseover', intersected.parentMesh));
                         }
@@ -471,14 +467,8 @@ function onSceneEvent(event,eventName){
 
              // Check for mouseout
              for(i=0; i < mousemotionArray.length; i++){
-                flag = false;
                 if(mousemotionArray[i].parentMesh._listeners.hasOwnProperty('mouseover') && mousemotionArray[i].parentMesh._listeners.mouseover.active == true){
-                    if(intersected == mousemotionArray[i])
-                        flag = true;
-                    if(flag){
-                        break;
-                    }
-                    else if(!flag){
+                    if(!(intersected == mousemotionArray[i])){
                         if(mousemotionArray[i].parentMesh._listeners.hasOwnProperty('mouseout')){
                             mousemotionArray[i].parentMesh.dispatchEvent(setEventTypeMesh(event,'mouseout', mousemotionArray[i].parentMesh));
                         }
