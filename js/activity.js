@@ -1214,16 +1214,6 @@ define(function(require) {
             }
         }
 
-        // Remove this function if it is not used later on 
-        // function tick(event) {
-        //     // This set makes it so the stage only re-renders when an
-        //     // event handler indicates a change has happened.
-        //     if (update) {
-        //         update = false; // Only update once
-        //         stage.update(event);
-        //     }
-        // }
-
         function doOpenSamples() {
             console.log('save locally');
             saveLocally();
@@ -1658,12 +1648,6 @@ define(function(require) {
             headerContainer.add(background);
             headerContainer.position.setY(threeCoorY(cellSize/2));
             scriptingScene.add(headerContainer);
-
-            // TODO : Create false shadow effect 
-            // headerContainer.graphics.f('#2196f3').r(0, 0,
-            //     screen.width / scale, cellSize);
-            // headerContainer.shadow = new createjs.Shadow('#777', 0, 2, 2);
-            // stage.addChild(headerContainer);
 
             var buttonNames = [
                 ['fast', doFastButton],
