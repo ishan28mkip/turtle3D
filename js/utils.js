@@ -731,11 +731,14 @@ function editText(mesh,text,options){
 }
 
 
-function alignText(mesh,value){
+function alignText(mesh, value, parent){
     if(mesh === undefined){
         return;
     }
-    if(mesh.parent === null || mesh.parent === undefined){
+
+    parent = (parent === undefined) ? mesh.parent : parent;
+
+    if(parent === null || parent === undefined){
         return;
     }
 
@@ -752,15 +755,15 @@ function alignText(mesh,value){
     var parentHeight;
     var parentWidth;
     
-    if(mesh.parent.type === 'Scene'){
+    if(parent.type === 'Scene'){
         parentHeight = window.innerHeight;
         parentWidth = window.innerWidth;
     }
     else{
-        mesh.parent.bounds = new THREE.Box3().setFromObject( mesh.parent );
-        mesh.parent.bounds.size = mesh.parent.bounds.size();
-        parentHeight = mesh.parent.bounds.size.y;
-        parentWidth = mesh.parent.bounds.size.x;
+        parent.bounds = new THREE.Box3().setFromObject( parent );
+        parent.bounds.size = parent.bounds.size();
+        parentHeight = parent.bounds.size.y;
+        parentWidth = parent.bounds.size.x;
     }
 
     switch(value){
