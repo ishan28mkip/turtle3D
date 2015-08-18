@@ -983,24 +983,24 @@ function windowHeight() {
     }
 }
 // Fix this function later
-// function httpGet(projectName) {
-//     var xmlHttp = null;
+function httpGet(projectName) {
+    // var xmlHttp = null;
 
-//     xmlHttp = new XMLHttpRequest();
+    // xmlHttp = new XMLHttpRequest();
 
-//     if (projectName == null) {
-//         xmlHttp.open("GET", window.server, false);
-//         xmlHttp.setRequestHeader('x-api-key', '3tgTzMXbbw6xEKX7');
-//     } else {
-//         xmlHttp.open("GET", window.server + projectName, false);
-//         xmlHttp.setRequestHeader('x-api-key', '3tgTzMXbbw6xEKX7');
-//     }
-//     xmlHttp.send();
-//     if (xmlHttp.status > 299) {
-//         throw 'Error from server';
-//     }
-//     return xmlHttp.responseText;
-// }
+    // if (projectName == null) {
+    //     xmlHttp.open("GET", window.server, false);
+    //     xmlHttp.setRequestHeader('x-api-key', '3tgTzMXbbw6xEKX7');
+    // } else {
+    //     xmlHttp.open("GET", window.server + projectName, false);
+    //     xmlHttp.setRequestHeader('x-api-key', '3tgTzMXbbw6xEKX7');
+    // }
+    // xmlHttp.send();
+    // if (xmlHttp.status > 299) {
+    //     throw 'Error from server';
+    // }
+    // return xmlHttp.responseText;
+}
 
 
 function httpPost(projectName, data) {
