@@ -427,7 +427,20 @@ function Block(protoblock, blocks, overrideName) {
                 }
             }
 
-            var artwork = myBlock.artwork.replace(/fill_color/g, PALETTEHIGHLIGHTCOLORS[myBlock.protoblock.palette.name]).replace(/stroke_color/g, HIGHLIGHTSTROKECOLORS[myBlock.protoblock.palette.name]).replace('block_label', block_label);
+            if (PALETTEBLOCKFILLCOLORS.hasOwnProperty(myBlock.name)) {
+                var paletteColors = [
+                    PALETTEBLOCKHIGHLIGHTCOLORS[myBlock.name],
+                    HIGHLIGHTBLOCKSTROKECOLORS[myBlock.name]
+                ];    
+            }
+            else{
+                var paletteColors = [
+                    PALETTEHIGHLIGHTCOLORS[myBlock.protoblock.palette.name],
+                    HIGHLIGHTSTROKECOLORS[myBlock.protoblock.palette.name]
+                ];
+            }
+
+            var artwork = myBlock.artwork.replace(/fill_color/g, paletteColors[0]).replace(/stroke_color/g, paletteColors[1]).replace('block_label', block_label);
 
             for (var i = 1; i < myBlock.protoblock.staticLabels.length; i++) {
                 artwork = artwork.replace('arg_label_' + i, myBlock.protoblock.staticLabels[i]);
@@ -444,7 +457,20 @@ function Block(protoblock, blocks, overrideName) {
             }
         }
 
-        var artwork = this.artwork.replace(/fill_color/g, PALETTEFILLCOLORS[this.protoblock.palette.name]).replace(/stroke_color/g, PALETTESTROKECOLORS[this.protoblock.palette.name]).replace('block_label', block_label);
+        if (PALETTEBLOCKFILLCOLORS.hasOwnProperty(this.name)) {
+            var paletteColors = [
+                PALETTEBLOCKFILLCOLORS[this.name],
+                PALETTEBLOCKSTROKECOLORS[this.name]
+            ];    
+        }
+        else{
+            var paletteColors = [
+                PALETTEFILLCOLORS[this.protoblock.palette.name],
+                PALETTESTROKECOLORS[this.protoblock.palette.name]
+            ];
+        }
+
+        var artwork = this.artwork.replace(/fill_color/g, paletteColors[0]).replace(/stroke_color/g, paletteColors[1]).replace('block_label', block_label);
 
         for (var i = 1; i < this.protoblock.staticLabels.length; i++) {
             artwork = artwork.replace('arg_label_' + i, this.protoblock.staticLabels[i]);
