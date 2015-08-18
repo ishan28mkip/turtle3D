@@ -107,52 +107,42 @@ function Trashcan (canvas, stage, size, refreshCanvas) {
     }
 
     this.stage.add(this.container);
-    // this.stage.setChildIndex(this.container, 0); //see why this is used
+    // FIXME : Z-index, push to bottom
     this.resizeEvent(1);
     makeTrash(this);
 
-
     this.hide = function() {
         var me = this;
-        this.container.visible = false;
-        // TODO : Fix this animation. See how to add requestAnimationFrame properly.
-        // this.container.traverse(function(node){
-        //     if(node.material){
-        //         node.material.transparent = true;
-        //         var tween = new TWEEN.Tween( node.material )
-        //         .to( { opacity: 0 }, 200 )
-        //         .onUpdate( function () {
-        //             me.refreshCanvas(1);
-        //         })
-        //         .onComplete( function(){
-        //             me.container.visible = false;
-        //         })
-        //         .start();
-        //     }
-        // });
+        this.container.traverse(function(node){
+            if(node.material){
+                var tween = TweenLite.to(node.material, 0.5, 
+                {   
+                    opacity : 0,
+                    onUpdate: function(){
+                        me.refreshCanvas(1);
+                    },
+                    onComplete: function(){
+                        me.container.visible = false;
+                    }
+                });
+            }
+        });
     }
 
     this.show = function() {
         var me = this;
-        var flag;
         this.container.visible = true;
-        // TODO : Fix this animation. See how to add requestAnimationFrame properly.
-        // this.container.traverse(function(node){
-        //     if(node.material){
-        //         node.material.transparent = true;
-        //         if(!flag){
-        //             flag = true;
-        //             me.container.visible = true;
-        //         }
-        //         node.material.opacity = 0;
-        //         var tween = new TWEEN.Tween( node.material )
-        //         .to( { opacity: 1.0 }, 200 )
-        //         .onUpdate( function () {
-        //             me.refreshCanvas(1);
-        //         })
-        //         .start();
-        //     }
-        // });        
+        this.container.traverse(function(node){
+            if(node.material){
+                var tween = TweenLite.to(node.material, 0.5, 
+                {   
+                    opacity : 1,
+                    onUpdate: function() {
+                        me.refreshCanvas(1);
+                    },
+                });
+            }
+        }); 
     }
 
     this.highlight = function() {
