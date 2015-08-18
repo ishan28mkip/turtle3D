@@ -929,10 +929,44 @@ function clearCanvas(canvas){
     }
 }
 
-function setZindex(container, minLimit, maxLimit){
-    container.zIndex = minLimit;
-    container.position.setZ(minLimit);
-    
+function removeAllChildren(container){
+    for(var i = container.children.length - 1; i>=0; i--){
+        container.remove(container.children[i]);
+    }
+}
+
+function hideAllChildren(container){
+    for(var i = container.children.length - 1; i>=0; i--){
+        container.children[i].visible = false;
+    }
+}
+
+function bringToTop(mesh){
+    if(mesh === null || mesh === undefined){
+        return false;
+    }
+    var tempMesh = mesh;
+    if(mesh.parent === undefined){
+        console.log('Bring to top unsuccessfull, parent undefined');  
+        return false;
+    }
+    var tempParent = mesh.parent;
+    mesh.parent.remove(mesh);
+    tempParent.add(tempMesh);
+}
+
+function sendToBottom(mesh){
+    if(mesh === null || mesh === undefined){
+        return false;
+    }
+    var tempMesh = mesh;
+    if(mesh.parent === undefined){
+        console.log('Bring to top unsuccessfull, parent undefined');  
+        return false;
+    }
+    var tempParent = mesh.parent;
+    mesh.parent.remove(mesh);
+    tempParent.addInvert(tempMesh);
 }
 
 
