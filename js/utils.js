@@ -403,6 +403,8 @@ function initMouseEvents(events, renderer, camera){
 function onSceneEvent(event,eventName){
     event.preventDefault();
     var intersects;
+    var parentContainer;
+
     mouseTHREECoordinates.x = ( event.clientX / scriptingRenderer.domElement.width ) * 2 - 1;
     mouseTHREECoordinates.y = - ( event.clientY / scriptingRenderer.domElement.height ) * 2 + 1;
     raycaster.setFromCamera( mouseTHREECoordinates, scriptingCamera ); 
@@ -412,8 +414,9 @@ function onSceneEvent(event,eventName){
             intersects = raycaster.intersectObjects(clickArray);
             if(intersects.length > 0){
                 for(var i = 0; i < intersects.length ; i++){
-                    if(intersects[i].object.parentMesh.visible == true){
-                        intersects[i].object.parentMesh.dispatchEvent(setEventTypeMesh(event,'click', intersects[i].object.parentMesh));
+                    parentContainer = intersects[i].object.parentMesh;
+                    if(parentContainer.visible == true){
+                        parentContainer.dispatchEvent(setEventTypeMesh(event,'click', parentContainer));
                         break;
                     }
                 }
@@ -423,8 +426,9 @@ function onSceneEvent(event,eventName){
             intersects = raycaster.intersectObjects(dblclickArray);
             if(intersects.length > 0){
                 for(var i = 0; i < intersects.length ; i++){
-                    if(intersects[i].object.parentMesh.visible == true){
-                        intersects[i].object.parentMesh.dispatchEvent(setEventTypeMesh(event,'dblclick', intersects[i].object.parentMesh));
+                    parentContainer = intersects[i].object.parentMesh;
+                    if(parentContainer.visible == true){
+                        parentContainer.dispatchEvent(setEventTypeMesh(event,'dblclick', parentContainer));
                         break;
                     }
                 }
@@ -434,13 +438,14 @@ function onSceneEvent(event,eventName){
             intersects = raycaster.intersectObjects(mousedownArray);
             if(intersects.length > 0){
                 for(var i = 0; i < intersects.length ; i++){
-                    if(intersects[i].object.parentMesh.visible == true){
-                        if(intersects[i].object.parentMesh._listeners.hasOwnProperty('mousedown')){
-                            intersects[i].object.parentMesh.dispatchEvent(setEventTypeMesh(event,'mousedown', intersects[i].object.parentMesh));
-                            intersects[i].object.parentMesh._listeners.mousedown.active = true;
+                    parentContainer = intersects[i].object.parentMesh;
+                    if(parentContainer.visible == true){
+                        if(parentContainer._listeners.hasOwnProperty('mousedown')){
+                            parentContainer.dispatchEvent(setEventTypeMesh(event,'mousedown', parentContainer));
+                            parentContainer._listeners.mousedown.active = true;
                         }
-                        if(intersects[i].object.parentMesh._listeners.hasOwnProperty('pressmove')){
-                            intersects[i].object.parentMesh._listeners.pressmove.active = true;
+                        if(parentContainer._listeners.hasOwnProperty('pressmove')){
+                            parentContainer._listeners.pressmove.active = true;
                         }
                         break;
                     }
@@ -451,20 +456,22 @@ function onSceneEvent(event,eventName){
             intersects = raycaster.intersectObjects(mouseupArray);
             if(intersects.length > 0){
                 for(var i = 0; i < intersects.length ; i++){
-                    if(intersects[i].object.parentMesh.visible == true){
-                        if(intersects[i].object.parentMesh._listeners.hasOwnProperty('mousedown')){
-                            if(intersects[i].object.parentMesh._listeners.mousedown.active){
-                                intersects[i].object.parentMesh._listeners.mousedown.active = false;
+                    parentContainer = intersects[i].object.parentMesh;
+                    if(parentContainer.visible == true){
+                        if(parentContainer._listeners.hasOwnProperty('mousedown')){
+                            if(parentContainer._listeners.mousedown.active){
+                                parentContainer._listeners.mousedown.active = false;
                             }
                         }
-                        if(intersects[i].object.parentMesh._listeners.hasOwnProperty('mouseup')){
-                            intersects[i].object.parentMesh.dispatchEvent(setEventTypeMesh(event,'mouseup', intersects[i].object.parentMesh));
+                        // FIXME : Mouse up should not fire if pressup is firing?
+                        if(parentContainer._listeners.hasOwnProperty('mouseup')){
+                            parentContainer.dispatchEvent(setEventTypeMesh(event,'mouseup', parentContainer));
                         }
-                        if(intersects[i].object.parentMesh._listeners.hasOwnProperty('pressup')){
-                            if(intersects[i].object.parentMesh._listeners.pressmove !== undefined){
-                                if(intersects[i].object.parentMesh._listeners.pressmove.active){
-                                   intersects[i].object.parentMesh.dispatchEvent(setEventTypeMesh(event,'pressup', intersects[i].object.parentMesh));
-                                   intersects[i].object.parentMesh._listeners.pressmove.active = false;
+                        if(parentContainer._listeners.hasOwnProperty('pressup')){
+                            if(parentContainer._listeners.pressmove !== undefined){
+                                if(parentContainer._listeners.pressmove.active){
+                                   parentContainer.dispatchEvent(setEventTypeMesh(event,'pressup', parentContainer));
+                                   parentContainer._listeners.pressmove.active = false;
                                 }
                             }
                         }
@@ -502,7 +509,8 @@ function onSceneEvent(event,eventName){
             intersects = raycaster.intersectObjects(mousemotionArray);
             if(intersects.length > 0){
                 for(var i = 0; i < intersects.length ; i++){
-                    if(intersects[i].object.parentMesh.visible == true){
+                    parentContainer = intersects[i].object.parentMesh;
+                    if(parentContainer.visible == true){
                         intersected = intersects[i].object;
                         break;
                     }
@@ -548,25 +556,6 @@ function setEventTypeMesh(event,type, mesh){
     return eventObject;
 }
 
-function createBoundingBitmap(container,scene){
-    var bounds = container.get2DBounds(true);
-
-    var hexColor = '#'+Math.floor(Math.random()*16777215).toString(16);
-    var material = new THREE.LineBasicMaterial({
-        color: hexColor,
-        linewidth: 3
-    });
-    var geometry = new THREE.Geometry();
-    geometry.vertices.push(new THREE.Vector3(bounds.min.x, bounds.min.y, 10));
-    geometry.vertices.push(new THREE.Vector3(bounds.max.x, bounds.min.y, 10));
-    geometry.vertices.push(new THREE.Vector3(bounds.max.x, bounds.max.y, 10));
-    geometry.vertices.push(new THREE.Vector3(bounds.min.x, bounds.max.y, 10));
-    geometry.vertices.push(new THREE.Vector3(bounds.min.x, bounds.min.y, 10));
-
-    var line = new THREE.Line(geometry, material);
-    scene.add(line);
-}
-
 function createRectangle(width,height,color){
     var rectShape = new THREE.Shape();
     rectShape.moveTo( -width/2, height/2 );
@@ -575,7 +564,7 @@ function createRectangle(width,height,color){
     rectShape.lineTo( -width/2, -height/2 );
     rectShape.lineTo( -width/2, height/2 );
     var rectGeom = new THREE.ShapeGeometry( rectShape );
-    var rectMesh = new THREE.Mesh( rectGeom, new THREE.MeshBasicMaterial( { 'color': color } ) ) ;
+    var rectMesh = new THREE.Mesh( rectGeom, new THREE.MeshBasicMaterial( { 'color': color , transparent : true } ) ) ;
     return rectMesh;
 }
 
@@ -593,7 +582,7 @@ function createText(text,color,size,font,weight,style,curveSegments){
 
     var textShapes = THREE.FontUtils.generateShapes( text, options );
     var textGeometry = new THREE.ShapeGeometry( textShapes );
-    var textMesh = new THREE.Mesh( textGeometry, new THREE.MeshBasicMaterial( { color: color } ) ) ;
+    var textMesh = new THREE.Mesh( textGeometry, new THREE.MeshBasicMaterial( { color: color, transparent : true } ) ) ;
 
 
     // Setting the default options in the mesh
