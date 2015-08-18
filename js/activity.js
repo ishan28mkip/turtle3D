@@ -635,106 +635,96 @@ define(function(require) {
             turtleScene.add( grid );
         }
 
-                container.add(bitmap);
-                bitmap.visible = false;
-                refreshCanvas(1);
-            }
-            img.src = imagePath;
-            return container;
-        };
-
-
-        // TODO : Rewrite this function using the text utility and implement proper drag handlers
         function createMsgContainer(fillColor, strokeColor, callback, y) {
-            var container = new THREE.Group();
-            scriptingScene.add(container);
-            container.position.set(0, window.innerHeight/2 - (y+cellSize/2),1); //cellsize/2 to center it
-            container.visible = false;
+            if(msgContainer === null){
+                msgContainer = new THREE.Group();
+                scriptingScene.add(msgContainer);
+            }
 
-            // axes = buildAxes( 1000 );
-            // container.add( axes );
+            var container = new THREE.Group();
+            msgContainer.add(container); 
+            container.visible = false;
 
             var img = new Image();
             var svgData = MSGBLOCK.replace('fill_color', fillColor).replace(
                 'stroke_color', strokeColor);
+
             var img = new Image();
             img.onload = function(){
-                var texture = new THREE.Texture(img) 
+                var scaleX = 1;
+                var scaleY = 1;
+
+                var canvas = document.createElement('canvas');
+                canvas.width = img.width * scaleX;
+                canvas.height = img.height * scaleY;
+                var context = canvas.getContext('2d');
+                context.drawImage(img, 0, 0, img.width * scaleX, img.height * scaleY);
+                var texture = new THREE.Texture(canvas);
                 texture.needsUpdate = true;
                 texture.minFilter = THREE.NearestFilter; 
-                var material = new THREE.MeshBasicMaterial( {map: texture, side: THREE.DoubleSide} );
+                var material = new THREE.MeshBasicMaterial( {map: texture} );
                 material.transparent = true;
-                var msgBlock = new THREE.Mesh(new THREE.PlaneBufferGeometry(img.width, img.height),material);
-                container.add(msgBlock);
+                material.depthWrite = false;
 
-                var options = {'font' : 'helvetiker','weight' : 'normal', 'style' : 'normal','size' : 15,'curveSegments' : 20};
-                var textShapes = THREE.FontUtils.generateShapes( 'The message has changed and has been replaced', options );
-                var text = new THREE.ShapeGeometry( textShapes );
-                var textMesh = new THREE.Mesh( text, new THREE.MeshBasicMaterial( { color: 0x000000 } ) ) ;
-                
-                textMesh.geometry.computeBoundingBox(); 
-                var textbounds = textMesh.geometry.boundingBox.size();
-                textMesh.position.set(-textbounds.x/2,-textbounds.y/4,1); // FLAG : See why -textbounds.y/4 works
-                container.add(textMesh);
+                var msgBlock = new THREE.Mesh(new THREE.PlaneBufferGeometry(img.width * scaleX, img.height * scaleY), material);
+                msgBlock.name = name;
+                msgBlock.imgWidth = img.width * scaleX;
+                msgBlock.imgHeight = img.height * scaleY;
+                msgBlock.initialWidth = img.width;
+                msgBlock.initialHeight = img.height;
+
+                // FIXME : Font Scaling
+                var text = createText(_('Default'), '#000000', 12);
+                container.add(msgBlock, text);
+
+                text.align = 'center';
+                text.vAlign = 'middle';
 
                 container.hitmesh = msgBlock;
 
-                // container.on('click',function(){
-                //     container.visible = false;
-                //     if (errorMsgArrow !== null) {
-                //         errorMsgArrow.removeAllChildren(); // Hide the error arrow.
-                //     }
-                //     refreshCanvas(1);
-                // });
+                refreshCanvas(1);
 
-                // FIXME : Implement the new drag and drop functionality
-
-                var px,py;
-                var coor = new THREE.Vector3();
-                coor.z = 0;
+                var oldX,oldY;
+                var dx,dy;
+                var moved;
+                
+                container.on('mousedown',function(event){
+                    oldX = event.clientX;
+                    oldY = event.clientY;
+                    bringToTop(container);
+                    moved = true;
+                });
+                
                 container.on('pressmove',function(event){
-                    if(!px || !py){
-                        px = event.clientX;
-                        py = event.clientY;
-                    }
-                    else{
-                        coor.x = event.clientX - px;
-                        coor.y = py - event.clientY;
-                    }
-                    container.position.add(coor);
-                    px = event.clientX;
-                    py = event.clientY;
+                    dx = event.clientX - oldX;
+                    dy = event.clientY - oldY;
+                    container.position.setX(container.position.x + dx);
+                    container.position.setY(container.position.y - dy);
+                    oldX = event.clientX;
+                    oldY = event.clientY;
                     refreshCanvas(1);
                 });
+
                 container.on('pressup',function(event){
-                    px = false;
-                    py = false;
+                    moved = false;
                 });
 
-                refreshCanvas(1);
-                callback(textMesh);
-                blocks.setMsgText(textMesh);
+                callback(text);
+                blocks.setMsgText(text);
 
             }
             img.src = 'data:image/svg+xml;base64,' + window.btoa(
                 unescape(encodeURIComponent(svgData)));
         };
 
-
         function createErrorContainers() {
             // Some error messages have special artwork.
             if(errorContainer === null){
                 errorContainer = new THREE.Group();
                 scriptingScene.add(errorContainer);
-                // Set the z-index
-                setZindex(errorContainer, 98700,98799);
-                errorContainer.zIndex = 98700;
-                errorContainer.position.setZ(98700);
-                errorContainer.currentZindex = 0;
             }
             else{
-                // TODO : Instead of return here, remove all artwork and re-call makeErrorArtwork
-                return;
+                removeAllChildren(errorContainer);
             }
             for (var i = 0; i < ERRORARTWORK.length; i++) {
                 var name = ERRORARTWORK[i];
@@ -746,52 +736,50 @@ define(function(require) {
             
             var container = new THREE.Group();
             errorContainer.add(container);
-            container.position.setX(-200)
-            container.position.setY(threeCoorY(cellSize*2)-100); //TODO : How is this position decided
-            
-            container.position.setZ(errorContainer.currentZindex);
-            container.zIndex = errorContainer.currentZindex;
-            container.currentZindex = 0;
-
-            errorContainer.currentZindex += 1;
-            if(errorContainer.currentZindex >= 98800)
-                console.log('Error Containers have exceeded the z-index limit of 98799');
 
             errorArtwork[name] = container;
             errorArtwork[name].name = name;
             errorArtwork[name].visible = false;
 
             var img = new Image();
-
-            img.onload = function() {
-                var originalSize = 55; // this is the original svg size
-                // var halfSize = Math.floor(size / 2);
+            img.onload = function () {
+                // FIXME : Scaling
+                var scale = 1;
 
                 var canvas = document.createElement('canvas');
-                canvas.width = img.width;
-                canvas.height = img.height;
+                canvas.width = img.width * scale;
+                canvas.height = img.height * scale;
                 var context = canvas.getContext('2d');
-                context.drawImage(img, 0, 0);
+                context.drawImage(img, 0, 0, img.width * scale, img.height * scale);
                 var texture = new THREE.Texture(canvas);
                 texture.needsUpdate = true;
                 texture.minFilter = THREE.NearestFilter; 
-                var material = new THREE.MeshBasicMaterial( {map: texture, transparent : true, depthWrite : false} );
-                var artwork = new THREE.Mesh(new THREE.PlaneBufferGeometry(img.width, img.height),material);
-                artwork.name = name;
-                artwork.imgWidth = img.width;
-                artwork.imgHeight = img.height;
+                var material = new THREE.MeshBasicMaterial( {map: texture} );
+                material.transparent = true;
+                material.depthWrite = false;
 
+                var artwork = new THREE.Mesh(new THREE.PlaneBufferGeometry(img.width * scale, img.height * scale), material);
+                artwork.name = name;
+                artwork.imgWidth = img.width * scale;
+                artwork.imgHeight = img.height * scale;
+                artwork.initialWidth = img.width;
+                artwork.initialHeight = img.height;
+
+                container.artwork = artwork;
+
+                container.position.setY(threeCoorY(100) - artwork.imgHeight / 2);
+                container.position.setX(threeCoorX(100) + artwork.imgWidth / 2);
+                
                 container.add(artwork);
                 container.hitmesh = artwork;
-                container.zIndex = 0;
 
-                var errorText = createText(name + 'error occured','#ffffff',10); //TODO : Adjust scaling here
+                // FIXME : Font Scaling
+                var errorText = createText(name + 'error occured','#ffffff',10);
                 container.add(errorText);
                 errorText.align = 'center';
                 errorText.vAlign = 'middle';
-                errorText.zIndex = 0.1;
-                errorText.position.setZ(0.1);
 
+                refreshCanvas(1);
 
                 container.on('click', function(event) {
                     container.visible = false;
@@ -799,18 +787,14 @@ define(function(require) {
                     // arrow associated with this container
                     if (errorMsgArrow !== null) {
                         // Hide the error arrow
-                        for(var i = errorMsgArrow.children.length - 1 ; i>=0 ; i--){
-                            errorMsgArrow.remove(errorMsgArrow.children[i]);
-                        }
+                        removeAllChildren(errorMsgArrow);
                     }
                     refreshCanvas(1);
                 });
-
-                refreshCanvas(1);
-
             }
             img.src = 'images/' + name + '.svg';
         }
+
 
         function keyPressed(event) {
             if (docById('labelDiv').classList.contains('hasKeyboard')) {
@@ -963,7 +947,7 @@ define(function(require) {
                     if (blocks.blockList[blk].name == 'start') {
                         turtle = blocks.blockList[blk].value;
                         turtles.turtleList[turtle].trash = false;
-                        turtles.turtleList[turtle].container.visible = true;
+                        turtles.turtleList[turtle].axis = true;
                     }
                 }
             }
