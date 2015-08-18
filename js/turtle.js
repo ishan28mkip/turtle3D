@@ -96,7 +96,7 @@ function Turtle (name, turtles) {
         this.stroke = DEFAULTSTROKE;
         this.font = DEFAULTFONT;
 
-        if(this.axis !== null){ // Can occur if the turtle is still not initialized
+        if(this.axis){ // Can occur if the turtle is still not initialized
             this.axis.position.copy(ORIGIN);
         }
 
@@ -366,16 +366,6 @@ function Turtle (name, turtles) {
         //     me.bitmap.rotation = me.orientation;
         //     me.skinChanged = true;
 
-        //     me.container.uncache();
-        //     var bounds = me.container.getBounds();
-        //     me.container.cache(bounds.x, bounds.y, bounds.width, bounds.height);
-
-        //     // Recalculate the hit area as well.
-        //     var hitArea = new createjs.Shape();
-        //     hitArea.graphics.beginFill('#FFF').drawRect(0, 0, bounds.width, bounds.height);
-        //     hitArea.x = -bounds.width / 2;
-        //     hitArea.y = -bounds.height / 2;
-        //     me.container.hitArea = hitArea;
 
         //     if (me.startBlock != null) {
         //         me.startBlock.container.removeChild(me.decorationBitmap);
@@ -403,6 +393,7 @@ function Turtle (name, turtles) {
 
     this.doShowText = function(size, myText) {
         // TODO : Add a text or image object to the canvas
+        // This object should be 3D Text
     }
 
     this.doSetFont = function(font) {
@@ -473,7 +464,6 @@ function Turtle (name, turtles) {
 function Turtles(canvas, stage2D, stage3D, refreshCanvas) {
     this.canvas = canvas;
     
-    // TODO : Remove the concept of two stages when the turtle becomes a 3D model instead.
     this.stage2D = stage2D;
     this.stage3D = stage3D;
 
@@ -519,18 +509,6 @@ function Turtles(canvas, stage2D, stage3D, refreshCanvas) {
 
         this.turtleList.push(myTurtle);
 
-        // Each turtle needs its own canvas.
-        // myTurtle.drawingCanvas = new createjs.Shape();
-        // this.stage3D.add(myTurtle.drawingCanvas);
-        // In theory, this prevents some unnecessary refresh of the
-        // canvas.
-        // myTurtle.drawingCanvas.tickEnabled = false;
-
-        var turtleImage = new Image();
-        i %= 10;
-        myTurtle.container = new THREE.Group();
-        this.stage2D.add(myTurtle.container);
-
         // Add's a 3D Axis to the turtle
         var axislength = 8;
         turtleAxis = new THREE.Object3D();
@@ -548,20 +526,9 @@ function Turtles(canvas, stage2D, stage3D, refreshCanvas) {
 
         function processTurtleBitmap(me, name, bitmap, startBlock) {
             myTurtle.bitmap = bitmap;
-            myTurtle.bitmap.regX = 27 | 0;
-            myTurtle.bitmap.regY = 27 | 0;
-            // myTurtle.bitmap.cursor = 'pointer';
-
-            myTurtle.container.add(myTurtle.bitmap);
-            myTurtle.container.visible = false;
-
-            // TODO : Add a sphere hitmesh for the axes
-            myTurtle.container.hitmesh = myTurtle.bitmap;
-
-            myTurtle.container.bounds = new THREE.Box3().setFromObject( myTurtle.container );
-            myTurtle.container.bounds.size = myTurtle.container.bounds.size();
-
+            myTurtle.bitmap.cursor = 'pointer';
             myTurtle.startBlock = startBlock;
+
             if (startBlock != null) {
                 myTurtle.decorationBitmap = myTurtle.bitmap.clone();
                 startBlock.container.add(myTurtle.decorationBitmap);
@@ -579,11 +546,10 @@ function Turtles(canvas, stage2D, stage3D, refreshCanvas) {
                 myTurtle.decorationBitmap.scaleStore = 0.5 * startBlock.protoblock.scale / 2;
 
             }
-            loadTurtleDragHandler(me,myTurtle,blkInfoAvailable);
+            loadBlockInfo(me,myTurtle,blkInfoAvailable);
             me.refreshCanvas(1);
         }
-
-        makeTurtleBitmap(this, TURTLESVG.replace(/fill_color/g, FILLCOLORS[i]).replace(/stroke_color/g, STROKECOLORS[i]), 'turtle', processTurtleBitmap, startBlock);
+        makeTurtleBitmap(this, TURTLESVG.replace(/fill_color/g, FILLCOLORS[i]).replace(/stroke_color/g, STROKECOLORS[i]), 'turtle', processTurtleBitmap, startBlock, 0.5 * startBlock.protoblock.scale / 2 );
     }
 
     // TODO : When the blkInfoAvailable data is fixed in blocks.js update this file
