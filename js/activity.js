@@ -105,8 +105,6 @@ define(function(require) {
         var ambientLight;
 
         // Variable initialization done
-
-
         pluginObjs = {
             'PALETTEPLUGINS': {},
             'PALETTEFILLCOLORS': {},
@@ -168,6 +166,7 @@ define(function(require) {
 
         var helpContainer = null;
         var helpIdx = 0;
+
         var HELPCONTENT = [[_('Welcome to Turtle Blocks 3D'), _('Turtle Blocks is a Logo-inspired turtle that draws colorful pictures with snap-together visual-programming blocks.'), 'activity/activity-icon-color.svg'],
                            [_('Palette buttons'), _('This toolbar contains the palette buttons: click to show or hide the palettes of blocks (Turtle, Pen, Numbers, Boolean, Flow, Blocks, Media, Sensors, and Extras). Once open, you can drag blocks from the palettes onto the canvas to use them.'), 'images/icons.svg'],
                            [_('Run fast'), _('Click to run the project in fast mode.'), 'icons/fast-button.svg'],
@@ -266,6 +265,7 @@ define(function(require) {
                 showPolar();
                 polarVisible = true;
             }
+            refreshCanvas(2);
         }
 
         function doBiggerFont() {
@@ -300,8 +300,10 @@ define(function(require) {
         // Msg block
         var msgText = null;
 
-        // ErrorMsg block
+        // Error Message block
         var errorMsgText = null;
+
+        // ErrorMsg block
         var errorMsgArrow = null;
         var errorArtwork = {};
         var ERRORARTWORK = ['emptybox', 'emptyheap', 'negroot', 'noinput', 'zerodivide', 'notanumber', 'nostack'];
@@ -335,6 +337,7 @@ define(function(require) {
             scriptingRenderer.setSize(window.innerWidth, window.innerHeight);
             scriptingRenderer.shadowMapEnabled = true;
             document.getElementById("scriptingOutput").appendChild(scriptingRenderer.domElement);
+            scriptingRenderer.sortObjects = false
 
 
             // Create the turtle renderer and set the size
@@ -362,17 +365,13 @@ define(function(require) {
             // Add ambient light to the turtle scene
             turtleScene.add(ambientLight);
 
-            // Axes
-            axes = buildAxes( 1000 );
-            turtleScene.add( axes );
-            var grid = new THREE.GridHelper(100, 10);
-            turtleScene.add(grid);
+            // Creates the grid and axes
+            createGrid();
 
             // Initialize the DOM Mouse Events
             var events = ['click','dblclick','mousedown','mouseup','mousemove'];
             initMouseEvents(events,scriptingRenderer,scriptingCamera);
 
-            // TODO create a tick library for three.js
 
             createMsgContainer('#ffffff', '#7a7a7a', function(text) {
                 msgText = text;
@@ -399,7 +398,7 @@ define(function(require) {
             turtle2DContainer = new THREE.Group();
             turtle3DContainer = new THREE.Group();
 
-            scriptingScene.add(palettesContainer,blocksContainer,trashContainer,turtle2DContainer);
+            scriptingScene.add(turtle2DContainer,trashContainer,blocksContainer,palettesContainer);
             turtleScene.add(turtle3DContainer);
             setupBlocksContainerEvents();
 
@@ -441,13 +440,13 @@ define(function(require) {
             blocks.setMacroDictionary(macroDict);
             palettes.setMacroDictionary(macroDict);
 
-            // FIXME : Activate this local storage retrive when everything else works fine
+            // FIXME : Handle Plugins
             // Load any plugins saved in local storage.
-            // var pluginData = localStorage.getItem('plugins');
-            // if (pluginData != null) {
-            //     var obj = processPluginData(pluginData, palettes, blocks, logo.evalFlowDict, logo.evalArgDict, logo.evalParameterDict, logo.evalSetterDict);
-            //     updatePluginObj(obj);
-            // }
+            var pluginData = localStorage.getItem('plugins');
+            if (pluginData != null) {
+                var obj = processPluginData(pluginData, palettes, blocks, logo.evalFlowDict, logo.evalArgDict, logo.evalParameterDict, logo.evalSetterDict);
+                updatePluginObj(obj);
+            }
 
             fileChooser.addEventListener('click', function(event) { this.value = null; });
             fileChooser.addEventListener('change', function(event) {
@@ -514,8 +513,6 @@ define(function(require) {
                 reader.readAsText(pluginChooser.files[0]);
             }, false);
 
-            cartesianBitmap = createGrid('images/Cartesian.svg','cartesian');
-            polarBitmap = createGrid('images/polar.svg','polar');
 
             var URL = window.location.href;
             var projectName = null; 
@@ -552,7 +549,6 @@ define(function(require) {
         }
 
         // FIXME : Works well before clicking any block and then stops working
-        // FIXME : Is not detecting clicks well
         function setupBlocksContainerEvents() {
             var moving = false;
             var lastCords;
@@ -600,6 +596,7 @@ define(function(require) {
             },false);    
         }
 
+        // FIXME
         function scrollEvent(event) {
             var data = event.wheelDelta || -event.detail;
             var delta = Math.max(-1, Math.min(1, (data)));
@@ -766,6 +763,7 @@ define(function(require) {
         }
 
         function makeErrorArtwork(name) {
+            
             var container = new THREE.Group();
             errorContainer.add(container);
             container.position.setX(-200)
@@ -1142,11 +1140,10 @@ define(function(require) {
             //           window.btoa(unescape(encodeURIComponent(svgData)));
         }
 
-        // FIXME
         function loadProject(projectName) {
             // Show busy cursor.
             document.body.style.cursor = 'wait';
-            // palettes.updatePalettes();
+            palettes.updatePalettes();
             setTimeout(function() {
                 if (fileExt(projectName) != 'tb') {
                     projectName += '.tb';
@@ -1270,11 +1267,10 @@ define(function(require) {
         }
 
         function hideMsgs() {
-            errorMsgText.parent.visible = false;
+            hideAllChildren(errorContainer);
+
             if (errorMsgArrow !== null) {
-                for(var i = 0; i < errorMsgArrow.children.length; i++){
-                    errorMsgArrow.remove(errorMsgArrow.children[i]);
-                }
+                removeAllChildren(errorMsgArrow);
                 refreshCanvas(1);
             }
             if(msgText.parent !== undefined){
@@ -1297,12 +1293,8 @@ define(function(require) {
             // TODO : Bring the text to the front
         }
 
-
-        // FIXME :
-        // (1) Need to create a arrow graphic
-        // (2) Need to create a function to bring the function to the top
         function errorMsg(msg, blk, text) {
-            if (errorMsgText == null) {
+            if (errorContainer == null) {
                 // The container may not be ready yet... so do nothing
                 return;
             }
@@ -1376,7 +1368,7 @@ define(function(require) {
                     // errorMsgText.text = msg;
                     break;
             }
-            update = true;
+            refreshCanvas(1);
         }
 
         function hideCartesian() {
@@ -1572,9 +1564,6 @@ define(function(require) {
         function setupRightMenu(scale) {
             var rightMenuContainer = new THREE.Group();
             scriptingScene.add(rightMenuContainer);
-            // Set the zIndex;
-            rightMenuContainer.zIndex = 98900;
-            rightMenuContainer.position.setZ(98900);
 
             if (rightMenuContainer !== undefined) {
                     rightMenuContainer.remove(menuContainer);
@@ -1755,7 +1744,7 @@ define(function(require) {
         function doMenuAnimation() {
             var bitmap = first(menuContainer.children);
 
-            // FIXME : Make the rotation a animation instead of direct change
+            // FIXME : Make the rotation animation instead of direct change
 
             if (bitmap !== null) {
                 bitmap.rotation.z = -Math.PI / 2;
@@ -1792,7 +1781,7 @@ define(function(require) {
             refreshCanvas(1);
         }
 
-        // creates a button
+        // Creating the buttons
         function makeButton(name, x, y, size, rotation, action, parentContainer) {
             var container = new THREE.Group();
             var buttonName = name + '-button';
@@ -1846,7 +1835,6 @@ define(function(require) {
                 var circleGeometry = new THREE.ShapeGeometry( circleShape );
                 var circleMesh = new THREE.Mesh( circleGeometry, new THREE.MeshBasicMaterial( { color: 0x000000, transparent : true, depthWrite : false } ) ) ; 
                 circleMesh.material.opacity = 0;
-                circleMesh.position.setZ(2);
                 circleMesh.visible = false;
                 container.add(circleMesh);
 
@@ -1859,12 +1847,6 @@ define(function(require) {
                 }
 
                 refreshCanvas(1);
-
-                // bitmap.regX = halfSize / bitmap.scaleX; //PE : Why is cache used and what is regX,regY for?
-                // bitmap.regY = halfSize / bitmap.scaleY;
-
-                // bitmap.cache(0, 0, size, size);
-                // bitmap.updateCache();
             }
             img.src = 'icons/' + buttonName + '.svg';
             return container;
@@ -1890,8 +1872,8 @@ define(function(require) {
                         refreshCanvas(1);
                     }
                 });
-
             });
+
             container.on('mouseup', function(event) {
                 container.position.setX(ox);
                 container.position.setY(oy);
