@@ -161,10 +161,13 @@ function Logo(canvas, blocks, turtles, stage2D, stage3D, refreshCanvas, textMsg,
                     }
                     break;
                 case 'x':
-                    value = this.turtles.turtleList[turtle].x;
+                    value = this.turtles.turtleList[turtle].position.x;
                     break;
                 case 'y':
-                    value = this.turtles.turtleList[turtle].y;
+                    value = this.turtles.turtleList[turtle].position.y;
+                    break;
+                case 'z':
+                    value = this.turtles.turtleList[turtle].position.z;
                     break;
                 case 'heading':
                     value = this.turtles.turtleList[turtle].orientation;
@@ -219,7 +222,6 @@ function Logo(canvas, blocks, turtles, stage2D, stage3D, refreshCanvas, textMsg,
             } else {
                 this.blocks.blockList[blk].text.text = Math.round(value).toString();
             }
-            this.blocks.blockList[blk].container.updateCache();
             this.refreshCanvas(1);
         }
     }
@@ -230,11 +232,12 @@ function Logo(canvas, blocks, turtles, stage2D, stage3D, refreshCanvas, textMsg,
 
         this.stopTurtle = false;
         this.blocks.unhighlightAll();
+        
         this.blocks.bringToTop(); // Draw under blocks.
 
         this.hideMsgs();
 
-        // We run the Logo commands here.
+        // We run the Logo commands here.   
         var d = new Date();
         this.time = d.getTime();
 
@@ -1342,10 +1345,13 @@ function Logo(canvas, blocks, turtles, stage2D, stage3D, refreshCanvas, textMsg,
                     logo.blocks.blockList[blk].value = logo.turtles.turtleList[turtle].orientation;
                     break;
                 case 'x':
-                    logo.blocks.blockList[blk].value = logo.turtles.screenX2turtleX(logo.turtles.turtleList[turtle].container.x);
+                    logo.blocks.blockList[blk].value = logo.turtles.turtleList[turtle].position.x;
                     break;
                 case 'y':
-                    logo.blocks.blockList[blk].value = logo.turtles.screenY2turtleY(logo.turtles.turtleList[turtle].container.y);
+                    logo.blocks.blockList[blk].value = logo.turtles.turtleList[turtle].position.y;
+                    break;
+                case 'z':
+                    logo.blocks.blockList[blk].value = logo.turtles.turtleList[turtle].position.z;
                     break;
                 case 'xturtle':
                 case 'yturtle':
