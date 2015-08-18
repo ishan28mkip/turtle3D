@@ -1,21 +1,3 @@
-// PE : Check the scaling and if it is not working fix it
-// Code Snippets
-   // Set interval based opacity animation
-    // var me = this;
-    // var interval = setInterval(function(){
-    //     me.container.traverse( function( node ) {
-    //         if( node.material) {
-    //             if(node.material.opacity - (1/10) > 0)
-    //                 node.material.opacity = node.material.opacity - (1/10);
-    //             else
-    //                 clearInterval(interval);
-    //         }
-    //     });
-    //     me.refreshCanvas(1);
-    // },20);
-    
-    // View overtrashcan function for coordinate conversion demo
-
 // require(['activity/utils']);
 
 var TRASHWIDTH = 320;
