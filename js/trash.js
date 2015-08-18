@@ -156,18 +156,20 @@ function Trashcan (canvas, stage, size, refreshCanvas) {
     }
 
     this.highlight = function() {
-        if (!last(this.container.children).visible) {
-            last(this.container.children).visible = true;
-            this.container.children[1].visible = false;
+        if (this.borderHighlight !== null) {
+            this.borderHighlight.visible = true;
+            this.border.visible = false;
+            this.icon.visible = true;
             this.container.visible = true;
             this.refreshCanvas(1);
         }
     }
 
     this.unhighlight = function() {
-        if (last(this.container.children).visible) {
-            last(this.container.children).visible = false;
-            this.container.children[1].visible = true;
+        if (this.border !== null) {
+            this.border.visible = true;
+            this.borderHighlight.visible = false;
+            this.icon.visible = true;
             this.container.visible = true;
             this.refreshCanvas(1);
         }
