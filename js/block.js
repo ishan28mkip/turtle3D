@@ -1059,14 +1059,18 @@ function calculateBlockHitArea(myBlock) {
 
     var hitmesh;
 
-    // Only detect hits on top section of block.
-    // FIXME : Why is hitmesh height reduced?
-    // if (myBlock.isClampBlock()) {
+    if (myBlock.isClampBlock()) {
+        // FIXME Scaling
+        var height = myBlock.docks[1][1] - myBlock.docks[0][1];
+        var width = bounds.size.x;
+        hitmesh = createRectangle(width, height, '#000000');
+        // FIXME Scaling
+        hitmesh.position.setY(-myBlock.docks[1][1] + height / 2);
+
+    } else {
         hitmesh = createRectangle(bounds.size.x, bounds.size.y, '#000000');
-    // } else {
-    //     hitmesh = createRectangle(bounds.width, bounds.height * 0.75, '#000000'); // Shrinking the height makes it easier to grab blocks below in the stack.
-    //     hitmesh.position.setY(bounds.height * 0.25 / 2);
-    // }
+    }
+
     myBlock.container.add(hitmesh);
     hitmesh.visible = false;
 
