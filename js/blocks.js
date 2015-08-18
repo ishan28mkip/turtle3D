@@ -547,7 +547,6 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
                 continue;
             }
 
-
             // Another database integrety check.
             if (this.blockList[cblk] == null) {
                 console.log('This is not good: we encountered a null block: ' + cblk);
@@ -588,9 +587,8 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
                 // or it's parent.
                 var dx = cdock[0] - bdock[0];
                 var dy = cdock[1] - bdock[1];
-                var nx = this.blockList[cblk].container.x + dx;
-                // PE : Check this for error when the docking happens with parent
-                var ny = this.blockList[cblk].container.y + dy;
+                var nx = this.blockList[cblk].container.position.x + dx;
+                var ny = this.blockList[cblk].container.position.y - dy;
                 this.moveBlock(blk, nx, ny);
             }
 
@@ -610,7 +608,7 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
         // (4) Is it an arg block connected to a 2-arg block?
         // (5) Recheck if it inside of a expandable block.
         // TODO :  
-        // (6) Handle 3-arg Blocks.
+        // (6) Handle 3-arg Blocks, they have to be handled exactly like 2-arg's except resize should happen when a argument is connected to the center port
 
         // Find any containing expandable blocks.
         var checkExpandableBlocks = [];
@@ -631,6 +629,8 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
         }
 
         this.checkTwoArgBlocks = [];
+        this.checkThreeArgBlocks = [];
+
         var checkArgBlocks = [];
         var myBlock = this.blockList[thisBlock];
         if (myBlock == null) {
@@ -643,15 +643,24 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
             var cBlock = this.blockList[c];
         }
 
+        // TODO : Handle three arg blocks
         // If it is an arg block, where is it coming from?
         if (myBlock.isArgBlock() && c != null) {
             // We care about twoarg (2arg) blocks with
-            // connections to the first arg;
+            // connections to the first arg, and threearg
+            // (3arg) blocks with connection in the 
+            // first and second arg.
             if (this.blockList[c].isTwoArgBlock()) {
                 if (cBlock.connections[1] == thisBlock) {
                     this.checkTwoArgBlocks.push(c);
                 }
-            } else if (this.blockList[c].isArgBlock() && this.blockList[c].isExpandableBlock()) {
+            }
+            else if(this.blockList[c].isThreeArgBlock()){
+                if(cBlock.connections[1] == thisBlock || cBlock.connections[2] == thisBlock){
+                    this.checkThreeArgBlocks.push(c);
+                }
+            }
+            else if (this.blockList[c].isArgBlock() && this.blockList[c].isExpandableBlock()) {
                 if (cBlock.connections[1] == thisBlock) {
                     this.checkTwoArgBlocks.push(c);
                 }
@@ -670,7 +679,6 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
             myBlock.connections[0] = null;
         }
 
-
         // Look for a new connection.
         var x1 = myBlock.container.position.x + myBlock.docks[0][0];
         var y1 = myBlock.container.position.y - myBlock.docks[0][1];
@@ -678,11 +686,11 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
         // enough, connect;
         var newBlock = null;
         var newConnection = null;
+
         // TODO: Make minimum distance relative to scale.
         var min = MINIMUMDOCKDISTANCE;
         var blkType = myBlock.docks[0][2]
 
-        // TODO : Optimize this code by reducing the number of iterations by imposing conditions
         for (var b = 0; b < this.blockList.length; b++) {
             // Don't connect to yourself.
             if (b == thisBlock) {
@@ -742,6 +750,7 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
         }
 
         // If it is an arg block, where is it coming from?
+        // TODO : Add threearg Block here
         if (myBlock.isArgBlock() && newBlock != null) {
             // We care about twoarg blocks with connections to the
             // first arg;
@@ -814,7 +823,7 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
             }
             blocks.adjustExpandableClampBlock(checkExpandableBlocks);
             blocks.refreshCanvas(1);
-        }, 250);
+        }, 100);
     }
 
     this.testConnectionType = function(type1, type2) {
@@ -893,7 +902,6 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
         this.refreshCanvas(1);
     }
 
-    // DONE : Tested
     this.moveBlock = function(blk, x, y) {
         // Move a block (and its label) to x, y.
         var myBlock = this.blockList[blk];
@@ -903,9 +911,15 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
             myBlock.x = x;
             myBlock.y = y;
             if (myBlock.collapseContainer != null) {
-                // FIXME : Fix this positioning
-                myBlock.collapseContainer.position.setX(x + COLLAPSEBUTTONXOFF * (this.blockList[blk].protoblock.scale / 2));
-                myBlock.collapseContainer.position.setY(y + COLLAPSEBUTTONYOFF * (this.blockList[blk].protoblock.scale / 2));
+
+                var parentHeight = myBlock.bitmap.imgHeight;
+                var parentWidth = myBlock.bitmap.imgWidth;
+
+                var height = myBlock.collapseBitmap.imgHeight;
+                var width = myBlock.collapseBitmap.imgWidth;
+
+                myBlock.collapseContainer.position.setX(myBlock.container.position.x + COLLAPSEBUTTONXOFF - parentWidth / 2 - width / 2);
+                myBlock.collapseContainer.position.setY(myBlock.container.position.y - height / 2 - myBlock.docks[0][1]);
             }
         } else {
             console.log('no container yet');
@@ -914,7 +928,6 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
         }
     }
 
-    // DONE : Tested
     this.moveBlockRelative = function(blk, dx, dy) {
         // Move a block (and its label) by dx, dy.
         var myBlock = this.blockList[blk];
@@ -934,10 +947,10 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
         }
     }
 
+    // TODO : Fix this function 
     this.updateBlockText = function(blk) {
         // // When we create new blocks, we may not have assigned the
         // // value yet.
-        // TODO : Fix this function and add the text utils
         var myBlock = this.blockList[blk];
         var maxLength = 8;
         if (myBlock.text == null) {
@@ -1223,10 +1236,6 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
 
         // We need a container for the block graphics.
         myBlock.container = new THREE.Group();
-        
-        this.indexBlockList[this.currentZindex] = myBlock.container;
-        myBlock.updateZindex(this.currentZindex);
-        this.currentZindex += 50;
 
         // axes = buildAxes( 1000 );
         // myBlock.container.add( axes );
@@ -1458,14 +1467,12 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
         return blk;
     }
 
-    // DONE
     this.findDragGroup = function(blk) {
         // Generate a drag group from blocks connected to blk
         this.dragGroup = [];
         this.calculateDragGroup(blk);
     }
 
-    // DONE
     this.calculateDragGroup = function(blk) {
         // Give a block, find all the blocks connected to it
         if (blk == null) {
@@ -1736,7 +1743,6 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
         myActionBlock.palette.add(myActionBlock);
     }
 
-    // DONE | TODO : Understand this
     this.insideExpandableBlock = function(blk) {
         // Returns a containing expandable block or null
         if (this.blockList[blk] == null) {
@@ -1765,15 +1771,15 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
         this.timeOut == null;
         this.inLongPress = true;
         this.copyButton.visible = true;
-        this.copyButton.x = myBlock.container.x - 27;
-        this.copyButton.y = myBlock.container.y - 27;
+        this.copyButton.position.setX(myBlock.container.position.x - 27);
+        this.copyButton.position.setY(myBlock.container.position.y - 27);
         this.dismissButton.visible = true;
-        this.dismissButton.x = myBlock.container.x + 27;
-        this.dismissButton.y = myBlock.container.y - 27;
+        this.dismissButton.position.setX(myBlock.container.position.x + 27);
+        this.dismissButton.poisition.setY(myBlock.container.position.y - 27);
         if (myBlock.name == 'action') {
             this.saveStackButton.visible = true;
-            this.saveStackButton.x = myBlock.container.x + 82;
-            this.saveStackButton.y = myBlock.container.y - 27;
+            this.saveStackButton.position.setX(myBlock.container.position.x + 82);
+            this.saveStackButton.position.setY(myBlock.container.position.y - 27);
         }
         this.refreshCanvas(1);
     }
@@ -2370,8 +2376,17 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
 
         for (var blk = 0; blk < this.blockList.length; blk++) {
             if(this.blockList[blk].collapseContainer != null) {
-                this.blockList[blk].collapseContainer.x = this.blockList[blk].container.x + COLLAPSEBUTTONXOFF * (this.blockList[blk].protoblock.scale / 2);
-                this.blockList[blk].collapseContainer.y = this.blockList[blk].container.y + COLLAPSEBUTTONYOFF * (this.blockList[blk].protoblock.scale / 2);
+                // FIXME : Scaling
+                // this.blockList[blk].collapseContainer.position.setX(this.blockList[blk].container.position.x + COLLAPSEBUTTONXOFF * (this.blockList[blk].protoblock.scale / 2));
+                // this.blockList[blk].collapseContainer.position.setY(this.blockList[blk].container.position.y + COLLAPSEBUTTONYOFF * (this.blockList[blk].protoblock.scale / 2));
+                var parentHeight = this.blockList[blk].bitmap.imgHeight;
+                var parentWidth = this.blockList[blk].bitmap.imgWidth;
+
+                var height = this.blockList[blk].collapseBitmap.imgHeight;
+                var width = this.blockList[blk].collapseBitmap.imgWidth;
+
+                this.blockList[blk].collapseContainer.position.setX(this.blockList[blk].container.position.x + COLLAPSEBUTTONXOFF - parentWidth / 2 - width / 2);
+                this.blockList[blk].collapseContainer.position.setY(this.blockList[blk].container.position.y - height / 2 - this.blockList[blk].docks[0][1]);
             }
         }
         this.refreshCanvas(1);
@@ -2416,7 +2431,7 @@ function sendStackToTrash(blocks, myBlock) {
         if (turtle != null) {
             console.log('putting turtle ' + turtle + ' in the trash');
             blocks.turtles.turtleList[turtle].trash = true;
-            blocks.turtles.turtleList[turtle].container.visible = false;
+            blocks.turtles.turtleList[turtle].bitmap.visible = false;
             blocks.turtles.turtleList[turtle].axis.visible = false;
         } else {
             console.log('null turtle');
