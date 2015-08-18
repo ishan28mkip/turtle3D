@@ -1,6 +1,5 @@
 // TODO :
-// (1) Currently there are 2 stages, a 2D stage and 3D stage. Remove the 2D stage when the 3D turtle is available.
-// (2) Make a utility to produce a thick line in windows
+// (1) Make a utility to produce a thick line in windows (IMP)
 
 
 // Turtles
