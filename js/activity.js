@@ -39,11 +39,7 @@ define(function(require) {
             console.log(e);
         }
 
-        // var canvas = docById('myCanvas');
         var canvas = docById('scriptingOutput');
-
-        // See why is this queue created?
-        // var queue = new createjs.LoadQueue(false);
 
         // Check for the various File API support.
         if (window.File && window.FileReader && window.FileList && window.Blob) {
@@ -71,8 +67,12 @@ define(function(require) {
         var clearBox;
         var thumbnails;
         var buttonsVisible = true;
+        // Contains the complete top header
         var headerContainer = null;
+        // Contains all error containers
         var errorContainer = null;
+        // Contains all the messages shown on screen
+        var msgContainer = null;
         var toolbarButtonsVisible = true;
         var menuButtonsVisible = false;
         var rightMenuContainer = null;
@@ -81,9 +81,10 @@ define(function(require) {
         var currentKeyCode = 0;
         var lastKeyCode = 0;
         var pasteContainer = null;
-
-        // See where is this scene variable used?
-        // var scene;
+        // 3D Axis
+        var axes;
+        // 2D Grid on the XY plane
+        var grid;
 
 
         // Setup variables for three.js
