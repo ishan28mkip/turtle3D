@@ -1044,7 +1044,6 @@ define(function(require) {
                 palettes.hide();
             } else {
                 palettes.show();
-                // palettes.bringToTop();
             }
         }
 
@@ -1061,11 +1060,6 @@ define(function(require) {
                 console.log('calling toggleCollapsibles');
                 blocks.toggleCollapsibles();
             }
-        }
-
-        function stop() {
-            // FIXME: who calls this???
-            createjs.Ticker.removeEventListener('tick', tick);
         }
 
         function onStopTurtle() {
@@ -1121,10 +1115,13 @@ define(function(require) {
                 localStorage['SESSION' + p] = prepareExport();
             } catch (e) { console.log(e); }
 
+            // TODO : Make a method to store the drawing's as well
             // TODO : Add a flag in turtles to check if nothing has been drawn as of yet instead of this function 
             // if (isSVGEmpty(turtles)) {
             //     return;
             // }
+            
+            // IMP TODO : Write a tool to get the drawn lines back
 
             // var img = new Image();
             // var svgData = doSVG(canvas, logo, turtles, 320, 240, 320 / canvas.width);
@@ -1299,73 +1296,66 @@ define(function(require) {
                 return;
             }
 
-            if (blk !== undefined && blk !== null
-                && !blocks.blockList[blk].collapsed) {
-                var fromX = (canvas.width - 1000) / 2;
-                var fromY = 128;
-                var toX = blocks.blockList[blk].x + blocksContainer.position.x;
-                var toY = blocks.blockList[blk].y + blocksContainer.position.y;
+            if (blk !== undefined && blk !== null && !blocks.blockList[blk].collapsed) {
+
+                var errorWidth = errorArtwork['emptyheap'].artwork.imgWidth;
+                var errorHeight = errorArtwork['emptyheap'].artwork.imgHeight;
+
+                var from = new THREE.Vector3(threeCoorX(100) + errorWidth / 2, threeCoorY(100) - errorHeight / 2,  0);
+                var to = new THREE.Vector3(blocks.blockList[blk].x + blocksContainer.position.x, blocks.blockList[blk].y + blocksContainer.position.y, 0); 
+
 
                 if (errorMsgArrow == null) {
                     errorMsgArrow = new THREE.Group();
                     scriptingScene.add(errorMsgArrow);
                 }
 
-                // TODO : Create a arrow here
+                // FIXME : LineWidth
+                var material = new THREE.LineBasicMaterial({
+                    color: 0xff0000,
+                    linewidth: 4
+                });
 
-                // var line = new createjs.Shape();
-                // errorMsgArrow.addChild(line);
-                // line.graphics.setStrokeStyle(4).beginStroke('#ff0031').moveTo(fromX, fromY).lineTo(toX, toY);
-                // stage.setChildIndex(errorMsgArrow, stage.getNumChildren() - 1);
-
-                // var angle = Math.atan2(toX - fromX, fromY - toY) / Math.PI * 180;
-                // var head = new createjs.Shape();
-                // errorMsgArrow.addChild(head);
-                // head.graphics.setStrokeStyle(4).beginStroke('#ff0031').moveTo(-10, 18).lineTo(0, 0).lineTo(10, 18);
-                // head.x = toX;
-                // head.y = toY;
-                // head.rotation = angle;
+                var geometry = new THREE.Geometry();
+                geometry.vertices.push(from,to);
+                var line = new THREE.Line( geometry, material );
+                errorMsgArrow.add(line);
+                refreshCanvas(1);
             }
 
-            // TODO : Bring to top all the error artwork when setting visibility as true
-            console.log(msg);
+
             switch (msg) {
                 case 'empty heap.':
-                    // errorArtwork['emptyheap'].visible = true;
+                    errorArtwork['emptyheap'].visible = true;
                     break;
                 case 'Cannot take square root of negative number.':
-                    // errorArtwork['negroot'].visible = true;
+                    errorArtwork['negroot'].visible = true;
                     break;
 		        case 'Cannot find action.':
                     if (text == null) {
                         text = 'foo';
                     }
-                    // TODO : Edit the text here
-                    // errorArtwork['nostack'].children[1].text = text;
-                    // errorArtwork['nostack'].visible = true;
+                    errorArtwork['nostack'].children[1].text = text;
+                    errorArtwork['nostack'].visible = true;
                     break;
 		        case 'Cannot find box.':
                     if (text == null) {
                         text = 'foo';
                     }
-                    // errorArtwork['emptybox'].children[1].text = text;
-                    // errorArtwork['emptybox'].visible = true;
+                    errorArtwork['emptybox'].children[1].text = text;
+                    errorArtwork['emptybox'].visible = true;
                     break;
                 case 'Cannot divide by zero.':
-                    // errorArtwork['zerodivide'].visible = true;
+                    errorArtwork['zerodivide'].visible = true;
                     break;
                 case 'Not a number.':
-                    // errorArtwork['notanumber'].visible = true;
+                    errorArtwork['notanumber'].visible = true;
                     break;
                 case 'Missing argument.':
-                    // errorArtwork['noinput'].visible = true;
+                    errorArtwork['noinput'].visible = true;
                     break;
                 default:
-                    // TODO : Uncomment this when the container is ready
-                    // var errorMsgContainer = errorMsgText.parent;
-                    // errorMsgContainer.visible = true;
-                    // TODO : Set default error message text
-                    // errorMsgText.text = msg;
+                    console.log('Error msg does not match error containers');
                     break;
             }
             refreshCanvas(1);
