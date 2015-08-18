@@ -257,13 +257,28 @@ function loadPaletteButtonHandler(palettes, name) {
 
     palettes.buttons[name].on('mouseover',function(event){
         event.target.hitmesh.visible = true;
-        // event.target.hitmesh.material.opacity = 0.6;
-        palettes.refreshCanvas(1);
+        var tween = TweenLite.to(event.target.hitmesh.material, 0.5, 
+        {   
+            opacity : 0.7,
+            onUpdate: function(){
+                palettes.refreshCanvas(1);
+            }
+        });
     });
 
+    // FIXME : Very odd behaviour when opacity set to zero
     palettes.buttons[name].on('mouseout',function(event){
-        event.target.hitmesh.visible = false;
-        palettes.refreshCanvas(1);
+        var tween = TweenLite.to(event.target.hitmesh.material, 0.5, 
+        {   
+            opacity : 0.26,
+            onUpdate: function() {
+                palettes.refreshCanvas(1);
+            },
+            onComplete : function(){
+                event.target.hitmesh.visible = false;
+                palettes.refreshCanvas(1);
+            }
+        });
     });
 
     palettes.buttons[name].on('mousedown', function(event) {
