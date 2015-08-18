@@ -530,20 +530,19 @@ function Turtles(canvas, stage2D, stage3D, refreshCanvas) {
             myTurtle.startBlock = startBlock;
 
             if (startBlock != null) {
-                myTurtle.decorationBitmap = myTurtle.bitmap.clone();
-                startBlock.container.add(myTurtle.decorationBitmap);
-                myTurtle.decorationBitmap.name = 'decoration';
+                
+                if(startBlock.decorationContainer === null){
+                    startBlock.decorationContainer = new THREE.Group();
+                    startBlock.container.add(startBlock.decorationContainer)
+                }
+                startBlock.decorationContainer.add(myTurtle.bitmap);
 
                 var bounds = new THREE.Box3().setFromObject( startBlock.container );
-                startBlock.container.bounds = bounds;
-                startBlock.container.bounds.size = startBlock.container.bounds.size();
-                // FIXME : Fix the position of the decorative bitmap
-                myTurtle.decorationBitmap.position.setX(bounds.size.x - 30 * startBlock.protoblock.scale / 2);
-                myTurtle.decorationBitmap.position.setY(35 * startBlock.protoblock.scale / 2);
+                startBlock.bounds = bounds;
+                startBlock.bounds.size = startBlock.bounds.size();
 
-                myTurtle.decorationBitmap.scale.setX(0.5 * startBlock.protoblock.scale / 2);
-                myTurtle.decorationBitmap.scale.setY(0.5 * startBlock.protoblock.scale / 2);
-                myTurtle.decorationBitmap.scaleStore = 0.5 * startBlock.protoblock.scale / 2;
+                startBlock.decorationContainer.position.setX(bounds.size.x / 2 - 20);
+                startBlock.decorationContainer.position.setY(-(startBlock.docks[1][1] + startBlock.docks[0][1]) / 2);
 
             }
             loadBlockInfo(me,myTurtle,blkInfoAvailable);
