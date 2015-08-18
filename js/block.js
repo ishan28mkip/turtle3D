@@ -1068,8 +1068,8 @@ function calculateBlockHitArea(myBlock) {
     //     hitmesh.position.setY(bounds.height * 0.25 / 2);
     // }
     myBlock.container.add(hitmesh);
-     //Placing the hitmesh in the top right corner
     hitmesh.visible = false;
+
     myBlock.container.hitmesh = hitmesh;
 }
 
@@ -1079,13 +1079,14 @@ function loadEventHandlers(myBlock) {
     var thisBlock = myBlock.blocks.blockList.indexOf(myBlock);
     var blocks = myBlock.blocks;
 
-
+    // FIXME
     calculateBlockHitArea(myBlock);
+
     var moved = false;
     var locked = false;
     var getInput = window.hasMouse;
-    var px,py,dx,dy;
-
+    var oldX, oldY;
+    var dx,dy;
 
     myBlock.container.on('mouseover', function(event) {
         blocks.highlight(thisBlock, true);
@@ -1093,118 +1094,12 @@ function loadEventHandlers(myBlock) {
         blocks.refreshCanvas(1);
     });
 
-    myBlock.container.on('click', function(event) {
-        if (locked) {
-            return;
-        }
-        locked = true;
-        setTimeout(function() {
-            locked = false;
-        }, 500);
-        // hideDOMLabel(); //FIXME : fix the dom labels
-        if ((!window.hasMouse && getInput) || (window.hasMouse && !moved)) {
-            if (blocks.selectingStack) {
-                var topBlock = blocks.findTopBlock(thisBlock);
-                blocks.selectedStack = topBlock;
-                blocks.selectingStack = false;
-            } else if (myBlock.name == 'media') {
-                myBlock.doOpenMedia(myBlock);
-            } else if (myBlock.name == 'loadFile') {
-                myBlock.doOpenMedia(myBlock);
-            } else if (myBlock.name == 'text' || myBlock.name == 'number') {
-                var x = myBlock.container.position.x
-                var y = myBlock.container.position.y
-
-                var movedStage = false;
-
-                if (myBlock.name == 'text') {
-                    var type = 'text';
-                } else {
-                    var type = 'number';
-                }
-
-                // A place in the DOM to put modifiable labels (textareas).
-                var labelElem = docById('labelDiv');
-                labelElem.innerHTML = '<input id="' + type + 'Label" \
-                    style="position: absolute; \
-                    -webkit-user-select: text;-moz-user-select: text;-ms-user-select: text;" \
-                    class="' + type + '" type="' + type + '" \
-                    value="' + myBlock.value + '" />';
-                labelElem.classList.add('hasKeyboard');
-
-                myBlock.label = docById(type + 'Label');
-
-                var focused = false;
-                var blur = function (event) {
-                    if (!focused) {
-                        return;
-                    }
-
-                    labelChanged(myBlock);
-                    event.preventDefault();
-
-                    labelElem.classList.remove('hasKeyboard');
-                    window.scroll(0, 0);
-                    myBlock.label.style.display = 'none';
-                    myBlock.label.removeEventListener('keypress', keypress);
-
-                    if (movedStage) {
-                         blocks.stage.y = fromY;
-                         blocks.updateStage();
-                    }
-                };
-                myBlock.label.addEventListener('blur', blur);
-
-                var keypress = function (event) {
-                    if ([13, 10, 9].indexOf(event.keyCode) !== -1) {
-                        blur(event);
-                    }
-                };
-                myBlock.label.addEventListener('keypress', keypress);
-
-                myBlock.label.addEventListener('change', function() {
-                    labelChanged(myBlock);
-                });
-
-
-                // FIXME : Add scaling fix here
-                var width = 100;
-                var height = 20;
-                // var width = Math.round(100 * blocks.scale) * myBlock.protoblock.scale / 2;
-                // var height = Math.round(20 * blocks.scale * myBlock.protoblock.scale / 2);
-
-                
-                myBlock.label.style.left = Math.round(mouseCoorX((x + blocks.stage.position.x)) - width/2)  + 'px';
-                myBlock.label.style.top = Math.round(mouseCoorY((y + blocks.stage.position.y)) - height/2) + 'px';
-                myBlock.label.style.width = width + 'px';
-                myBlock.label.style.fontSize = height + 'px';
-                myBlock.label.style.display = '';
-                // Keep the z-index above the scripting output index
-                myBlock.label.style.zIndex = 25;
-                myBlock.label.focus();
-
-                // Firefox fix
-                setTimeout(function () {
-                    myBlock.label.style.display = '';
-                    myBlock.label.focus();
-                    focused = true;
-                }, 100);
-            } else {
-                // TODO : Fix inLongPress to properly support click and run
-                if (!blocks.inLongPress) {
-                    // var topBlock = blocks.findTopBlock(thisBlock);
-                    // console.log('running from ' + blocks.blockList[topBlock].name);
-                    // blocks.logo.runLogoCommands(topBlock);
-                }
-            }
-        }
-    });
-
     myBlock.container.on('mousedown', function(event) {
         hideDOMLabel();
+        oldX = event.clientX;
+        oldY = event.clientY;
         // Track time for detecting long pause...
         // but only for top block in stack
-        // TODO : Add support to trigger long press
         if (myBlock.connections[0] == null) {
             var d = new Date();
             blocks.time = d.getTime();
@@ -1221,33 +1116,13 @@ function loadEventHandlers(myBlock) {
 
         // And possibly the collapse button.
         if (myBlock.collapseContainer != null) {
-            // FIXME : set the collapseContainer z-index same as other
-            // blocks.stage.setChildIndex(myBlock.collapseContainer, blocks.stage.getNumChildren() - 1);
+
         }
 
-        moved = false;
-    });
-
-    myBlock.container.on('mouseout', function(event) {
-        if (!blocks.inLongPress) {
-            mouseoutCallback(myBlock, event, moved);
-        }
-        moved = false;
-    });
-
-    myBlock.container.on('pressup', function(event) {
-        px = false;
-        py = false;
-        if (!blocks.inLongPress) {
-            mouseoutCallback(myBlock, event, moved);
-        }
-        moved = false;
     });
 
     myBlock.container.on('pressmove', function(event) {
-        // FIXME: More voodoo, fix this function, causing errors
-        // event.nativeEvent.preventDefault();
-
+        moved = true;
         // FIXME: need to remove timer
         if (blocks.timeOut != null) {
             clearTimeout(blocks.timeOut);
