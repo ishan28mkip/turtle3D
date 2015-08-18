@@ -245,25 +245,24 @@ define(function(require) {
             logo.doStopTurtle();
         }
 
-        var cartesianVisible = false;
-        function doCartesian() {
-            if (cartesianVisible) {
-                hideCartesian();
-                cartesianVisible = false;
-            } else {
-                showCartesian();
-                cartesianVisible = true;
+        // FIXME : Currently Cartesian icon is used for axes
+        function doAxes() {
+            if(axes !== undefined && axes.visible){
+                axes.visible = false;
             }
+            else if(axes !== undefined){
+                axes.visible = true;
+            }
+            refreshCanvas(2);
         }
 
-        var polarVisible = false;
-        function doPolar() {
-            if (polarVisible) {
-                hidePolar();
-                polarVisible = false;
-            } else {
-                showPolar();
-                polarVisible = true;
+        // FIXME : Currently Polar icon is used for grids
+        function doGrid() {
+            if(grid !== undefined && grid.visible){
+                grid.visible = false;
+            }
+            else if(grid !== undefined){
+                grid.visible = true;
             }
             refreshCanvas(2);
         }
@@ -628,32 +627,13 @@ define(function(require) {
             cameraID = id;
         }
 
-        function createGrid(imagePath,name) {
-            var container = new THREE.Group();
-            scriptingScene.add(container);
+        function createGrid () {
+            axes = buildAxes( 1000 );
+            turtleScene.add( axes );
 
-            var img = new Image();
-            img.onload = function() {
-
-                var canvas = document.createElement('canvas');
-                canvas.width = img.width;
-                canvas.height = img.height;
-                var context = canvas.getContext('2d');
-                context.drawImage(img, 0, 0);
-                var texture = new THREE.Texture(canvas);
-                texture.needsUpdate = true;
-                texture.minFilter = THREE.NearestFilter; 
-                var material = new THREE.MeshBasicMaterial( {map: texture, transparent : true, depthWrite : false} );
-                var bitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(img.width, img.height),material);
-                bitmap.name = name;
-                bitmap.imgWidth = img.width;
-                bitmap.imgHeight = img.height;
-
-                // TODO : Set scaling when size is different
-                // if(size != originalSize){
-                //     bitmap.scale.setX(size/originalSize);
-                //     bitmap.scale.setY(size/originalSize);
-                // }
+            grid = new THREE.GridHelper(100, 10);
+            turtleScene.add( grid );
+        }
 
                 container.add(bitmap);
                 bitmap.visible = false;
@@ -995,7 +975,6 @@ define(function(require) {
         }
 
         // FIXME: confirm???
-        // FIXME : fix this function
         function sendAllToTrash(addStartBlock, doNotSave) {
             var dx = 2000;
             var dy = cellSize;
@@ -1009,10 +988,11 @@ define(function(require) {
                     if (turtle != null) {
                         console.log('sending turtle ' + turtle + ' to trash');
                         turtles.turtleList[turtle].trash = true;
-                        turtles.turtleList[turtle].container.visible = false;
+                        turtles.turtleList[turtle].axis = false;
                     }
                 }
             }
+            // FIXME
             if (addStartBlock) {
                 function postprocess() {
                     last(blocks.blockList).x = 250;
@@ -1036,7 +1016,8 @@ define(function(require) {
                 saveLocally();
             }
 
-            update = true;
+            refreshCanvas(1);
+            refreshCanvas(2);
         }
 
         function changePaletteVisibility() {
@@ -1566,8 +1547,8 @@ define(function(require) {
             var menuNames = [
                 ['planet', doOpenSamples],
                 ['paste-disabled', pasteStack],
-                ['Cartesian', doCartesian],
-                ['polar', doPolar],
+                ['Cartesian', doAxes],
+                ['polar', doGrid],
                 ['bigger', doBiggerFont],
                 ['smaller', doSmallerFont],
                 ['plugin', doOpenPlugin],
@@ -1657,8 +1638,7 @@ define(function(require) {
                         rectShape.lineTo( -w/2, h/2 );
 
                         var rectGeom = new THREE.ShapeGeometry( rectShape );
-                        var rectMesh = new THREE.Mesh( rectGeom, new THREE.MeshBasicMaterial( { color: 0xFFE5B4 } ) ) ;   
-                        rectMesh.position.setZ(1);
+                        var rectMesh = new THREE.Mesh( rectGeom, new THREE.MeshBasicMaterial( { color: 0xFFE5B4 , transparent : true} ) ) ;   
                         rectMesh.visible = false;
                         helpContainer.add(rectMesh);
                         helpContainer.hitmesh = rectMesh;
