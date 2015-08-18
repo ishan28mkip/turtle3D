@@ -473,37 +473,31 @@ function Block(protoblock, blocks, overrideName) {
             this.container.add(this.text);
             this.text.align = 'center';
             this.text.vAlign = 'middle';
-            // this.text.textBaseline = 'alphabetic';
 
-            //     this.text.x = VALUETEXTX * this.protoblock.scale / 2.;
-            //     this.text.y = VALUETEXTY * this.protoblock.scale / 2.;
-            
-            // Make sure text is on top.
-            this.text.position.setZ(100);
 
 
         } else if (this.protoblock.parameter) {
-        //     // Parameter blocks get a text label to show their current value
-        //     this.text.textBaseline = 'alphabetic';
-        //     this.container.addChild(this.text);
-        //     var bounds = this.container.getBounds();
-        //     if (this.protoblock.args == 0) {
-        //         this.text.textAlign = 'right';
-        //         this.text.x = bounds.width - 25;
-        //         this.text.y = VALUETEXTY * this.protoblock.scale / 2.;
-        //     } else if (this.isArgBlock()) {
-        //         this.text.textAlign = 'left';
-        //         this.text.x = BOXTEXTX;
-        //         if (this.docks[0][2] == 'booleanout') {
-        //             this.text.y = bounds.height - 15;
-        //         } else {
-        //             this.text.y = VALUETEXTY * this.protoblock.scale / 2.;
-        //         }
-        //     }
+            // Parameter blocks get a text label to show their current value
+            this.container.add(this.text);
+            if (this.protoblock.args == 0) {
+                // FIXME : Scaling, set font size according to scale
+                this.text.vAlign = 'middle';
+                this.text.align = 'right';
 
-        //     z = this.container.getNumChildren() - 1;
-        //     this.container.setChildIndex(this.text, z);
-        //     this.container.updateCache();
+
+            } else if (this.isArgBlock()) {
+                // FIXME : Scaling, set font size according to scale
+                this.text.align = 'left';
+                this.text.vAlign = 'bottom';
+
+                // TODO : Set special position for booleanout
+                // this.text.x = BOXTEXTX;
+                if (this.docks[0][2] == 'booleanout') {
+                    // this.text.y = bounds.height - 15;
+                } else {
+                    // this.text.y = VALUETEXTY * this.protoblock.scale / 2.;
+                }
+            }
         }
 
         if (['start', 'action'].indexOf(this.name) == -1) {
