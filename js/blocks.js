@@ -18,11 +18,6 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
     this.stage = stage;
     this.refreshCanvas = refreshCanvas;
     this.trashcan = trashcan;
-    
-    // Indicated the current z-index;
-    this.currentZindex = 90000;
-    // A store at all blocks at indexed locations
-    this.indexBlockList = [];
 
     // We keep a dictionary for the proto blocks,
     this.protoBlockDict = {}
@@ -288,6 +283,37 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
                 if (!(childFlowSize == 0 && myBlock.clampCount[clamp] == 1)) {
                     myBlock.updateSlots(clamp, plusMinus, blocksToCheck);
                 }
+            }
+
+            // Check if bounds have been computed
+            if(!myBlock.bounds){
+                var bounds = new THREE.Box3().setFromObject( myBlock.container );
+                myBlock.bounds = bounds;
+                myBlock.bounds.size = myBlock.bounds.size();
+            }
+
+            // Adjust the collapse container position, decoration , hitmesh position
+            // Hitmesh Position
+            var height = myBlock.docks[1][1] - myBlock.docks[0][1];
+            myBlock.container.hitmesh.position.setY(-myBlock.docks[1][1] + height / 2);
+            // Decoration Position
+            if(myBlock.decorationContainer === null){
+                myBlock.decorationContainer = new THREE.Group();
+                myBlock.container.add(myBlock.decorationContainer);
+            }
+            // FIXME : Postitioning, the XY position is corrent, z-index problem
+            myBlock.decorationContainer.position.setX(myBlock.bounds.size.x / 2 - 20);
+            myBlock.decorationContainer.position.setY(-(myBlock.docks[1][1] + myBlock.docks[0][1]) / 2);
+            // collapseContainer Position
+            if (myBlock.collapseContainer != null) {
+                // FIXME : Scaling
+                var height = myBlock.collapseBitmap.imgHeight;
+                var width = myBlock.collapseBitmap.imgWidth;
+
+                var parentWidth = myBlock.bitmap.imgWidth;
+
+                myBlock.collapseContainer.position.setX(myBlock.container.position.x + COLLAPSEBUTTONXOFF - parentWidth / 2 - width / 2);
+                myBlock.collapseContainer.position.setY(myBlock.container.position.y - height / 2 - myBlock.docks[0][1]);
             }
 
             // Recurse through the list.
