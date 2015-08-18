@@ -220,9 +220,10 @@ function ProtoBlock(name) {
     }
 
     // E.g., setXYZ These are expandable.
+    // TODO : Put the style as threearg and change in blocks.js
     this.threeArgBlock = function() {
         this.expandable = true;
-        this.style = 'threearg';
+        this.style = 'twoarg';
         this.size = 3;
         this.args = 3;
         this.dockTypes.push('out');
