@@ -918,24 +918,10 @@ function $() {
     return elements;
 }
 
-
-function calculateCollapseHitArea(myBlock) {
-    // var bounds = myBlock.collapseContainer.get2DBounds(true);
-    // TODO : Create hitmesh once the basic is done
-    // var hitArea = new createjs.Shape();
-    // var w2 = bounds.width;
-    // var h2 = bounds.height;
-    // hitArea.graphics.beginFill('#FFF').drawEllipse(-w2 / 2, -h2 / 2, w2, h2);
-    // hitArea.x = w2 / 2;
-    // hitArea.y = h2 / 2;
-    // myBlock.collapseContainer.hitArea = hitArea;
-}
-
-
 // These are the event handlers for collapsible blocks.
+// TODO
 function loadCollapsibleEventHandlers(myBlock) {
     var thisBlock = myBlock.blocks.blockList.indexOf(myBlock);
-    calculateCollapseHitArea(myBlock);
 
     myBlock.collapseContainer.on('mouseover', function(event) {
         myBlock.blocks.highlight(thisBlock, true);
@@ -1035,14 +1021,13 @@ function loadCollapsibleEventHandlers(myBlock) {
 }
 
 
-// DONE
 function collapseOut(blocks, myBlock, thisBlock, moved, event) {
     // Always hide the trash when there is no block selected.
     trashcan.hide();
     blocks.unhighlight(thisBlock);
     if (moved) {
         // Check if block is in the trash.
-        if (trashcan.overTrashcan(event.clientX / blocks.scale, event.clientY / blocks.scale)) {
+        if (trashcan.overTrashcan(event.clientX, event.clientY)) {
             sendStackToTrash(blocks, myBlock);
         } else {
             // Otherwise, process move.
@@ -1066,7 +1051,7 @@ document.addEventListener('mousemove', function (e) {
     window.hasMouse = true;
 });
 
-// DONE
+
 function calculateBlockHitArea(myBlock) {
     
     var bounds = new THREE.Box3().setFromObject( myBlock.container );
@@ -1383,65 +1368,11 @@ function mouseoutCallback(myBlock, event, moved) {
     }
 }
 
-// DONE
-// FIXME :
-// Currently whenever this function runs, the objects z-index becomes highest + 1,
-// this makes the z-index to grow to large numbers if check is not placed
-// either fix the algo or reset all the z-indexes after a value is reached.
-function ensureDecorationOnTop(myBlock) {
-    // Find the turtle decoration and move it to the top.
-    var decorationIndex;
-    var currZindex = myBlock.container.children[0].position.z;
-    var maxZindex = currZindex;
-    var flag = false;
-
-    for (var child = 1; child < myBlock.container.children.length; child++) {
-        if (myBlock.container.children[child].name == 'decoration') {
-            decorationIndex = child;        
-        }
-        else{
-            currZindex = myBlock.container.children[child].position.z;
-            if(currZindex > maxZindex){
-                maxZindex = currZindex;
-                flag = true;
-            }
-        }
-    }
-
-    if(decorationIndex !== undefined && flag){
-        myBlock.container.children[decorationIndex].position.setZ(maxZindex+1);
-    }
-}
-
-// DONE
-function bringTextToTop(myBlock){
-    var index;
-    var currZindex = myBlock.container.children[0].position.z;
-    var maxZindex = currZindex;
-    var flag = false;
-
-    for (var child = 1; child < myBlock.container.children.length; child++) {
-        if (myBlock.container.children[child] === myBlock.text) {
-            index = child;        
-        }
-        else{
-            currZindex = myBlock.container.children[child].position.z;
-            if(currZindex > maxZindex){
-                maxZindex = currZindex;
-                flag = true;
-            }
-        }
-    }
-    if(index !== undefined && flag){
-        myBlock.text.setZ(maxZindex+1);
-    }
-}
-
-
-// DONE
-function makeBitmap(data, name, callback, args) {
+function makeBitmap(data, name, callback, args, scale) {
     // Async creation of bitmap from SVG data
     // Works with Chrome, Safari, Firefox (untested on IE)
+    scale = (scale === undefined) ? 1 : scale;
+
     var img = new Image();
         img.onload = function () {
             var canvas = document.createElement('canvas');
