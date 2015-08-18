@@ -91,17 +91,27 @@ function buildAxis( src, dst, colorHex, dashed ) {
     geom.computeLineDistances(); 
 
     var axis = new THREE.Line( geom, mat, THREE.LinePieces );
-
     return axis;
 }
 
+// TODO : Priority List
+// (1) : Add touch support
+// (2) : Add cursor Support
+// (3) : Check complete tree for visibility instead of just the parent. 
+//       (Till then only hide parentMesh in the hide Operations)
+// (4) : Even after drag, click event handler is evoked. (Till then use only mouseup)
+// (5) : Port to independent js file in object oriented manner
+// (6) : Remove multiple event hadler array and replace by only one event handler array,
+//       this would allow to use only one ray in the onScene event.
+// (7) : Add bubbling Support
+// (8) : Add many to one and one to many hitmesh binding.
 
-// News 
-// Bubbling needs to be added
-// Optimize the library
-// FIXME mouseup bug : If mousedown is on element1 and element2 also has mousedown and mouseup events attached then mouseup event will fire even if mouse is on element2. Event should only fire if mouse is on element1. 
-// FIXME mouseout can only be used with mouseover & pressmove can only be used along with pressup
-// TODO : Add many to one and one to many binding on hitmesh
+
+// FIXME :
+// (1) Mouseup bug : If mousedown is on element1 and element2 also has mousedown 
+//                     and mouseup events attached then mouseup event will fire even
+//                     if mouse is on element2. Event should only fire if mouse is on element1. 
+// (2) Mouseout can only be used with mouseover & pressmove can only be used along with pressup
 
 // Event handler arrays
 var clickArray = [];
