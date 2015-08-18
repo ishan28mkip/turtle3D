@@ -800,43 +800,46 @@ function Palette(palettes, name) {
 
                         // Add the new image function with scale
                         if (myBlock.image) {
-                            var image = new Image(); 
-                            image.onload = function() {
+                            var img = new Image();
+                            img.onload = function () {
+                                // FIXME : Scaling using myBlock.scale
+                                // bitmap.scaleStore = (MEDIASAFEAREA[2] / image.width * (myBlock.scale / 2));
+                                var scale = 1;
+                                if(img.width > img.height){
+                                    scale = palette.protoContainers[modname].bitmap.imgWidth * 0.8 / img.width;
+                                    // FIXME : What does MEDIASAFEAREA signify?
+                                    // scale = MEDIASAFEAREA[2] / img.width;
+                                }
+                                else{
+                                    scale = palette.protoContainers[modname].bitmap.imgHeight * 0.8 / img.height;
+                                    // FIXME : What does MEDIASAFEAREA signify?
+                                    // scale =  MEDIASAFEAREA[2] / img.height;
+                                }
                                 var canvas = document.createElement('canvas');
-                                canvas.width = image.width;
-                                canvas.height = image.height;
+                                canvas.width = img.width * scale;
+                                canvas.height = img.height * scale;
                                 var context = canvas.getContext('2d');
-                                context.drawImage(image, 0, 0);
+                                context.drawImage(img, 0, 0, img.width * scale, img.height * scale);
                                 var texture = new THREE.Texture(canvas);
                                 texture.needsUpdate = true;
                                 texture.minFilter = THREE.NearestFilter; 
-                                var material = new THREE.MeshBasicMaterial( {map: texture, transparent : true, depthWrite : false} );
-                                var bitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(image.width, image.height),material);
-                                bitmap.name = modname;
-                                bitmap.imageWidth = image.width;
-                                bitmap.imageHeight = image.height;
-                                if(image.width > image.height){
-                                    // FIXME : Fix the scaling issues together
-                                    bitmap.scale.setX(MEDIASAFEAREA[2] / image.width);
-                                    bitmap.scale.setY(MEDIASAFEAREA[2] / image.width );
-                                    bitmap.scaleStore = (MEDIASAFEAREA[2] / image.width );
-                                    // bitmap.scale.setX(MEDIASAFEAREA[2] / image.width * (myBlock.scale / 2));
-                                    // bitmap.scale.setY(MEDIASAFEAREA[2] / image.width * (myBlock.scale / 2));
-                                    // bitmap.scaleStore = (MEDIASAFEAREA[2] / image.width * (myBlock.scale / 2));
-                                }
+                                var material = new THREE.MeshBasicMaterial( {map: texture} );
+                                material.transparent = true;
+                                material.depthWrite = false;
 
-                                palette.protoContainers[modname].add(bitmap);
-                                // FIXME : fix the image positions or just add these in the mesh
-                                // bitmap.position.setX(MEDIASAFEAREA[0] * (myBlock.scale / 2));
-                                // bitmap.position.setY(MEDIASAFEAREA[1] * (myBlock.scale / 2));
+                                var bitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(img.width * scale, img.height * scale),material);
+                                bitmap.name = modname+'image';
+                                bitmap.imgWidth = img.width * scale;
+                                bitmap.imgHeight = img.height * scale;
+                                bitmap.initialWidth = img.width;
+                                bitmap.initialHeight = img.height;
+                                // FIXME : Scale Position? Also position is a bit off due to non consideration of the docks
 
-                                // bitmap.position.setX(MEDIASAFEAREA[0]);
-                                // bitmap.position.setY(MEDIASAFEAREA[1]);
-                                bitmap.position.setX(0);
-                                bitmap.position.setY(0);
-                                loadPaletteMenuItemHandler(palette, blk, modname); //Here the calculate bounds function call was there
+                                palette.protoContainers[modname].bitmap.add(bitmap);
+
+                                loadPaletteMenuItemHandler(palette, blk, modname);
                             }
-                            image.src = myBlock.image;
+                            img.src = myBlock.image;
                         } else {
                             loadPaletteMenuItemHandler(palette, blk, modname); //Here the calculate bounds function call was there
                         }
