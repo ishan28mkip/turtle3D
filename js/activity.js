@@ -612,11 +612,11 @@ define(function(require) {
         }
 
         function getStageX() {
-            return turtles.screenX2turtleX(stageX / blocks.scale);
+            return stageX;
         }
 
         function getStageY() {
-            return turtles.screenY2turtleY(stageY / blocks.scale);
+            return stageY;
         }
 
         function getStageMouseDown() {

@@ -1262,42 +1262,18 @@ function loadEventHandlers(myBlock) {
         } else {
             // Make it eaiser to select text on mobile
             setTimeout(function () {
-                // FIXME : THIS Mobile version
                 // moved = Math.abs(event.clientX - original.x) + Math.abs(event.stageY - original.y) > 20 && !window.hasMouse;
                 getInput = !moved;
             }, 200);
         }
 
-        // var oldX = myBlock.container.x;
-        // var oldY = myBlock.container.y;
-        // myBlock.container.x = Math.round(event.stageX / blocks.scale) + offset.x;
-        // myBlock.container.y = Math.round(event.stageY / blocks.scale) + offset.y;
-        // myBlock.x = myBlock.container.x;
-        // myBlock.y = myBlock.container.y;
-        // var dx = Math.round(myBlock.container.x - oldX);
-        // var dy = Math.round(myBlock.container.y - oldY);
-
-        // TODO : When scaling is active throughout then put it here as well
-        // just divide event.clientX and event.clientY with blocks.scale
-
-        if(!px || !py){
-            px = event.clientX;
-            py = event.clientY;
-            dx = 0;
-            dy = 0;
-        }
-        else{
-            dx = event.clientX - px;
-            dy = py - event.clientY;
-        }
+        dx = event.clientX - oldX;
+        dy = oldY - event.clientY;
 
         myBlock.container.position.setX(myBlock.container.position.x + dx);
         myBlock.container.position.setY(myBlock.container.position.y + dy);
 
-
-        // If we are over the trash, warn the user.
-        // Add scaling here
-        // if (trashcan.overTrashcan(event.stageX / blocks.scale, event.stageY / blocks.scale)) {
+        // FIXME : Scaling
         if(trashcan.overTrashcan(event.clientX, event.clientY)){
             trashcan.highlight();
         } else {
@@ -1305,16 +1281,26 @@ function loadEventHandlers(myBlock) {
         }
 
         if (myBlock.isValueBlock() && myBlock.name != 'media') {
-            // Ensure text is on top
-            bringTextToTop(myBlock);
+            if(myBlock.text !== null){
+                bringToTop(myBlock.text);
+            }
+
         } else if (myBlock.collapseContainer != null) {
-            // PE : Check whether the positioning is working fine
-            myBlock.collapseContainer.position.setX(myBlock.container.position.x + COLLAPSEBUTTONXOFF * (myBlock.protoblock.scale / 2));
-            myBlock.collapseContainer.position.setY(myBlock.container.position.y + COLLAPSEBUTTONYOFF * (myBlock.protoblock.scale / 2));
+            
+            var parentHeight = myBlock.bitmap.imgHeight;
+            var parentWidth = myBlock.bitmap.imgWidth;
+
+            var height = myBlock.collapseBitmap.imgHeight;
+            var width = myBlock.collapseBitmap.imgWidth;
+
+            myBlock.collapseContainer.position.setX(myBlock.container.position.x + COLLAPSEBUTTONXOFF - parentWidth / 2 - width / 2);
+            myBlock.collapseContainer.position.setY(myBlock.container.position.y - height / 2 - myBlock.docks[0][1]);
+            // FIXME : Scale
+            // myBlock.collapseContainer.position.setX(myBlock.container.position.x + COLLAPSEBUTTONXOFF * (myBlock.protoblock.scale / 2));
+            // myBlock.collapseContainer.position.setY(myBlock.container.position.y + COLLAPSEBUTTONYOFF * (myBlock.protoblock.scale / 2));
         }
 
         // Move any connected blocks.
-        // PE : Check whether this is working
         blocks.findDragGroup(thisBlock);
         if (blocks.dragGroup.length > 0) {
             for (var b = 0; b < blocks.dragGroup.length; b++) {
@@ -1324,18 +1310,129 @@ function loadEventHandlers(myBlock) {
                 }
             }
         }
-
-        px = event.clientX;
-        py = event.clientY;
-
+        oldX = event.clientX;
+        oldY = event.clientY;
         blocks.refreshCanvas(1);
     });
 
-    myBlock.container.on('mouseout', function(event) {
+    myBlock.container.on('pressup', function(event) {
+        
+    });
+
+    myBlock.container.on('mouseup',function(event){
         if (!blocks.inLongPress) {
             mouseoutCallback(myBlock, event, moved);
         }
+        if(!moved){
+            // Click handling
+            if (locked) {
+            return;
+            }
+            locked = true;
+            setTimeout(function() {
+                locked = false;
+            }, 500);
+            // hideDOMLabel(); //FIXME : fix the dom labels
+            if ((!window.hasMouse && getInput) || (window.hasMouse && !moved)) {
+                if (blocks.selectingStack) {
+                    var topBlock = blocks.findTopBlock(thisBlock);
+                    blocks.selectedStack = topBlock;
+                    blocks.selectingStack = false;
+                } else if (myBlock.name == 'media') {
+                    myBlock.doOpenMedia(myBlock);
+                } else if (myBlock.name == 'loadFile') {
+                    myBlock.doOpenMedia(myBlock);
+                } else if (myBlock.name == 'text' || myBlock.name == 'number') {
+                    var x = myBlock.container.position.x
+                    var y = myBlock.container.position.y
+
+                    var movedStage = false;
+
+                    if (myBlock.name == 'text') {
+                        var type = 'text';
+                    } else {
+                        var type = 'number';
+                    }
+
+                    // A place in the DOM to put modifiable labels (textareas).
+                    var labelElem = docById('labelDiv');
+                    labelElem.innerHTML = '<input id="' + type + 'Label" \
+                        style="position: absolute; \
+                        -webkit-user-select: text;-moz-user-select: text;-ms-user-select: text;" \
+                        class="' + type + '" type="' + type + '" \
+                        value="' + myBlock.value + '" />';
+                    labelElem.classList.add('hasKeyboard');
+
+                    myBlock.label = docById(type + 'Label');
+
+                    var focused = false;
+                    var blur = function (event) {
+                        if (!focused) {
+                            return;
+                        }
+
+                        labelChanged(myBlock);
+                        event.preventDefault();
+
+                        labelElem.classList.remove('hasKeyboard');
+                        window.scroll(0, 0);
+                        myBlock.label.style.display = 'none';
+                        myBlock.label.removeEventListener('keypress', keypress);
+
+                        if (movedStage) {
+                             blocks.stage.y = fromY;
+                             blocks.updateStage();
+                        }
+                    };
+                    myBlock.label.addEventListener('blur', blur);
+
+                    var keypress = function (event) {
+                        if ([13, 10, 9].indexOf(event.keyCode) !== -1) {
+                            blur(event);
+                        }
+                    };
+                    myBlock.label.addEventListener('keypress', keypress);
+
+                    myBlock.label.addEventListener('change', function() {
+                        labelChanged(myBlock);
+                    });
+
+
+                    // FIXME : Add scaling fix here
+                    var width = 100;
+                    var height = 20;
+                    // var width = Math.round(100 * blocks.scale) * myBlock.protoblock.scale / 2;
+                    // var height = Math.round(20 * blocks.scale * myBlock.protoblock.scale / 2);
+
+                    
+                    myBlock.label.style.left = Math.round(mouseCoorX((x + blocks.stage.position.x)) - width/2)  + 'px';
+                    myBlock.label.style.top = Math.round(mouseCoorY((y + blocks.stage.position.y)) - height/2) + 'px';
+                    myBlock.label.style.width = width + 'px';
+                    myBlock.label.style.fontSize = height + 'px';
+                    myBlock.label.style.display = '';
+                    // Keep the z-index above the scripting output index
+                    myBlock.label.style.zIndex = 25;
+                    myBlock.label.focus();
+
+                    // Firefox fix
+                    setTimeout(function () {
+                        myBlock.label.style.display = '';
+                        myBlock.label.focus();
+                        focused = true;
+                    }, 100);
+                } else {
+                    // TODO : Fix inLongPress to properly support click and run
+                    if (!blocks.inLongPress) {
+                        // var topBlock = blocks.findTopBlock(thisBlock);
+                        // console.log('running from ' + blocks.blockList[topBlock].name);
+                        // blocks.logo.runLogoCommands(topBlock);
+                    }
+                }
+            }
+        }
+        moved = false;
     });
+
 }
 
 // DONE | TEST
@@ -1374,26 +1471,28 @@ function makeBitmap(data, name, callback, args, scale) {
     scale = (scale === undefined) ? 1 : scale;
 
     var img = new Image();
-        img.onload = function () {
-            var canvas = document.createElement('canvas');
-            canvas.width = img.width;
-            canvas.height = img.height;
-            var context = canvas.getContext('2d');
-            context.drawImage(img, 0, 0);
-            var texture = new THREE.Texture(canvas);
-            texture.needsUpdate = true;
-            texture.minFilter = THREE.NearestFilter; 
-            var material = new THREE.MeshBasicMaterial( {map: texture} );
-            material.transparent = true;
-            material.depthWrite = false;
-            // me.container.scaleX = size/me.iconsize; //See if the scale variable is required here
-            // me.container.scaleY = size/me.iconsize;
-            // var bitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(me.container.scaleX*img.width, me.container.scaleY*img.height),material);
-            var bitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(img.width, img.height),material);
-            bitmap.name = name;
-            bitmap.imgWidth = img.width;
-            bitmap.imgHeight = img.height;
-            callback(name, bitmap, args);
+    img.onload = function () {
+
+        var canvas = document.createElement('canvas');
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        var context = canvas.getContext('2d');
+        context.drawImage(img, 0, 0, img.width * scale, img.height * scale);
+        var texture = new THREE.Texture(canvas);
+        texture.needsUpdate = true;
+        texture.minFilter = THREE.NearestFilter; 
+        var material = new THREE.MeshBasicMaterial( {map: texture} );
+        material.transparent = true;
+        material.depthWrite = false;
+
+        var bitmap = new THREE.Mesh(new THREE.PlaneBufferGeometry(img.width * scale, img.height * scale),material);
+        bitmap.name = name;
+        bitmap.imgWidth = img.width * scale;
+        bitmap.imgHeight = img.height * scale;
+        bitmap.initialWidth = img.width;
+        bitmap.initialHeight = img.height;
+        
+        callback(name, bitmap, args);
     }
     img.src = 'data:image/svg+xml;base64,' + window.btoa(
         unescape(encodeURIComponent(data)));
