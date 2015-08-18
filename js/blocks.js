@@ -530,12 +530,13 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
         // Walk through each connection except the parent block; the
         // exception being the parent block of boolean 2arg blocks,
         // since the dock[0] position can change.
-        if (myBlock.isTwoArgBooleanBlock()) {
-            var start = 0;
-        } else {
-            var start = 1;
-        }
-        for (var c = start; c < myBlock.connections.length; c++) {
+        // if (myBlock.isTwoArgBooleanBlock()) {
+        //     var start = 0;
+        // } else {
+        //     var start = 1;
+        // }
+
+        for (var c = 0  ; c < myBlock.connections.length; c++) {
             // Get the dock position for this connection.
             var bdock = myBlock.docks[c];
 
