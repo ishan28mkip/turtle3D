@@ -186,11 +186,11 @@ Object.defineProperty(THREE.Object3D.prototype, 'on', {
         }
         else if(!(this.hasOwnProperty('hitmesh'))){
             // TODO : Later log this in a debugger instead
-            // console.log(this , 'does not have a hitmesh and is not a mesh');
+            console.log(this.name , 'does not have a hitmesh and is not a mesh');
         }
         else if(this.hitmesh.type !== 'Mesh'){
             // TODO : Later log this in a debugger instead
-            // console.log(this ,  'has a hitmesh which is not a mesh');
+            console.log(this.name ,  'has a hitmesh which is not a mesh');
         }
 
         if(this.hasOwnProperty('hitmesh') && this.hitmesh.type == 'Mesh'){
@@ -199,16 +199,16 @@ Object.defineProperty(THREE.Object3D.prototype, 'on', {
                 callback(event);
             });
             switch(eventName){
-                case 'click': clickArray.push(this.hitmesh);
+                case 'click': clickArray.unshift(this.hitmesh);
                 break;
-                case 'dblclick': dblclickArray.push(this.hitmesh);
+                case 'dblclick': dblclickArray.unshift(this.hitmesh);
                 break;
                 case 'mousedown' : 
                     if(this._listeners.hasOwnProperty('pressmove')){
                         break;
                     }
                     else{
-                        mousedownArray.push(this.hitmesh);
+                        mousedownArray.unshift(this.hitmesh);
                         break;
                     }
                 case 'mouseup' : 
@@ -216,7 +216,7 @@ Object.defineProperty(THREE.Object3D.prototype, 'on', {
                         break;
                     }
                     else{
-                        mouseupArray.push(this.hitmesh);
+                        mouseupArray.unshift(this.hitmesh);
                         break;
                     }
                 case 'mousemove' : 
@@ -224,7 +224,7 @@ Object.defineProperty(THREE.Object3D.prototype, 'on', {
                         break;
                     }
                     else{
-                        mousemotionArray.push(this.hitmesh);
+                        mousemotionArray.unshift(this.hitmesh);
                         break;
                     }
                 case 'mouseover' : 
@@ -232,7 +232,7 @@ Object.defineProperty(THREE.Object3D.prototype, 'on', {
                         break;
                     }
                     else{
-                        mousemotionArray.push(this.hitmesh);
+                        mousemotionArray.unshift(this.hitmesh);
                         break;
                     }
                 case 'mouseout' :
@@ -240,7 +240,7 @@ Object.defineProperty(THREE.Object3D.prototype, 'on', {
                         break;
                     }
                     else{
-                        mousemotionArray.push(this.hitmesh);
+                        mousemotionArray.unshift(this.hitmesh);
                         break;
                     }
                 case 'pressmove' : 
@@ -248,7 +248,7 @@ Object.defineProperty(THREE.Object3D.prototype, 'on', {
                         break;
                     }
                     else{
-                        mousedownArray.push(this.hitmesh);
+                        mousedownArray.unshift(this.hitmesh);
                         break;
                     }
                 case 'pressup' : 
@@ -256,7 +256,7 @@ Object.defineProperty(THREE.Object3D.prototype, 'on', {
                         break;
                     }
                     else{
-                        mouseupArray.push(this.hitmesh);
+                        mouseupArray.unshift(this.hitmesh);
                         break;
                     }
                 default : callback(false);
@@ -399,7 +399,6 @@ function initMouseEvents(events, renderer, camera){
         }
     }
 }
-
 
 function onSceneEvent(event,eventName){
     event.preventDefault();
