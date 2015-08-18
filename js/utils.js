@@ -125,6 +125,53 @@ var scriptingRenderer;
 var scriptingCamera;
 var num = 0;
 
+Object.defineProperty(THREE.Object3D.prototype, 'addInvert',{
+    enumerable: false,
+    configurable: false,
+    writable: false,
+    value: function( object ){
+        if ( arguments.length > 1 ) {
+
+            for ( var i = 0; i < arguments.length; i ++ ) {
+
+                this.addInvert( arguments[ i ] );
+
+            }
+
+            return this;
+
+        };
+
+        if ( object === this ) {
+
+            THREE.error( "THREE.Object3D.add: object can't be added as a child of itself.", object );
+            return this;
+
+        }
+
+        if ( object instanceof THREE.Object3D ) {
+
+            if ( object.parent !== undefined ) {
+
+                object.parent.remove( object );
+
+            }
+
+            object.parent = this;
+            object.dispatchEvent( { type: 'added' } );
+
+            this.children.unshift( object );
+
+        } else {
+
+            THREE.error( "THREE.Object3D.add: object not an instance of THREE.Object3D.", object );
+
+        }
+
+        return this;
+    }
+});
+
 // Binding the on event to Object3D prototype
 Object.defineProperty(THREE.Object3D.prototype, 'on', {
     enumerable: false,
