@@ -851,7 +851,20 @@ function Palette(palettes, name) {
                         }
                     }
 
-                    artwork = artwork.replace(/fill_color/g, PALETTEFILLCOLORS[myBlock.palette.name]).replace(/stroke_color/g, PALETTESTROKECOLORS[myBlock.palette.name]).replace('block_label', block_label);
+                    if (PALETTEBLOCKFILLCOLORS.hasOwnProperty(myBlock.name)) {
+                        var paletteColors = [
+                            PALETTEBLOCKFILLCOLORS[myBlock.name],
+                            PALETTEBLOCKSTROKECOLORS[myBlock.name]
+                        ];    
+                    }
+                    else{
+                        var paletteColors = [
+                            PALETTEFILLCOLORS[myBlock.palette.name],
+                            PALETTESTROKECOLORS[myBlock.palette.name]
+                        ];
+                    }
+
+                    artwork = artwork.replace(/fill_color/g, paletteColors[0]).replace(/stroke_color/g, paletteColors[1]).replace('block_label', block_label);
 
                     while (myBlock.staticLabels.length < myBlock.args + 1) {
                         myBlock.staticLabels.push('');
@@ -859,7 +872,7 @@ function Palette(palettes, name) {
                     for (var i = 1; i < myBlock.staticLabels.length; i++) {
                         artwork = artwork.replace('arg_label_' + i, myBlock.staticLabels[i]);
                     }
-                    makePaletteBitmap(palette, artwork, modname, processBitmap, [myBlock, blk, currY]);
+                    makePaletteBitmap(palette, artwork, modname, processBitmap, [myBlock, blk, currY],PROTOBLOCKSCALE);
                 }
                 makePaletteBitmap(this, PALETTEFILLER.replace(/filler_height/g, height.toString()), modname, processFiller, [blkname, blk, this.y]);
 
@@ -1057,7 +1070,7 @@ var MODEDRAG = 1;
 var MODESCROLL = 2;
 var DECIDEDISTANCE = 20;
 
-// FIXME : background events once the background is in place
+// FIXME : Add background events when drag animation is placed
 function setupBackgroundEvents(palette) {
     // var scrolling = false;
     // var lastY;
@@ -1087,7 +1100,7 @@ function setupBackgroundEvents(palette) {
 }
 
 function removeBackgroundEvents(palette){
-    palette.palettePages[palette.currentPage].background.off();
+    palette.background.off();
 }
 
 
