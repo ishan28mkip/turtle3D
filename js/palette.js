@@ -6,8 +6,7 @@ var PALETTELEFTMARGIN = 10;
 // We don't include 'extras' since we want to be able to delete
 // plugins from the extras palette.
 var BUILTINPALETTES = ['turtle', 'pen', 'number', 'boolean', 'flow', 'blocks',
-    'actions', 'media', 'sensors', 'myblocks',
-];
+    'actions', 'media', 'sensors', 'myblocks', 'camera'];
 
 
 // FIXME : Scaling
@@ -119,8 +118,6 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
                 }
 
                 function processButtonIcon(me, name, bitmap, extras) {
-                    me.buttons[name].add(bitmap);
-
 
                     var circleRadius = me.halfCellSize;
                     var circleShape = new THREE.Shape();
@@ -130,11 +127,12 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
                     circleShape.quadraticCurveTo( -circleRadius, -circleRadius, -circleRadius, 0 );
                     circleShape.quadraticCurveTo( -circleRadius, circleRadius, 0, circleRadius );
                     var circleGeometry = new THREE.ShapeGeometry( circleShape );
-                    var circleMesh = new THREE.Mesh( circleGeometry, new THREE.MeshBasicMaterial( { color: 0x333333 } ) ) ; 
+                    var circleMesh = new THREE.Mesh( circleGeometry, new THREE.MeshBasicMaterial( { color: 0x444444, transparent: true } ) ) ; 
                     me.buttons[name].add(circleMesh);
-                    circleMesh.material.opacity = 0.26;
+                    circleMesh.material.opacity = 0;
                     circleMesh.visible = false;
 
+                    me.buttons[name].add(bitmap);
                     me.buttons[name].hitmesh = circleMesh;
 
                     me.refreshCanvas(1);
@@ -254,12 +252,13 @@ function Palettes(canvas, refreshCanvas, stage, cellSize, refreshCanvas, trashca
 function loadPaletteButtonHandler(palettes, name) {
     var locked = false;
     var scrolling = false;
+    var mouseoverTween;
 
     palettes.buttons[name].on('mouseover',function(event){
         event.target.hitmesh.visible = true;
-        var tween = TweenLite.to(event.target.hitmesh.material, 0.5, 
+        mouseoverTween = TweenLite.to(event.target.hitmesh.material, 0.5, 
         {   
-            opacity : 0.7,
+            opacity : 0.5,
             onUpdate: function(){
                 palettes.refreshCanvas(1);
             }
@@ -270,7 +269,7 @@ function loadPaletteButtonHandler(palettes, name) {
     palettes.buttons[name].on('mouseout',function(event){
         var tween = TweenLite.to(event.target.hitmesh.material, 0.5, 
         {   
-            opacity : 0.26,
+            opacity : 0,
             onUpdate: function() {
                 palettes.refreshCanvas(1);
             },
@@ -309,6 +308,21 @@ function loadPaletteButtonHandler(palettes, name) {
         setTimeout(function() {
             locked = false;
         }, 500);
+
+        mouseoverTween.kill();
+        event.target.hitmesh.material.opacity = 1;
+        var tween = TweenLite.to(event.target.hitmesh.material, 1, 
+        {   
+            opacity : 0,
+            onUpdate: function() {
+                palettes.refreshCanvas(1);
+            },
+            onComplete : function(){
+                event.target.hitmesh.visible = false;
+                palettes.refreshCanvas(1);
+            }
+        });
+
         for (var i in palettes.dict) {
             if (palettes.dict[i] == palettes.dict[name]) {
                 palettes.dict[name].showMenu(true);
@@ -1049,6 +1063,7 @@ function initPalettes(canvas, refreshCanvas, stage, cellSize, trashcan, b) {
     add('number').
     add('boolean').
     add('flow').
+    add('camera').
     add('blocks').
     add('actions').
     add('media').
