@@ -72,6 +72,7 @@ function Turtle (name, turtles) {
     // Turtle functions
     this.doClear = function() {
         // Reset turtle.
+        var me = this;
         var i = this.turtles.turtleList.indexOf(this) % 10;
         this.color = i * 10;
         this.value = DEFAULTVALUE;
@@ -86,10 +87,8 @@ function Turtle (name, turtles) {
         // Make a tween queue for such cases
         this.setCameraPosition(60,60,60);
         // FIXME : This should change after the tween is over?
-        setTimeout(function(){
-            console.log('hello');
-            this.setCameraLookat(0,0,0);
-        },500);
+        
+        this.setCameraLookat(0,0,0);
 
         this.position.copy(ORIGIN);
 
@@ -284,10 +283,55 @@ function Turtle (name, turtles) {
     }
 
     this.setCameraLookat = function(x,y,z){
-        var currentLookat = {};
-        this.turtles.camera.lookAt(new THREE.Vector3(x,y,z));
+        var vector = new THREE.Vector3();
+        vector.applyQuaternion( this.turtles.camera.quaternion );
+        
+        var cameraCurrent = { x : vector.x, y : vector.y, z : vector.z};
+        
+        this.cameraLookatX(x, cameraCurrent, vector);
+        this.cameraLookatY(y, cameraCurrent, vector);
+        this.cameraLookatZ(z, cameraCurrent, vector);
+
         this.turtles.refreshCanvas(2);
     }
+
+    this.cameraLookatX = function(x, currentCamera, vector){
+        var me = this;
+        var tween = TweenLite.to(currentCamera, 0.5, {   
+                x : x,
+                onUpdate: function() {
+                    vector.setX(currentCamera.x);
+                    me.turtles.camera.lookAt(vector);
+                    me.turtles.refreshCanvas(2);
+                }
+        });
+    }
+
+    this.cameraLookatY = function(y, currentCamera, vector){
+        var me = this;
+        var tween = TweenLite.to(currentCamera, 0.5, {   
+                y : y,
+                onUpdate: function() {
+                    vector.setY(currentCamera.y);
+                    me.turtles.camera.lookAt(vector);
+                    me.turtles.refreshCanvas(2);
+                }
+        });
+    }
+
+    this.cameraLookatZ = function(z, currentCamera, vector){
+        var me = this;
+        var tween = TweenLite.to(currentCamera, 0.5, {   
+                z : z,
+                onUpdate: function() {
+                    vector.setZ(currentCamera.z);
+                    me.turtles.camera.lookAt(vector);
+                    me.turtles.refreshCanvas(2);
+                }
+        });
+    }
+
+
 
     this.cameraForwardX = function(value){
         var currentX = { x : this.turtles.camera.position.x };
