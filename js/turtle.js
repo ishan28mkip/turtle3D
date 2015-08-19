@@ -266,9 +266,84 @@ function Turtle (name, turtles) {
         this.setYaw(this.yaw+degrees);
     };
 
+    // Camera options
 
-    
-    // FIXME
+    this.setCameraPosition = function(x,y,z){
+        var dx,dy,dz;
+        dx = x - this.turtles.camera.position.x;
+        dy = z - this.turtles.camera.position.y;
+        dz = y - this.turtles.camera.position.z;
+        this.cameraForwardX(dx);
+        this.cameraForwardY(dy);
+        this.cameraForwardZ(dz);
+    }
+
+    this.setCameraLookat = function(x,y,z){
+        this.turtles.camera.lookAt(new THREE.Vector3(x,y,z));
+        this.turtles.refreshCanvas(2);
+    }
+
+    this.cameraForwardX = function(value){
+        var currentX = { x : this.turtles.camera.position.x };
+        var finalX = currentX.x + value;
+        var me = this;
+        var tween = TweenLite.to(currentX, 0.5, {   
+                x : finalX,
+                onUpdate: function() {
+                    me.turtles.camera.position.setX(currentX.x);
+                    me.turtles.refreshCanvas(2);
+                }
+        });
+    }
+
+
+    this.cameraForwardY = function(value){
+        var currentY = { y : this.turtles.camera.position.y };
+        var finalY = currentY.y + value;
+        var me = this;
+        var tween = TweenLite.to(currentY, 0.5, {   
+                y : finalY,
+                onUpdate: function() {
+                    me.turtles.camera.position.setY(currentY.y);
+                    me.turtles.refreshCanvas(2);
+                }
+        });
+    }
+
+
+    this.cameraForwardZ = function(value){
+        var currentZ = { z : this.turtles.camera.position.z };
+        var finalZ = currentZ.z + value;
+        var me = this;
+        var tween = TweenLite.to(currentZ, 0.5, {   
+                z : finalZ,
+                onUpdate: function() {
+                    me.turtles.camera.position.setZ(currentZ.z);
+                    me.turtles.refreshCanvas(2);
+                }
+        });
+    }
+
+    // TODO : Add circumference rotations
+    this.cameraRoll = function(degrees){
+        var DEGTORAD = Math.PI / 180;
+        var RADTODEG = 180 / Math.PI;
+        this.turtles.refreshCanvas(2);
+        
+    }
+
+    this.cameraPitch = function(degrees){
+        var currentRotate = { x : this.turtles.camera.rotation.x , y : this.turtles.camera.rotation.y , z : this.turtles.camera.rotation.z };
+        this.turtles.refreshCanvas(2);
+
+    }
+
+    this.cameraYaw = function(degrees){
+        this.turtles.refreshCanvas(2);
+    }
+
+
+// 
     this.doShowImage = function(size, myImage) {
         // Set the orientation of the image
     }
