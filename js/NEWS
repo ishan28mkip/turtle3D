@@ -61,56 +61,72 @@
 // refreshCanvas(1);
 
 // Code Snippets
-    // createMsgContainer
-        // Code to add a bounding box
-        // var box = new THREE.BoxHelper( msgBlock );
-        // scriptingScene.add(box);
+// createMsgContainer
+    // Code to add a bounding box
+    // var box = new THREE.BoxHelper( msgBlock );
+    // scriptingScene.add(box);
 
-        // Code to add/edit/align text
-        // var textMesh = createText();
-        // refreshCanvas(1);
-        // textMesh.text = 'Hello there is something wrong here';
-        // textMesh.size = 50;
-        // textMesh.color = 'rgb(40,40,180)';
-        // scriptingScene.add(textMesh);
-        // textMesh.align = 'right';
-        // textMesh.vAlign = 'middle';
-        // refreshCanvas(1);
+// Code to add/edit/align text
+    // var textMesh = createText();
+    // refreshCanvas(1);
+    // textMesh.text = 'Hello there is something wrong here';
+    // textMesh.size = 50;
+    // textMesh.color = 'rgb(40,40,180)';
+    // scriptingScene.add(textMesh);
+    // textMesh.align = 'right';
+    // textMesh.vAlign = 'middle';
+    // refreshCanvas(1);
 
-        // Code to get global bounds of the container
-        // var box = new THREE.Box3().setFromObject( con2 );
-        // console.log( box.min, box.max, box.size() );
+// Code to get global bounds of the container
+    // var box = new THREE.Box3().setFromObject( con2 );
+    // console.log( box.min, box.max, box.size() );
 
-        // Drag handler code
-        // function eventHandler(mesh){
-        //     var moved = false;
-        //     var oldX,oldY;
-        //     var dx,dy;
-        //     mesh.on('mousedown',function(event){
-        //         moved = true;
-        //         oldX = event.clientX;
-        //         oldY = event.clientY;
-        //     });
-        //     mesh.on('pressmove',function(event){
-        //         dx = event.clientX - oldX;
-        //         dy = oldY - event.clientY;
-        //         mesh.position.setX(mesh.position.x + dx);
-        //         mesh.position.setY(mesh.position.y + dy);
-        //         refreshCanvas(1);
-        //         oldX = event.clientX;
-        //         oldY = event.clientY;
+// Drag handler code
+    // function eventHandler(mesh){
+    //     var moved = false;
+    //     var oldX,oldY;
+    //     var dx,dy;
+    //     mesh.on('mousedown',function(event){
+    //         moved = true;
+    //         oldX = event.clientX;
+    //         oldY = event.clientY;
+    //     });
+    //     mesh.on('pressmove',function(event){
+    //         dx = event.clientX - oldX;
+    //         dy = oldY - event.clientY;
+    //         mesh.position.setX(mesh.position.x + dx);
+    //         mesh.position.setY(mesh.position.y + dy);
+    //         refreshCanvas(1);
+    //         oldX = event.clientX;
+    //         oldY = event.clientY;
 
-        //     });
-        //     mesh.on('pressup',function(event){
-        //         moved = false;
-        //     });
-        // }
+    //     });
+    //     mesh.on('pressup',function(event){
+    //         moved = false;
+    //     });
+    // }
 
-        // Code to add axes to any container
-        // axes = buildAxes( 1000 );
-        // container.add( axes );
+// Code to add axes to any container
+    // axes = buildAxes( 1000 );
+    // container.add( axes );
 
-        // var box = new THREE.BoxHelper( object );
-        // scene.add( box );
+    // var box = new THREE.BoxHelper( object );
+    // scene.add( box );
+
+// Code to rotate
+    var DEGTORAD = Math.PI / 180;
+    var RADTODEG = 180 / Math.PI;
+    var currentRadian = { x : this.turtles.camera.rotation.x , y : this.turtles.camera.rotation.y , z : this.turtles.camera.rotation.z };
+    var currentDegrees = { x : currentRadian.x * RADTODEG,  y : currentRadian.y * RADTODEG, z : currentRadian.z * RADTODEG};
+    if(currentDegrees.z + degrees >= 360)
+        currentDegrees.z = currentDegrees.z + degrees - 360;
+    else if(currentDegrees.z + degrees < 0 )
+        currentDegrees.z = currentDegrees.z + degrees + 360;
+    else
+        currentDegrees.z += degrees;
+    var finalRadian = currentRadian;
+    finalRadian.z = currentDegrees.z * DEGTORAD;
+    this.turtles.camera.rotation.set(finalRadian.x, finalRadian.y, finalRadian.z);
+    this.turtles.refreshCanvas(2);
 
 // TODO : IMP : If there is no start block the grids and the grid helper don't
