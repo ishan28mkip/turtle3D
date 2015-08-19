@@ -69,26 +69,9 @@ function Turtle (name, turtles) {
     this.material = new THREE.LineBasicMaterial({color: this.canvasColor, linewidth: this.stroke});
     this.media = [];  // Media (text, images) we need to remove on clear.
 
-
-    this.move = function(ox, oy, x, y, invert) {
-
-    };
-
-    this.arc = function(cx, cy, ox, oy, x, y, radius, start, end, anticlockwise, invert) {
-        // TODO : Add option to draw arc later on when the implementation pattern is clear
-        // Problem is where the arc should be drawn, 
-        // (1) Should it be drawn in a plane, then which plane would this be.
-        // (2) Or somehow give option to draw a parametric 3D curve
-    };
-
-    this.doArc = function(angle, radius) {
-
-    };
-
     // Turtle functions
     this.doClear = function() {
         // Reset turtle.
-
         var i = this.turtles.turtleList.indexOf(this) % 10;
         this.color = i * 10;
         this.value = DEFAULTVALUE;
@@ -100,16 +83,12 @@ function Turtle (name, turtles) {
             this.axis.position.copy(ORIGIN);
         }
 
+        this.setCameraPosition(60,60,60);
+        this.setCameraLookat(0,0,0);
+
         this.position.copy(ORIGIN);
 
-
         clearCanvas(this.drawingCanvas);
-
-        // TODO : Port the do turtle shell function
-        // if (this.skinChanged) {
-        //     this.doTurtleShell(55, turtleBasePath + 'turtle-' + i.toString() + '.svg');
-        //     this.skinChanged = false;
-        // }
 
         this.setRoll(0);
         this.setPitch(0);
@@ -291,104 +270,22 @@ function Turtle (name, turtles) {
     
     // FIXME
     this.doShowImage = function(size, myImage) {
-        // Add an image object to the canvas
-        // if (myImage == null) {
-        //     return;
-        // }
-        // var image = new Image();
-        // var me = this;
-        // image.onload = function() {
-        //     var bitmap = new createjs.Bitmap(image);
-        //     me.turtles.stage.addChild(bitmap);
-        //     me.media.push(bitmap);
-        //     bitmap.scaleX = Number(size) / image.width;
-        //     bitmap.scaleY = bitmap.scaleX;
-        //     bitmap.scale = bitmap.scaleX;
-        //     bitmap.x = me.container.x;
-        //     bitmap.y = me.container.y;
-        //     bitmap.regX = image.width / 2;
-        //     bitmap.regY = image.height / 2;
-        //     bitmap.rotation = me.orientation;
-        //     me.turtles.refreshCanvas(1);
-        // }
-        // image.src = myImage;
+        // Set the orientation of the image
     }
 
     this.doShow3DModel = function(){
-        // TODO : Create this function
+        // Show the 3D model
     }
 
-    // FIXME
     this.doShowURL = function(size, myURL) {
-        // Add an image object from a URL to the canvas
         // if (myURL == null) {
         //     return;
-        // }
-        // var image = new Image();
-        // image.src = myURL;
-        // var me = this;
-        // image.onload = function() {
-        //     var bitmap = new createjs.Bitmap(image);
-        //     me.turtles.stage.addChild(bitmap);
-        //     me.media.push(bitmap);
-        //     bitmap.scaleX = Number(size) / image.width;
-        //     bitmap.scaleY = bitmap.scaleX;
-        //     bitmap.scale = bitmap.scaleX;
-        //     bitmap.x = me.container.x;
-        //     bitmap.y = me.container.y;
-        //     bitmap.regX = image.width / 2;
-        //     bitmap.regY = image.height / 2;
-        //     bitmap.rotation = me.orientation;
-        //     me.turtles.refreshCanvas(1);
-        // }
-    }
-
-    // TODO : Fix this function to change the turtle image, to be done when turtle graphic is finalized
-    this.doTurtleShell = function(size, myImage) {
-        // // Add image to turtle
-        // if (myImage == null) {
-        //     return;
-        // }
-        // var image = new Image();
-        // image.src = myImage;
-        // var me = this;
-        // image.onload = function() {
-        //     me.container.removeChild(me.bitmap);
-        //     me.bitmap = new createjs.Bitmap(image);
-        //     me.container.addChild(me.bitmap);
-        //     me.bitmap.scaleX = Number(size) / image.width;
-        //     me.bitmap.scaleY = me.bitmap.scaleX;
-        //     me.bitmap.scale = me.bitmap.scaleX;
-        //     me.bitmap.x = 0;
-        //     me.bitmap.y = 0;
-        //     me.bitmap.regX = image.width / 2;
-        //     me.bitmap.regY = image.height / 2;
-        //     me.bitmap.rotation = me.orientation;
-        //     me.skinChanged = true;
-
-
-        //     if (me.startBlock != null) {
-        //         me.startBlock.container.removeChild(me.decorationBitmap);
-        //         me.decorationBitmap = new createjs.Bitmap(myImage);
-        //         me.startBlock.container.addChild(me.decorationBitmap);
-        //         me.decorationBitmap.name = 'decoration';
-        //         var bounds = me.startBlock.container.getBounds();
-        //         // FIXME: Why is the position off? Does it need a scale factor?
-        //         me.decorationBitmap.x = bounds.width - 50 * me.startBlock.protoblock.scale / 2;
-        //         me.decorationBitmap.y = 20 * me.startBlock.protoblock.scale / 2;
-        //         me.decorationBitmap.scaleX = (27.5 / image.width) * me.startBlock.protoblock.scale / 2;
-        //         me.decorationBitmap.scaleY = (27.5 / image.height) * me.startBlock.protoblock.scale / 2;
-        //         me.decorationBitmap.scale = (27.5 / image.width) * me.startBlock.protoblock.scale / 2;
-        //         me.startBlock.container.updateCache();
-        //     }
-        //     me.turtles.refreshCanvas(1);
-        // }
     }
 
     this.resizeDecoration = function(scale, width) {
-        this.decorationBitmap.x = width - 30 * scale / 2;
-        this.decorationBitmap.y = 35 * scale / 2;
-        this.decorationBitmap.scaleX = this.decorationBitmap.scaleY = this.decorationBitmap.scale = 0.5 * scale / 2
+        // this.decorationBitmap.x = width - 30 * scale / 2;
+        // this.decorationBitmap.y = 35 * scale / 2;
+        // this.decorationBitmap.scaleX = this.decorationBitmap.scaleY = this.decorationBitmap.scale = 0.5 * scale / 2
     }
 
     this.doShowText = function(size, myText) {
@@ -461,11 +358,13 @@ function Turtle (name, turtles) {
 };
 
 
-function Turtles(canvas, stage2D, stage3D, refreshCanvas) {
+function Turtles(canvas, stage2D, stage3D, camera, refreshCanvas) {
     this.canvas = canvas;
     
     this.stage2D = stage2D;
     this.stage3D = stage3D;
+
+    this.camera = camera;
 
     this.refreshCanvas = refreshCanvas;
     this.scale = 1.0;
