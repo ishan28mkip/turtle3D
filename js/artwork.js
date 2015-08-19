@@ -149,6 +149,7 @@ var PALETTEFILLCOLORS = {
     'blocks': '#ffc000',
     'actions': '#ffc000',
     'media': '#987aff',
+    'camera': '#9932CC',
     'number': '#ff00ff',
     'boolean': '#ff00ff',
     'flow': '#fd6600',
@@ -163,6 +164,7 @@ var PALETTESTROKECOLORS = {
     'blocks': '#c48d00',
     'actions': '#c48d00',
     'media': '#8000fe',
+    'camera': '#6B238E',
     'number': '#c700d3',
     'boolean': '#c700d3',
     'flow': '#ac3d00',
@@ -177,6 +179,7 @@ var PALETTEHIGHLIGHTCOLORS = {
     'blocks': '#ffdc00',
     'actions': '#ffdc00',
     'media': '#c8c0ff',
+    'camera': '#BF3EFF',
     'number': '#ff9fff',
     'boolean': '#ff9fff',
     'flow': '#ffa548',
@@ -191,6 +194,7 @@ var HIGHLIGHTSTROKECOLORS = {
     'blocks': '#472d00',
     'actions': '#472d00',
     'media': '#7100dd',
+    'camera': '#551A8B',
     'number': '#9300a3',
     'boolean': '#9300a3',
     'flow': '#690700',
@@ -219,6 +223,8 @@ var BOOLEANPALETTEICON = '<svg xmlns="http://www.w3.org/2000/svg" width="55" hei
 
 var FLOWPALETTEICON = '<svg xmlns="http://www.w3.org/2000/svg" width="55" height="55" id="svg2"> <path d="m 14.85,27.1 -0.45,13.15 4.35,-2.4 c 0,0 6.349418,4.294879 10.2,4.05 4.946317,-0.314563 11.65,-7.5 11.65,-7.5 l -2.25,-2.3 c 0,0 -5.615371,6.15399 -9.4,6.65 -2.286298,0.29964 -7.05,-2.5 -7.05,-2.5 L 26,34.1 14.85,27.1 z" style="fill:none;stroke:#ffffff;stroke-width:2.29999995;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" /> <path d="m 40.15,28.955044 0.45,-13.150001 -4.35,2.4 c 0,0 -6.349418,-4.294879 -10.2,-4.05 -4.946317,0.314563 -11.65,7.5 -11.65,7.5 l 2.25,2.3 c 0,0 5.615371,-6.15399 9.4,-6.65 2.286298,-0.29964 7.05,2.5 7.05,2.5 l -4.1,2.15 11.15,7.000001 z" style="fill:none;stroke:#ffffff;stroke-width:2.29999995;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" /> </svg>';
 
+var CAMERAPALETTEICON = '<svg xmlns="http://www.w3.org/2000/svg" width="55" height="55"> <polygon fill="none" points="49,14 36,21 36,29 49,36 " stroke="#ffffff" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" /> <path d="M36,36c0,2.209-1.791,4-4,4  H5c-2.209,0-4-1.791-4-4V14c0-2.209,1.791-4,4-4h27c2.209,0,4,1.791,4,4V36z" fill="none" stroke="#ffffff" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" /></svg>';
+
 var BLOCKSPALETTEICON = '<svg xmlns="http://www.w3.org/2000/svg" width="55" height="55"> <path d="m 15.719636,31.331478 0.114372,5.261133 11.437247,6.290486 L 27.5,29.387146" style="fill:none;stroke:#ffffff;stroke-width:2;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" /> <path d="m 27.728744,29.501519 0.05719,13.381578 11.723178,-7.548583 0,-4.689272 -5.947368,3.545548" style="fill:none;stroke:#ffffff;stroke-width:2;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" /> <path d="m 10.001012,27.328441 5.604251,-5.146761 -5.832996,-2.973684 12.123482,-7.091093 5.718623,3.316801 5.489879,-3.088056 12.123482,7.319838 -5.832996,2.401822 5.489878,5.032388 -11.322874,7.205466 -5.947369,-5.261134 -6.290485,5.261134 -11.322875,-6.976721 z" style="fill:none;stroke:#ffffff;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" /> <path d="M 16.40587,21.952935 27.156883,15.204959 38.937247,22.067308 27.614372,28.815283 16.40587,21.952935 z" style="fill:none;stroke:#ffffff;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" /> </svg>';
 
 var ACTIONSPALETTEICON = '<svg xmlns="http://www.w3.org/2000/svg" width="55" height="55"> <path d="m 5.8333331,25.833333 0,-6.666667 A 6.6666667,6.6666667 0 0 1 12.5,12.5 l 6.666667,0 0,3.333333 16.666666,0 0,-3.333333 6.666667,0 a 6.6666667,6.6666667 0 0 1 6.666667,6.666666 l 0,6.666667 0,6.666667 A 6.6666667,6.6666667 0 0 1 42.5,39.166666 l -6.666667,0 -1.666666,0 0,3.333334 -13.333334,0 0,-3.333334 -1.666666,0 -6.666667,0 A 6.6666667,6.6666667 0 0 1 5.8333331,32.5 l 0,-6.666667 z" style="fill:none;stroke:#ffffff;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" /> </svg>';
@@ -237,6 +243,7 @@ var PALETTEICONS = {
     'number': NUMBERPALETTEICON,
     'boolean': BOOLEANPALETTEICON,
     'flow': FLOWPALETTEICON,
+    'camera' : CAMERAPALETTEICON,
     'blocks': BLOCKSPALETTEICON,
     'actions': ACTIONSPALETTEICON,
     'media': MEDIAPALETTEICON,
