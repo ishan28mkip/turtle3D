@@ -887,19 +887,8 @@ function Blocks(canvas, stage, refreshCanvas, trashcan) {
         }
     }
 
-    // FIXME : Fix this function
     this.bringToTop = function() {
         // Move all the blocks to the top layer of the stage
-        for (var blk in this.blockList) {
-            var myBlock = this.blockList[blk];
-            this.stage.remove(myBlock.container);
-            this.stage.add(myBlock.container);
-            if (myBlock.collapseContainer != null) {
-                this.stage.remove(myBlock.collapseContainer);
-                this.stage.add(myBlock.collapseContainer);
-            }
-        }
-        this.refreshCanvas(1);
     }
 
     this.moveBlock = function(blk, x, y) {
