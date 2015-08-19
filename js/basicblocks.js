@@ -735,6 +735,98 @@ function initBasicProtoBlocks(palettes, blocks) {
     clampBlock.hidden = true;
     clampBlock.flowClampBlock();
 
+    // Camera palette
+    var setCameraPosition = new ProtoBlock('setCameraPosition');
+    setCameraPosition.palette = palettes.dict['camera'];
+    blocks.protoBlockDict['setCameraPosition'] = setCameraPosition;
+    setCameraPosition.staticLabels.push(_('setCameraPosition'));
+    setCameraPosition.adjustWidthToLabel();
+    setCameraPosition.threeArgBlock();
+    setCameraPosition.defaults.push(100);
+    setCameraPosition.defaults.push(100);
+    setCameraPosition.defaults.push(100);
+    setCameraPosition.dockTypes[1] = 'numberin';
+
+    var setCameraLookat = new ProtoBlock('setCameraLookat');
+    setCameraLookat.palette = palettes.dict['camera'];
+    blocks.protoBlockDict['setCameraLookat'] = setCameraLookat;
+    setCameraLookat.staticLabels.push(_('setCameraLookat'));
+    setCameraLookat.adjustWidthToLabel();
+    setCameraLookat.threeArgBlock();
+    setCameraLookat.defaults.push(0);
+    setCameraLookat.defaults.push(0);
+    setCameraLookat.defaults.push(0);
+    setCameraLookat.dockTypes[1] = 'numberin';
+
+    var cameraForwardX = new ProtoBlock('cameraForwardX');
+    cameraForwardX.palette = palettes.dict['camera'];
+    blocks.protoBlockDict['cameraForwardX'] = cameraForwardX;
+    cameraForwardX.staticLabels.push(_('cameraX'));
+    cameraForwardX.adjustWidthToLabel();
+    cameraForwardX.oneArgBlock();
+    cameraForwardX.defaults.push(5);
+
+    var cameraForwardY = new ProtoBlock('cameraForwardY');
+    cameraForwardY.palette = palettes.dict['camera'];
+    blocks.protoBlockDict['cameraForwardY'] = cameraForwardY;
+    cameraForwardY.staticLabels.push(_('cameraY'));
+    cameraForwardY.adjustWidthToLabel();
+    cameraForwardY.oneArgBlock();
+    cameraForwardY.defaults.push(5);
+
+    var cameraForwardZ = new ProtoBlock('cameraForwardZ');
+    cameraForwardZ.palette = palettes.dict['camera'];
+    blocks.protoBlockDict['cameraForwardZ'] = cameraForwardZ;
+    cameraForwardZ.staticLabels.push(_('cameraZ'));
+    cameraForwardZ.adjustWidthToLabel();
+    cameraForwardZ.oneArgBlock();
+    cameraForwardZ.defaults.push(5);
+
+    var cameraX = new ProtoBlock('cameraX');
+    cameraX.palette = palettes.dict['camera'];
+    blocks.protoBlockDict['cameraX'] = cameraX;
+    cameraX.staticLabels.push(_('cameraX'));
+    cameraX.adjustWidthToLabel();
+    cameraX.parameterBlock();
+
+    var cameraY = new ProtoBlock('cameraY');
+    cameraY.palette = palettes.dict['camera'];
+    blocks.protoBlockDict['cameraY'] = cameraY;
+    cameraY.staticLabels.push(_('cameraY'));
+    cameraY.adjustWidthToLabel();
+    cameraY.parameterBlock();
+
+    var cameraZ = new ProtoBlock('cameraZ');
+    cameraZ.palette = palettes.dict['camera'];
+    blocks.protoBlockDict['cameraZ'] = cameraZ;
+    cameraZ.staticLabels.push(_('cameraZ'));
+    cameraZ.adjustWidthToLabel();
+    cameraZ.parameterBlock();
+
+    var cameraRoll = new ProtoBlock('cameraRoll');
+    cameraRoll.palette = palettes.dict['camera'];
+    blocks.protoBlockDict['cameraRoll'] = cameraRoll;
+    cameraRoll.staticLabels.push(_('cameraRoll'));
+    cameraRoll.adjustWidthToLabel(); 
+    cameraRoll.oneArgBlock();
+    cameraRoll.defaults.push(10);
+
+    var cameraPitch = new ProtoBlock('cameraPitch');
+    cameraPitch.palette = palettes.dict['camera'];
+    blocks.protoBlockDict['cameraPitch'] = cameraPitch;
+    cameraPitch.staticLabels.push(_('cameraPitch'));
+    cameraPitch.adjustWidthToLabel(); 
+    cameraPitch.oneArgBlock();
+    cameraPitch.defaults.push(10);
+
+    var cameraYaw = new ProtoBlock('cameraYaw');
+    cameraYaw.palette = palettes.dict['camera'];
+    blocks.protoBlockDict['cameraYaw'] = cameraYaw;
+    cameraYaw.staticLabels.push(_('cameraYaw'));
+    cameraYaw.adjustWidthToLabel(); 
+    cameraYaw.oneArgBlock();
+    cameraYaw.defaults.push(10);
+
     // Extras palette
     var vspaceBlock = new ProtoBlock('vspace');
     vspaceBlock.palette = palettes.dict['extras'];
