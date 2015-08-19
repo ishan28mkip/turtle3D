@@ -325,7 +325,7 @@ define(function(require) {
             // Create a orthographic camera for the graphical scripting
             scriptingCameraWidth = window.innerWidth;
             scriptingCameraHeight = window.innerHeight; 
-            scriptingCamera = new THREE.OrthographicCamera( scriptingCameraWidth / - 2, scriptingCameraWidth / 2, scriptingCameraHeight / 2, scriptingCameraHeight / - 2, 1, 100000 );
+            scriptingCamera = new THREE.OrthographicCamera( scriptingCameraWidth / - 2, scriptingCameraWidth / 2, scriptingCameraHeight / 2, scriptingCameraHeight / - 2, 1, 100 );
 
             turtleCameraWidth = window.innerWidth;
             turtleCameraHeight = window.innerHeight;
@@ -348,7 +348,7 @@ define(function(require) {
             // Position and point the scripting camera to the center of the scene
             scriptingCamera.position.x = (0);
             scriptingCamera.position.y = (0);
-            scriptingCamera.position.z = (100000);
+            scriptingCamera.position.z = (100);
             scriptingCamera.lookAt(new THREE.Vector3(0, 0, 0));
 
             // Position and point the turtle camera to the center of the screen
@@ -402,7 +402,7 @@ define(function(require) {
             setupBlocksContainerEvents();
 
             trashcan = new Trashcan(canvas, trashContainer, cellSize, refreshCanvas);
-            turtles = new Turtles(canvas, turtle2DContainer, turtle3DContainer, refreshCanvas);
+            turtles = new Turtles(canvas, turtle2DContainer, turtle3DContainer, turtleCamera, refreshCanvas);
             blocks = new Blocks(canvas, blocksContainer, refreshCanvas, trashcan);
             palettes = initPalettes(canvas, refreshCanvas, palettesContainer, cellSize, trashcan, blocks);
 
