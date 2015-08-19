@@ -83,8 +83,13 @@ function Turtle (name, turtles) {
             this.axis.position.copy(ORIGIN);
         }
 
+        // Make a tween queue for such cases
         this.setCameraPosition(60,60,60);
-        this.setCameraLookat(0,0,0);
+        // FIXME : This should change after the tween is over?
+        setTimeout(function(){
+            console.log('hello');
+            this.setCameraLookat(0,0,0);
+        },500);
 
         this.position.copy(ORIGIN);
 
@@ -279,6 +284,7 @@ function Turtle (name, turtles) {
     }
 
     this.setCameraLookat = function(x,y,z){
+        var currentLookat = {};
         this.turtles.camera.lookAt(new THREE.Vector3(x,y,z));
         this.turtles.refreshCanvas(2);
     }
